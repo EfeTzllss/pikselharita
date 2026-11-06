@@ -399,22 +399,22 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
     </div></section>
   <section class="dr-sec" id="lejant"><h2>Lejant</h2><p class="dr-sub">Çatı rengi binanın türünü gösterir; şekli ve yeri her zaman gerçek.</p><div class="panel">
       <ul class="legend">
-        <li><span class="sw" style="background:#C8553F"></span>Ev (kiremit çatı)</li>
-        <li><span class="sw" style="background:#DDD5C6"></span>Apartman</li>
-        <li><span class="sw" style="background:#8796BE"></span>Cami (kurşun kubbe)</li>
-        <li><span class="sw" style="background:#A9443A"></span>Kilise, sinagog</li>
-        <li><span class="sw" style="background:#D8C7A6"></span>Tarihî yapı, müze</li>
-        <li><span class="sw" style="background:#AEB8D3"></span>Ofis, ticari</li>
-        <li><span class="sw" style="background:#8CC2B6"></span>Park, bahçe</li>
-        <li><span class="sw" style="background:#4E9C95"></span>Orman, koru</li>
-        <li><span class="sw" style="background:#A3BDB4"></span>Mezarlık</li>
-        <li><span class="sw" style="background:#2D57A8"></span>Deniz, göl</li>
-        <li><span class="sw line" style="background:#E2483A"></span>Otoyol</li>
-        <li><span class="sw line" style="background:#F3B39E"></span>Ana cadde</li>
-        <li><span class="sw line" style="background:#4E66B0"></span>Tramvay</li>
-        <li><span class="sw line" style="background:#19203D"></span>Demiryolu</li>
-        <li><span class="sw line" style="background:#8C4A3C"></span>Sur</li>
-        <li><span class="sw line" style="background:#7FC6CB"></span>Vapur hattı</li>
+        <li><span class="sw" style="background:#c0623f"></span>Ev (kiremit çatı)</li>
+        <li><span class="sw" style="background:#cdc8c0"></span>Apartman</li>
+        <li><span class="sw" style="background:#8f9dad"></span>Cami (kurşun kubbe)</li>
+        <li><span class="sw" style="background:#b6684e"></span>Kilise, sinagog</li>
+        <li><span class="sw" style="background:#d3ba8b"></span>Tarihî yapı, müze</li>
+        <li><span class="sw" style="background:#b8c0c8"></span>Ofis, ticari</li>
+        <li><span class="sw" style="background:#8fca6a"></span>Park, bahçe</li>
+        <li><span class="sw" style="background:#5a9a4a"></span>Orman, koru</li>
+        <li><span class="sw" style="background:#a2c295"></span>Mezarlık</li>
+        <li><span class="sw" style="background:#3f97d2"></span>Deniz, göl</li>
+        <li><span class="sw line" style="background:#f2a541"></span>Otoyol</li>
+        <li><span class="sw line" style="background:#fbe08f"></span>Ana cadde</li>
+        <li><span class="sw line" style="background:#8f6ea8"></span>Tramvay</li>
+        <li><span class="sw line" style="background:#6b6763"></span>Demiryolu</li>
+        <li><span class="sw line" style="background:#a5764a"></span>Sur</li>
+        <li><span class="sw line" style="background:#9fd2f2"></span>Vapur hattı</li>
       </ul>
       <p class="totals mono">İstanbul'da şu an: 811.474 bina · 289.941 yol, ray ve vapur hattı · 64.484 park, orman ve su alanı</p>
     </div></section>
@@ -461,41 +461,41 @@ const mixc = (c, t, a) => { // u32 ABGR mix
   const r = c & 255, g = c >> 8 & 255, b = c >> 16 & 255, r2 = t & 255, g2 = t >> 8 & 255, b2 = t >> 16 & 255;
   return (255 << 24 | Math.round(b + (b2 - b) * a) << 16 | Math.round(g + (g2 - g) * a) << 8 | Math.round(r + (r2 - r) * a)) >>> 0;
 };
-const WHITE = hex('#ffffff'), BLACK = hex('#141a33');   // shading goes towards ink, not grey
+// pixel-art light: highlights lean warm, shadows lean cool purple, outlines are a deep hue-shifted tone
+const WHITE = hex('#fff6e0'), BLACK = hex('#1c1630'), LIGHT = hex('#fff2d0'), OUTLINE = hex('#231a35');
 const hi = c => mixc(c, WHITE, .28), sh = c => mixc(c, BLACK, .32);
 
 // ======================= palettes =======================
-// Every map colour is a tint or shade of the logo's six: kobalt #1B3C8F (water), turkuaz #2A9DA6 (green),
-// mercan #D2392C (roofs, main roads), sır #F6F2E9 (land, streets), mürekkep #19203D (rail, shadow), soluk #5A6079.
-const SEA = hex('#2D57A8'), WAVE = hex('#4B74BF'), WAVE2 = hex('#22478F'), LAND = hex('#EDE6D7');
-const AREA = { 1: '#E6DDCB', 2: '#EAD9D2', 3: '#D9D7DF', 4: '#E0D6BE', 5: '#A9CFC3', 6: '#8CC2B6', 7: '#4E9C95', 8: '#9CC4B5', 9: '#A3BDB4', 10: '#EFE6CC', 11: '#3A66B5', 12: '#7DB9B8', 13: '#7FC0B3', 14: '#DCD8D8', 15: '#EEE6D6', 16: '#DDCFCF', 17: '#EDE0C9', 18: '#CFC6B3', 19: '#C8BFB0', 20: '#DCD3C2', 21: '#A7D0C4' };
+// real-world colours: sea blue, park green, terracotta roofs, grey concrete
+const SEA = hex('#3f97d2'), WAVE = hex('#72b6e4'), WAVE2 = hex('#3086c2'), LAND = hex('#e4dfca');
+const AREA = { 1: '#e1dbca', 2: '#e8d6cf', 3: '#d9d0d6', 4: '#e4dea4', 5: '#acd983', 6: '#8fca6a', 7: '#5a9a4a', 8: '#a1c378', 9: '#a2c295', 10: '#efe0a0', 11: '#4fa6de', 12: '#8cc3b0', 13: '#78c062', 14: '#d2cec5', 15: '#e7dbc2', 16: '#dbc8c3', 17: '#eee0bd', 18: '#b9a589', 19: '#b8ab9b', 20: '#d1c7b3', 21: '#b3d88a' };
 const ACOL = {}; for (const k in AREA) ACOL[k] = hex(AREA[k]);
-const ATEX = { 7: [hex('#3E8A84'), hex('#6FB4AC')], 6: [hex('#79B8AB'), hex('#A4D2C7')], 9: [hex('#8FB0A7'), hex('#BBD3CC')], 8: [hex('#88B9A9'), hex('#B1D4C7')], 4: [hex('#D6CCAF'), hex('#EAE2CB')], 15: [hex('#DDD3BF'), hex('#F3ECDD')], 11: [hex('#4B74BF'), hex('#22478F')], 12: [hex('#3A66B5'), hex('#A3CFCB')], 13: [hex('#6CB5A7'), hex('#93CABE')] };
+const ATEX = { 7: [hex('#4a863e'), hex('#73b25e')], 6: [hex('#7fbc5d'), hex('#a3d67c')], 9: [hex('#8daf83'), hex('#b8d4ac')], 8: [hex('#8fb466'), hex('#b5d18c')], 4: [hex('#d8d193'), hex('#ece6b4')], 15: [hex('#d9cbb0'), hex('#efe5d0')], 11: [hex('#6fb8e6'), hex('#4296d0')], 12: [hex('#4fa6de'), hex('#a5d1c0')], 13: [hex('#6bb356'), hex('#86cc70')] };
 const AORDER = [1, 2, 3, 16, 17, 4, 20, 8, 5, 7, 6, 21, 9, 13, 14, 10, 12, 15, 11, 18, 19];
-const BPAL = {
-  0: ['#D9CFBE', '#CEC4B3', '#E2D9C9', '#C8604A', '#C9C3BC'], 1: ['#C8553F', '#B9483A', '#D46A52', '#A9413A'], 2: ['#DDD5C6', '#D2C9B9', '#E5DECF', '#C9BFAE', '#C9604B'],
-  3: ['#AEB8D3', '#A0ABCB', '#BCC4DB'], 4: ['#A7A9B8', '#9C9EAE', '#B4B5C2'], 5: ['#8796BE', '#93A1C6'], 6: ['#A9443A', '#9B3D35'], 7: ['#D8C7A6', '#CDBB98', '#E0D2B6'],
-  8: ['#D9C6A8', '#E2D2B8'], 9: ['#A39BA6'], 10: ['#E4DED2', '#D9D3C6'], 11: ['#BFAF95', '#B0A088'], 12: ['#DCCFB8']
+const BPAL = {   // roof colours: terracotta tiles, grey concrete, lead domes
+  0: ['#c8bfb2', '#bcb3a6', '#d2c9bc', '#c06a4c', '#b9b3aa'], 1: ['#c0623f', '#b2573a', '#cc7350', '#a84e35', '#b8644a'], 2: ['#cdc8c0', '#c2bdb4', '#d6d1c8', '#b9b2a8', '#c46a4c'],
+  3: ['#b8c0c8', '#aab4be', '#c4cad0'], 4: ['#aaaaa4', '#9e9f99', '#b6b4ac'], 5: ['#8f9dad', '#97a6b5'], 6: ['#b6684e', '#a95d46'], 7: ['#d3ba8b', '#c9ae7d', '#dcc69c'],
+  8: ['#dac093', '#e1caa1'], 9: ['#a9998b'], 10: ['#dcd7cb', '#d2ccbf'], 11: ['#bcaa8b', '#ad9b7c'], 12: ['#dccfb3']
 };
 const BCOL = {}; for (const k in BPAL) BCOL[k] = BPAL[k].map(hex);
 const BNAME = { 0: 'Bina', 1: 'Ev', 2: 'Apartman', 3: 'Ticari bina', 4: 'Sanayi / depo', 5: 'Cami', 6: 'Kilise / ibadethane', 7: 'Tarihî yapı', 8: 'Kamu binası', 9: 'Ulaşım binası', 10: 'Çatı / sundurma', 11: 'Kalıntı', 12: 'Kule' };
 // line classes: [fill, casing|null, width m, min px, min zoom]
 const L = {
-  1: ['#E2483A', '#8F2A22', 22, 2, 8.5], 2: ['#EB917B', '#A2574A', 18, 1, 9], 3: ['#F4C1B0', '#AE8174', 15, 1, 10], 4: ['#F8DDCF', '#A99A90', 12, 1, 11],
-  5: ['#FBF8F1', '#A8A3A8', 10, 1, 12], 6: ['#F9F6EF', '#B5B0B4', 7, 1, 13], 7: ['#F3EFE6', '#C0BAB8', 4.5, 1, 14.5], 8: ['#ECE3D2', '#B9AC98', 6, 1, 14],
-  9: ['#B89B87', null, 2, 1, 15.3], 10: ['#A88672', null, 2.5, 1, 15.3], 11: ['#A98A72', null, 3, 1, 14.5], 12: ['#19203D', null, 3, 1, 10], 13: ['#4E66B0', null, 2.5, 1, 13],
-  14: ['#1B3C8F', null, 3, 1, 11], 15: ['#9C3B33', null, 2.5, 1, 13], 16: ['#3A66B5', null, 14, 1, 11], 17: ['#4B74BF', null, 3, 1, 14], 18: ['#8C4A3C', '#4E2A24', 6, 1, 12],
-  19: ['#CFC6B3', '#8D8577', 5, 1, 14], 20: ['#7FC6CB', null, 1, 1, 13], 21: ['#19203D', null, 1, 1, 13], 22: ['#CFCAD3', null, 45, 1, 10]
+  1: ['#f2a541', '#a65d22', 22, 2, 8.5], 2: ['#f6c25c', '#a6762e', 18, 1, 9], 3: ['#fbe08f', '#a6904f', 15, 1, 10], 4: ['#fdf0b5', '#a69e7a', 12, 1, 11],
+  5: ['#ffffff', '#a39d8e', 10, 1, 12], 6: ['#fbfaf5', '#b1aa9b', 7, 1, 13], 7: ['#f4f1ea', '#bdb5a6', 4.5, 1, 14.5], 8: ['#ecdfc6', '#b5a486', 6, 1, 14],
+  9: ['#c39d70', null, 2, 1, 15.3], 10: ['#a9825e', null, 2.5, 1, 15.3], 11: ['#a8865a', null, 3, 1, 14.5], 12: ['#6b6763', null, 3, 1, 10], 13: ['#8f6ea8', null, 2.5, 1, 13],
+  14: ['#7564a6', null, 3, 1, 11], 15: ['#a05a8a', null, 2.5, 1, 13], 16: ['#4fa6de', null, 14, 1, 11], 17: ['#5aaee3', null, 3, 1, 14], 18: ['#a5764a', '#6b462a', 6, 1, 12],
+  19: ['#b9a589', '#7b684e', 5, 1, 14], 20: ['#9fd2f2', null, 1, 1, 13], 21: ['#3d3d46', null, 1, 1, 13], 22: ['#bdbab2', null, 45, 1, 10]
 };
 const LC = {}; for (const k in L) LC[k] = [hex(L[k][0]), L[k][1] ? hex(L[k][1]) : 0];
 const LORDER_CASE = [7, 6, 5, 8, 19, 4, 3, 2, 1, 18];
 const LORDER_FILL = [16, 17, 22, 11, 9, 10, 7, 6, 8, 19, 5, 4, 3, 2, 1, 18, 12, 13, 14, 15, 20, 21];
-const BRIDGE_CASE = hex('#2B2F4A');
+const BRIDGE_CASE = hex('#4a4038'), LANE = hex('#fffdf6');
 
 // ======================= canvas & view =======================
 const cv = document.getElementById('map'), ctx = cv.getContext('2d');
 const art = document.createElement('canvas'), actx = art.getContext('2d', { willReadFrequently: true });
-let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null, wall = null;
+let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null, wall = null, wmask = null;
 const view = { x: lon2x(35.2), y: lat2y(39.0), z: 6.2 };
 
 function resize() {
@@ -507,7 +507,7 @@ function resize() {
   // a hidden tab or a frame that has not been laid out yet reports 0×0; never let that crash start-up
   W = Math.max(1, Math.ceil(cv.width / PXD)); H = Math.max(1, Math.ceil(cv.height / PXD));
   art.width = W; art.height = H;
-  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H); wall = new Uint8Array(W * H);
+  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H); wall = new Uint8Array(W * H); wmask = new Uint8Array(W * H);
   dirty = true;
 }
 let dirty = true;
@@ -696,30 +696,99 @@ function sortN(a, n) { for (let i = 1; i < n; i++) { const v = a[i]; let j = i -
 function pSolid(y, a, b, c) { const o = y * W; buf.fill(c, o + a, o + b + 1); }
 function hash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return (h ^ (h >>> 16)) >>> 0; }
 let WOX = 0, WOY = 0; // integer world-art origin for textures
+// ---------- pixel-art ground textures ----------
+// Hand-made motifs on a jittered lattice (not random noise): grass tufts, tree crowns, gravestones, wave curls.
+// TEX_PX is how many metres one art pixel covers this frame; motifs only appear when they fit.
+let TEX_PX = 4;
+const isWater = cls => cls === 11 || cls === 12;
+function pArea(y, a, b, c, cls) {   // plain fill that also records water for the shoreline pass
+  const o = y * W; buf.fill(c, o + a, o + b + 1); wmask.fill(isWater(cls) ? 1 : 0, o + a, o + b + 1);
+}
+// tree crowns packed on a jittered grid: the forest is drawn tree by tree
+function canopy(wx, wy, g, base, dark, light) {
+  const cx0 = Math.floor(wx / g), cy0 = Math.floor(wy / g);
+  let best = 1e9, bx = 0, by = 0;
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const cx = cx0 + i, cy = cy0 + j, h = hash(cx * 31 + 7, cy * 17 + 3);
+    const px = (cx + 0.2 + (h & 255) / 255 * 0.6) * g, py = (cy + 0.2 + (h >> 8 & 255) / 255 * 0.6) * g;
+    const d = (wx + .5 - px) ** 2 + (wy + .5 - py) ** 2;
+    if (d < best) { best = d; bx = wx + .5 - px; by = wy + .5 - py; }
+  }
+  const r = g * 0.68, d = Math.sqrt(best);
+  if (d > r) return mixc(dark, BLACK, .25);                 // the shade between crowns
+  if (d > r - 1) return dark;                               // crown outline
+  const lit = (-bx - by) / (r * 1.41);                      // sun from the upper left
+  return lit > 0.45 ? light : lit > -0.15 ? base : mixc(base, dark, .55);
+}
 function pTex(y, a, b, c, cls) {
   const o = y * W, t = ATEX[cls], wy = y + WOY;
+  const fine = TEX_PX < 1.6;                                  // close enough for motifs
+  if (isWater(cls)) wmask.fill(1, o + a, o + b + 1); else wmask.fill(0, o + a, o + b + 1);
   for (let x = a; x <= b; x++) {
-    const h = hash(x + WOX, wy) & 255;
+    const wx = x + WOX, h = hash(wx, wy) & 255;
     let col = c;
-    if (cls === 7) { if (h < 46) col = t[0]; else if (h > 222) col = t[1]; }
+    if (cls === 7) {                                          // forest: individual crowns ~6 m across
+      const g = Math.min(11, Math.round(9 / TEX_PX));      // forest crowns ~9 m
+      col = g >= 3 ? canopy(wx, wy, g, c, t[0], t[1]) : (h < 46 ? t[0] : h > 222 ? t[1] : c);
+    } else if (cls === 5 || cls === 6 || cls === 8 || cls === 21) {   // lawn and scrub: little V tufts
+      col = c;
+      if (fine) {
+        const sx = cls === 8 ? 4 : 6, sy = cls === 8 ? 4 : 5, rowOff = (Math.floor(wy / sy) & 1) * (sx >> 1);
+        const cxl = Math.floor((wx + rowOff) / sx), cyl = Math.floor(wy / sy), hh = hash(cxl, cyl);
+        const lx = (wx + rowOff) - cxl * sx - (hh & 1), ly = wy - cyl * sy - (hh >> 1 & 1);
+        if ((hh >> 3 & 3) === 0) { /* some cells left bare, so the lawn does not look stamped */ }
+        else if ((ly === 1 && (lx === 0 || lx === 2)) || (cls === 8 && ly === 2 && lx === 1)) col = TUFT_D[cls] || t[0];
+        else if (ly === 0 && lx === 1) col = TUFT_L[cls] || t[1];
+        if (cls === 6 && h === 0 && (wy & 1)) col = FLOWERS[(wx >> 1) % 3];   // the odd wild flower in parks
+      } else if (h < 14) col = t[0];
+    } else if (cls === 9) {                                   // cemetery: rows of small stones on grass
+      col = h < 18 ? t[0] : c;
+      if (fine) {
+        const lx = ((wx % 4) + 4) % 4, ly = ((wy % 5) + 5) % 5, hh = hash(Math.floor(wx / 4), Math.floor(wy / 5));
+        if ((hh & 3) !== 0 && lx === 1 && (ly === 1 || ly === 2)) col = ly === 1 ? STONE_L : STONE_D;
+      }
+    }
     else if (cls === 4) { col = ((wy >> 1) & 3) === 0 ? t[0] : c; }
-    else if (cls === 15) { col = ((x + WOX) & 3) === 0 || (wy & 3) === 0 ? t[0] : c; }
-    else if (cls === 11) { if (h < 3) col = t[0]; }
+    else if (cls === 15) { col = ((wx) & 3) === 0 || (wy & 3) === 0 ? t[0] : c; }
+    else if (cls === 11) { col = waveAt(wx, wy, c, t[0], t[1]); }
     else if (cls === 12) { if (h < 40) col = t[0]; }
-    else if (cls === 13) { col = (((x + WOX) >> 2) & 1) ? t[1] : c; }
+    else if (cls === 13) { col = ((wx >> 2) & 1) ? t[1] : c; }
     else { if (h < 18) col = t[0]; else if (h > 244) col = t[1]; }
     buf[o + x] = col;
   }
 }
+// small wave curls on a staggered grid, the classic pixel-art sea
+function waveAt(wx, wy, sea, hi, lo) {
+  const sx = 14, sy = 6, off = (Math.floor(wy / sy) & 1) * 7;
+  const cx = Math.floor((wx + off) / sx), cy = Math.floor(wy / sy), h = hash(cx, cy);
+  if ((h & 3) === 0) return sea;                              // not every cell has a wave
+  const lx = (wx + off) - cx * sx - (h >> 2 & 3), ly = wy - cy * sy - (h >> 4 & 1);
+  if (ly === 0 && (lx === 1 || lx === 2)) return hi;
+  if (ly === 1 && (lx === 0 || lx === 3)) return hi;
+  if (ly === 1 && (lx === 1 || lx === 2)) return lo;
+  return sea;
+}
 function pSea(y, a, b) {
   const o = y * W, wy = y + WOY;
-  for (let x = a; x <= b; x++) {
-    const wx = x + WOX, h = hash(wx >> 1, wy) % 211;
-    buf[o + x] = h === 0 ? WAVE : (h === 1 ? WAVE2 : SEA);
+  wmask.fill(1, o + a, o + b + 1);
+  for (let x = a; x <= b; x++) buf[o + x] = waveAt(x + WOX, wy, SEA, WAVE, WAVE2);
+}
+// shoreline: a line of foam on the water's edge and a dithered band of shallow water behind it
+const FOAM = hex('#e8f5fb'), SHALLOW = hex('#6cb7e4'), STONE_L = hex('#ece8df'), STONE_D = hex('#9b968c');
+const TUFT_D = { 5: hex('#7fb560'), 6: hex('#5f9e46'), 8: hex('#6f8f4c'), 21: hex('#7fb560') }, TUFT_L = { 5: hex('#c5e79c'), 6: hex('#b3e08a'), 8: hex('#b9d48e'), 21: hex('#c5e79c') };
+const FLOWERS = [hex('#fff8e8'), hex('#f2d14b'), hex('#e0533d')];
+function shorelines() {
+  for (let y = 2; y < H - 2; y++) {
+    const o = y * W;
+    for (let x = 2; x < W - 2; x++) {
+      const i = o + x; if (!wmask[i]) continue;
+      if (!wmask[i - 1] || !wmask[i + 1] || !wmask[i - W] || !wmask[i + W]) { buf[i] = FOAM; continue; }
+      if (((x + y + WOX + WOY) & 1) === 0 && (!wmask[i - 2] || !wmask[i + 2] || !wmask[i - 2 * W] || !wmask[i + 2 * W])) buf[i] = SHALLOW;
+    }
   }
 }
 function pLand(y, a, b) {
-  const o = y * W;
+  const o = y * W; wmask.fill(0, o + a, o + b + 1);
   if (!crop) { buf.fill(LAND, o + a, o + b + 1); return; }
   const wy = (y + .5 + OY) / S, ry = Math.floor(wy / crop.k) - crop.y0;
   if (ry < 0 || ry >= crop.h) { buf.fill(LAND, o + a, o + b + 1); return; }
@@ -799,15 +868,15 @@ function render(snapshot) {
   // 1) base raster
   if (!inIst) {
     actx.imageSmoothingEnabled = false;
-    actx.fillStyle = '#22478F'; actx.fillRect(0, 0, W, H);
+    actx.fillStyle = '#265e98'; actx.fillRect(0, 0, W, H);
     if (baseImg) {
       const k = Math.pow(2, ZQ - baseMeta.z) * S;
       actx.drawImage(baseImg, baseMeta.x0 * k - OX, baseMeta.y0 * k - OY, baseMeta.w * k, baseMeta.h * k);
     }
     const d = actx.getImageData(0, 0, W, H); buf.set(new Uint32Array(d.data.buffer));
   }
-  bid.fill(0); frameB = [];
-  const mpa = metersPerArt();
+  bid.fill(0); frameB = []; wmask.fill(0);
+  const mpa = metersPerArt(); TEX_PX = mpa;
   // 2) Istanbul vector world
   if (meta && view.z >= 9 && (lo || over || heroMode)) {
     const vx0 = Math.max(0, Math.ceil(q[0] * S - OX)), vx1 = Math.min(W - 1, Math.floor(q[2] * S - OX)), vy0 = Math.max(0, Math.ceil(q[1] * S - OY)), vy1 = Math.min(H - 1, Math.floor(q[3] * S - OY));
@@ -819,10 +888,11 @@ function render(snapshot) {
         const cks = heroMode ? [heroData.ck] : view.z >= 13 ? visChunks() : [];
         for (const c of AORDER) {
           const tex = ATEX[c] && view.z >= 12.5;
-          const draw = f => { if (visible(f.bb, 1)) fillPoly(f.rings, tex ? pTex : pSolid, ACOL[c], c); };
+          const draw = f => { if (visible(f.bb, 1)) fillPoly(f.rings, tex ? pTex : pArea, ACOL[c], c); };
           (src.a[c] || []).forEach(draw);
           for (const ch of cks) (ch.a[c] || []).forEach(draw);
         }
+        if (view.z >= 12) shorelines();
         drawLines(src, cks, mpa);
         if (view.z >= 13.4) drawBuildings(cks, mpa);
         if (view.z >= 14.8) drawPoints(cks, mpa);
@@ -842,19 +912,25 @@ function visChunks() {
   return out;
 }
 function lw(cls, mpa) { const d = L[cls]; return Math.max(d[3], Math.min(60, d[2] / mpa)); }
+// close in, streets switch from map colours to what they really look like from above:
+// asphalt grey (darker for busier roads) with pale pavements, and stone paving for pedestrian streets
+const ASPH = { 1: hex('#5d5f66'), 2: hex('#62646a'), 3: hex('#686a6f'), 4: hex('#6f7075'), 5: hex('#76777b'), 6: hex('#7e7f82'), 7: hex('#878787'), 8: hex('#ddd3bf') };
+const PAVE = hex('#d6d0c5'), PAVE_PED = hex('#b9ad98');
 function drawLines(src, cks, mpa) {
-  const z = view.z;
+  const z = view.z, real = z >= 15;
   const each = (cls, fn) => { (src.l[cls] || []).forEach(fn); for (const ch of cks) (ch.l[cls] || []).forEach(fn); };
   const bridges = [];
-  // casings
+  // casings (pavements when close in)
   for (const cls of LORDER_CASE) {
     const d = L[cls]; if (z < d[4] || !d[1]) continue;
     const w = lw(cls, mpa); if (w < 2.2 && cls !== 18) continue;
-    each(cls, f => { if (f.br && z >= 13.5) return; if (visible(f.bb, w)) w + 2 > 2.5 ? lineThick(f.p, LC[cls][1], w + 2) : lineThin(f.p, LC[cls][1], 2); });
+    const road = real && ASPH[cls], cc = road ? (cls === 8 ? PAVE_PED : PAVE) : LC[cls][1];
+    const cw = road && cls !== 8 ? w + Math.max(2, Math.round(4.5 / mpa)) : w + 2;   // ~2.2 m of pavement each side
+    each(cls, f => { if (f.br && z >= 13.5) return; if (visible(f.bb, cw)) cw > 2.5 ? lineThick(f.p, cc, cw) : lineThin(f.p, cc, 2); });
   }
   for (const cls of LORDER_FILL) {
     const d = L[cls]; if (z < d[4]) continue;
-    const w = lw(cls, mpa), c = LC[cls][0];
+    const w = lw(cls, mpa), c = real && ASPH[cls] ? ASPH[cls] : LC[cls][0];
     each(cls, f => {
       if (!visible(f.bb, w + 2)) return;
       if (f.br && cls <= 11 && z >= 13.5) { bridges.push([cls, f, w]); return; }
@@ -867,6 +943,8 @@ function drawLines(src, cks, mpa) {
       if (cls === 21) { lineThin(f.p, c, 1, [3, 2]); return; }
       if (cls === 9 || cls === 10) { if (w < 2.5) lineThin(f.p, c, 1, cls === 10 ? [2, 1] : [3, 2]); else lineThick(f.p, c, w); return; }
       w > 1.6 ? lineThick(f.p, c, w) : lineThin(f.p, c, 1);
+      // close in, the big roads get their painted centre line (dashed white)
+      if (cls <= 4 && w >= 7) lineThin(f.p, LANE, 1, [5, 4]);
     });
   }
   bridges.sort((a, b) => a[0] - b[0]);
@@ -877,7 +955,8 @@ function drawLines(src, cks, mpa) {
     }
     const ww = Math.max(w, 2);
     lineThick(f.p, BRIDGE_CASE, ww + 3);
-    lineThick(f.p, LC[cls][0], ww);
+    lineThick(f.p, view.z >= 15 && ASPH[cls] ? ASPH[cls] : LC[cls][0], ww);
+    if (cls <= 4 && ww >= 7) lineThin(f.p, LANE, 1, [5, 4]);
   }
 }
 function drawBuildings(cks, mpa) {
@@ -888,15 +967,52 @@ function drawBuildings(cks, mpa) {
     fillPoly(b.rings, pBuild, pal[b.v % pal.length]);
   }
 }
+// ---------- tree sprites ----------
+// Built once per size and colour: a round crown with a 1 px outline in its own darkest green, three light bands
+// from the upper-left sun, a speck of highlight and a few leaf clusters, so every tree reads as drawn by hand.
+const TREE_TONES = [
+  ['#24502c', '#3a7a3c', '#57a148', '#86c86a', '#c4e89a'],   // plane tree green
+  ['#2b4a26', '#46733a', '#6a9a4c', '#97bf6c', '#cfe3a0'],   // olive
+  ['#1d4433', '#2f6a4f', '#468f69', '#6cb588', '#b5e0b8']    // pine, blue-green
+].map(r => r.map(hex));
+const spriteCache = new Map();
+function treeSprite(d, v) {
+  const key = d * 4 + v; if (spriteCache.has(key)) return spriteCache.get(key);
+  const [OUT, DK, MD, LT, HL] = TREE_TONES[v], r = d / 2, px = new Uint32Array(d * d);
+  for (let y = 0; y < d; y++) for (let x = 0; x < d; x++) {
+    const dx = x + .5 - r, dy = y + .5 - r, dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > r) continue;
+    if (dist > r - 1) { px[y * d + x] = OUT; continue; }
+    const lit = (-dx - dy) / (r * 1.41) + ((hash(x * 3 + v, y * 5 + d) & 7) - 3.5) * 0.04;   // light from upper left, a little leafy noise
+    px[y * d + x] = lit > 0.55 ? HL : lit > 0.25 ? LT : lit > -0.25 ? MD : DK;
+  }
+  spriteCache.set(key, px); return px;
+}
+function stampTree(x, y, d, v) {
+  const px = treeSprite(d, v), r = d >> 1;
+  // soft drop shadow to the lower right, then the crown
+  for (let j = 0; j < d; j++) for (let i = 0; i < d; i++) {
+    if (!px[j * d + i]) continue;
+    const X = x - r + i + Math.max(1, d >> 2), Y = y - r + j + Math.max(1, d >> 2);
+    if (X >= 0 && Y >= 0 && X < W && Y < H && !bid[Y * W + X]) buf[Y * W + X] = mixc(buf[Y * W + X], BLACK, .32);
+  }
+  for (let j = 0; j < d; j++) for (let i = 0; i < d; i++) {
+    const c = px[j * d + i]; if (!c) continue;
+    const X = x - r + i, Y = y - r + j;
+    if (X >= 0 && Y >= 0 && X < W && Y < H) buf[Y * W + X] = c;
+  }
+}
 function drawPoints(cks, mpa) {
-  const z = view.z, tree = hex('#3E9488'), treeD = hex('#22665F'), treeL = hex('#7CC1B6'), mina = hex('#F6F2E9'), minaD = hex('#5A6079'), fnt = hex('#3FC1C9');
-  const r = Math.max(1, Math.min(4, 4 / mpa));
+  const z = view.z, tree = hex('#4f9a45'), treeD = hex('#2f6a33'), mina = hex('#f4f1e8'), minaD = hex('#6f6a63'), fnt = hex('#6fc3f0');
+  // a street tree crown is ~5-8 m: sprite diameter follows the real size, odd so it has a centre pixel
+  const dm = Math.round(6.5 / mpa) | 1;
   for (const ch of cks) for (const p of ch.p) {
     const x = Math.floor(p.x * S - OX), y = Math.floor(p.y * S - OY);
-    if (x < -6 || y < -6 || x > W + 6 || y > H + 6) continue;
+    if (x < -12 || y < -12 || x > W + 12 || y > H + 12) continue;
     if (p.c === 1) {
-      if (r >= 2) { disc(x + .5, y + 1.5, r, treeD); disc(x + .5, y + .5, r, tree); plot(x - 1, y - 1, treeL); plot(x, y - 1, treeL); }
-      else { plot(x, y, tree); plot(x, y + 1, treeD); }
+      const hv = hash(Math.round(p.x), Math.round(p.y)), d = Math.max(3, Math.min(15, dm + ((hv >> 3) % 3 - 1) * 2));
+      if (d >= 5) stampTree(x, y, d, hv % 3);
+      else { plot(x, y, tree); plot(x + 1, y + 1, treeD); }
     } else if (p.c === 2) { // minaret: slim white spire with a shadow
       const h = Math.max(2, Math.round(Math.min(10, 3 / mpa * 2)));
       for (let i = 1; i <= h; i++) plot(x + i, y + i, minaD);
@@ -908,10 +1024,85 @@ function drawPoints(cks, mpa) {
 // typical height in metres per building class (index = BNAME), used when OSM has no building:levels
 const BHEIGHT = [9, 6.5, 15, 16, 9, 14, 12, 10, 12, 9, 3, 3, 24];
 // windows in kobalt with the odd lit one in glaze cream; landmarks get a mercan and cream rim like a tile border
-const WIN = hex('#2E3F78'), WIN_LIT = hex('#F6E9C9'), GOLD = hex('#E2483A'), GOLD_D = hex('#F6F2E9');
+const WIN = hex('#4a5d86'), WIN_LIT = hex('#f3d27a'), GOLD = hex('#E2483A'), GOLD_D = hex('#F6F2E9');
+// ---------- roofs: each building's real footprint gets a roof drawn for its type ----------
+// orientation and size come from the footprint itself (principal axis of its outline), cached per building
+function roofGeo(b) {
+  if (b.rg) return b.rg;
+  const r = b.rings[0], n = r.length / 2;
+  let cx = 0, cy = 0; for (let i = 0; i < r.length; i += 2) { cx += r[i]; cy += r[i + 1]; } cx /= n; cy /= n;
+  let sxx = 0, syy = 0, sxy = 0;
+  for (let i = 0; i < r.length; i += 2) { const dx = r[i] - cx, dy = r[i + 1] - cy; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+  const th = 0.5 * Math.atan2(2 * sxy, sxx - syy), ax = Math.cos(th), ay = Math.sin(th);
+  let u0 = 1e18, u1 = -1e18, v0 = 1e18, v1 = -1e18;
+  for (let i = 0; i < r.length; i += 2) {
+    const dx = r[i] - cx, dy = r[i + 1] - cy, u = dx * ax + dy * ay, v = -dx * ay + dy * ax;
+    if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
+  }
+  const cu = (u0 + u1) / 2, cv = (v0 + v1) / 2;
+  const pal = BCOL[b.c] || BCOL[0], base = pal[b.v % pal.length];
+  const R = base & 255, G = base >> 8 & 255;
+  // the roof type follows what the building is and the colour it was given: terracotta reads as a tiled roof
+  let type = 'flat';
+  if (b.c === 5) type = 'dome';
+  else if (b.c === 1 || b.c === 6 || R > G + 28) type = (u1 - u0) / Math.max(1e-9, v1 - v0) > 1.7 ? 'gable' : 'hip';
+  return (b.rg = { cx: cx + ax * cu - ay * cv, cy: cy + ay * cu + ax * cv, ax, ay, L: (u1 - u0) / 2, Wd: (v1 - v0) / 2, type, base });
+}
+const SUN = [-0.55, -0.83], SUN3 = [-0.42, -0.62, 0.66];
+const ROOF_TANK = hex('#7c7a78'), ROOF_TANK_HI = hex('#b4b1ac'), ROOF_SOLAR = hex('#dfe6ee'), ROOF_SOLAR_D = hex('#3b4a63'), ROOF_AC = hex('#c9c6bf'), FINIAL = hex('#e3c46a');
+function drawRoofs(mpa) {
+  const n = frameB.length; if (!n) return;
+  // per visible building, in art pixels
+  const T = new Uint8Array(n + 1), CX = new Float32Array(n + 1), CY = new Float32Array(n + 1), AX = new Float32Array(n + 1), AY = new Float32Array(n + 1), LA = new Float32Array(n + 1), WA = new Float32Array(n + 1), BASE = new Uint32Array(n + 1);
+  for (let j = 0; j < n; j++) {
+    const g = roofGeo(frameB[j][0]), la = g.L * S, wa = g.Wd * S;
+    if (Math.min(la, wa) < 2.2) continue;   // too small on screen to show a roof shape
+    const id = j + 1;
+    T[id] = g.type === 'flat' ? 1 : g.type === 'gable' ? 2 : g.type === 'hip' ? 3 : 4;
+    CX[id] = g.cx * S - OX; CY[id] = g.cy * S - OY; AX[id] = g.ax; AY[id] = g.ay; LA[id] = la; WA[id] = wa; BASE[id] = g.base;
+  }
+  const mpx = mpa;                       // metres per art pixel
+  const tiles = mpx < 0.75, clutter = mpx < 1.6;
+  for (let y = 0; y < H; y++) {
+    const o = y * W;
+    for (let x = 0; x < W; x++) {
+      const i = o + x, id = bid[i], t = T[id];
+      if (!t) continue;
+      const dx = x + .5 - CX[id], dy = y + .5 - CY[id], ax = AX[id], ay = AY[id];
+      const u = dx * ax + dy * ay, v = -dx * ay + dy * ax, la = LA[id], wa = WA[id], base = BASE[id];
+      if (t === 2 || t === 3) {          // pitched: two (gable) or four (hip) planes meeting at a ridge
+        const du = la - Math.abs(u), dv = wa - Math.abs(v);
+        let nx, ny, ridge, row;
+        if (t === 2 || dv <= du) { const s = v < 0 ? -1 : 1; nx = -ay * s; ny = ax * s; ridge = Math.abs(v) < 0.55 || (t === 3 && Math.abs(dv - du) < 0.5); row = Math.abs(v); }
+        else { const s = u < 0 ? -1 : 1; nx = ax * s; ny = ay * s; ridge = Math.abs(dv - du) < 0.5; row = Math.abs(u); }
+        const f = nx * SUN[0] + ny * SUN[1];
+        let c = f > 0 ? mixc(base, WHITE, 0.2 * f) : mixc(base, BLACK, -0.26 * f);
+        if (tiles && ((row * mpx / 0.45) | 0) % 2 === 1) c = mixc(c, BLACK, 0.07);      // rows of tiles every ~45 cm
+        if (ridge) c = mixc(base, WHITE, 0.3);
+        buf[i] = c;
+      } else if (t === 4) {               // a lead dome with the light on its upper left, and a gilded finial
+        // a main dome is at most ~32 m across (Ayasofya 31 m, Süleymaniye 27 m); the finial is a pixel or two
+        const r = Math.min(la * 0.82, wa * 0.82, 16 / mpx), d2 = (dx * dx + dy * dy) / (r * r);
+        if (d2 < 1) {
+          const nz = Math.sqrt(1 - d2), sh = (dx / r) * SUN3[0] + (dy / r) * SUN3[1] + nz * SUN3[2];
+          buf[i] = dx * dx + dy * dy < 1.3 ? FINIAL : sh > 0.75 ? mixc(base, WHITE, (sh - 0.75) * 1.4) : mixc(base, BLACK, (0.75 - sh) * 0.55);
+        }
+      } else if (clutter) {               // flat concrete: water tanks, solar water heaters and AC boxes on a grid of ~2.5 m
+        const du = la - Math.abs(u), dv = wa - Math.abs(v);
+        if (du < 1.5 || dv < 1.5) continue;
+        const cu = Math.floor((u + 4096) * mpx / 2.5), cv = Math.floor((v + 4096) * mpx / 2.5), h = hash(cu + id * 7919, cv + id * 104729) % 47;
+        if (h === 0) { const fu = ((u + 4096) * mpx / 2.5) % 1, fv = ((v + 4096) * mpx / 2.5) % 1; buf[i] = fu < .5 && fv < .5 ? ROOF_TANK_HI : ROOF_TANK; }
+        else if (h === 1 || h === 2) { const fv = ((v + 4096) * mpx / 2.5) % 1; buf[i] = fv < .25 ? ROOF_SOLAR_D : ROOF_SOLAR; }
+        else if (h === 3) buf[i] = ROOF_AC;
+        else if ((hash(x + WOX, y + WOY) & 31) === 0) buf[i] = mixc(base, BLACK, .06);   // weathered concrete
+      }
+    }
+  }
+}
 function shade3d() {
   const thick = view.z >= 16.6 ? 2 : 1, mpa = metersPerArt(), walls = view.z >= 14.6;
   wall.fill(0);
+  if (view.z >= 15.2) drawRoofs(mpa);
   if (walls) {
     // south-facing walls: each building hangs its real (or typical) height below its roof, oblique-map style.
     // Walls stop at anything already drawn below them, so nearer (lower on screen) buildings stay in front.
@@ -926,7 +1117,7 @@ function shade3d() {
       for (let x = 0; x < W; x++) {
         const i = o + x, id = bid[i];
         if (!id || bid[i + W] === id) continue;
-        const k = kOf[id], base = buf[i], wc = mixc(base, BLACK, .3), foot = mixc(base, BLACK, .5);
+        const k = kOf[id], base = roofGeo(frameB[id - 1][0]).base, wc = mixc(base, BLACK, .3), foot = mixc(base, BLACK, .5);
         for (let d = 1; d <= k && y + d < H; d++) {
           const j = i + d * W;
           if (bid[j] || wall[j]) break;
@@ -937,10 +1128,19 @@ function shade3d() {
       }
     }
   }
+  // pixel-art outline: close in, every roof gets a 1 px rim in its own darkest tone (hue-shifted, never black)
+  // and a 1 px light line just inside its upper and left edges
+  const outline = view.z >= 15;
   for (let y = H - 1; y >= 0; y--) {
     const o = y * W;
     for (let x = W - 1; x >= 0; x--) {
       const i = o + x, id = bid[i];
+      if (id && outline) {
+        const up = y > 0 ? bid[i - W] : id, dn = y + 1 < H ? bid[i + W] : id, lf = x > 0 ? bid[i - 1] : id, rt = x + 1 < W ? bid[i + 1] : id;
+        if (up !== id || dn !== id || lf !== id || rt !== id) buf[i] = mixc(buf[i], OUTLINE, .58);
+        else if ((y > 1 && bid[i - 2 * W] !== id) || (x > 1 && bid[i - 2] !== id)) buf[i] = mixc(buf[i], LIGHT, .22);
+        continue;
+      }
       if (id) {
         const down = y + 1 < H ? bid[i + W] : id, up = y > 0 ? bid[i - W] : id, right = x + 1 < W ? bid[i + 1] : id;
         if (down !== id || (thick === 2 && y + 2 < H && bid[i + 2 * W] !== id)) buf[i] = walls ? mixc(buf[i], BLACK, .12) : sh(buf[i]);
@@ -968,7 +1168,7 @@ function shade3d() {
 const SEAS = [['Karadeniz', 34.5, 42.9, 'sea'], ['Akdeniz', 32.0, 35.3, 'sea'], ['Ege Denizi', 25.3, 38.6, 'sea'], ['Marmara Denizi', 28.2, 40.72, 'sea'],
   ['Ağrı Dağı', 44.298, 39.702, 'peak'], ['Erciyes', 35.447, 38.531, 'peak'], ['Kaçkar', 41.161, 40.834, 'peak'], ['Süphan', 42.833, 38.933, 'peak'], ['Uludağ', 29.221, 40.071, 'peak'],
   ['Hasan Dağı', 34.168, 38.127, 'peak'], ['Nemrut Dağı', 38.741, 37.981, 'peak'], ['Van Gölü', 42.9, 38.62, 'lake'], ['Tuz Gölü', 33.38, 38.82, 'lake'], ['Boğaziçi', 29.06, 41.11, 'strait'], ['Çanakkale Boğazı', 26.45, 40.22, 'strait']];
-const KCOL = { mosque: '#93A1C6', church: '#E2483A', historic: '#E9D9B5', attraction: '#F08A6E', park: '#7CC1B6', station: '#8FA3DA', ferry: '#7FC6CB', bridge: '#EDE6D7', tower: '#F6F2E9', ruins: '#D8C7A6', public: '#E9D9B5', place: '#F6F2E9' };
+const KCOL = { mosque: '#9fb2c8', church: '#e08a6a', historic: '#e8c27a', attraction: '#f3a35b', park: '#8fd07a', station: '#c9a6f0', ferry: '#8fd3ff', bridge: '#e9d9b8', tower: '#f1e6c8', ruins: '#d8c49a', public: '#e6cf9f', place: '#ffffff' };
 const KNAME = { mosque: 'Cami', church: 'Kilise / ibadethane', historic: 'Tarihî yer', attraction: 'Gezilecek yer', park: 'Park', station: 'İstasyon', ferry: 'İskele', bridge: 'Köprü', tower: 'Kule', ruins: 'Kalıntı', public: 'Kamu', place: 'Yerleşim', city: 'Şehir', town: 'İlçe / kasaba' };
 function drawLabels() {
   const dpr = cv.width / innerWidth, z = view.z;
@@ -1021,9 +1221,9 @@ function drawLabels() {
   // Turkey-wide
   for (const s of SEAS) {
     const [n, lon, lat, k] = s;
-    if (k === 'sea' && z < 10.5) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 15, color: '#E4ECFA', halo: 'rgba(27,60,143,.85)' });
-    if (k === 'strait' && z >= 8 && z < 12.5) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 12, color: '#E4ECFA', halo: 'rgba(27,60,143,.85)' });
-    if (k === 'lake' && z >= 6 && z < 11) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 12, color: '#E4ECFA', halo: 'rgba(27,60,143,.85)' });
+    if (k === 'sea' && z < 10.5) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 15, color: '#d6efff', halo: 'rgba(20,50,90,.8)' });
+    if (k === 'strait' && z >= 8 && z < 12.5) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 12, color: '#d6efff', halo: 'rgba(20,50,90,.8)' });
+    if (k === 'lake' && z >= 6 && z < 11) tryLabel(n, lon2x(lon), lat2y(lat), { center: true, size: 12, color: '#d6efff', halo: 'rgba(20,50,90,.8)' });
     if (k === 'peak' && z >= 6.4 && z < 12) tryLabel('▲ ' + n, lon2x(lon), lat2y(lat), { size: 12, color: '#F6F2E9' });
   }
   const istLabelsActive = z >= 10.3 && over;
