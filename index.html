@@ -202,135 +202,135 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
   #card { top: auto; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+
+/* ---------- home: the map is the page; the menu is a pixel game menu ---------- */
+@font-face { font-family: "Piksel Oyun"; src: url("assets/fonts/pikseloyun.woff2") format("woff2"); font-display: swap; }
+:root { --f-game: "Piksel Oyun", "Pixelify Sans", monospace; --f-term: "VT323", "JetBrains Mono", monospace; --px-ink: #0F1C47; --px-ink-2: #182A62; --px-cream: #F6F2E9; --px-red: #E2483A; --px-teal: #3FC1C9; --px-dim: #9AA6CC; }
+/* stepped pixel frame: cream edge with notched corners and a hard drop shadow */
+.px { background: var(--px-ink); color: var(--px-cream); border: 0; box-shadow: 0 -4px 0 0 var(--px-cream), 0 4px 0 0 var(--px-cream), -4px 0 0 0 var(--px-cream), 4px 0 0 0 var(--px-cream), 0 0 0 4px var(--px-ink), 8px 12px 0 0 rgba(4, 8, 24, .55); }
+#brand { top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); width: min(330px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))); box-sizing: border-box; padding: 18px 18px 16px; gap: 14px; }
+.px-title { display: flex; align-items: center; gap: 12px; }
+.px-title img { width: 40px; height: 40px; image-rendering: pixelated; box-shadow: 0 0 0 3px var(--px-cream); }
+#brand .px-title h1 { margin: 0; font: 400 17px/1.45 var(--f-game); color: var(--px-cream); letter-spacing: .02em; }
+#brand .px-title h1 span { color: var(--px-red); }
+#brand .tag { margin: 0; font: 400 21px/1 var(--f-term); color: var(--px-teal); }
+#brand .tag::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+#brand .search { display: flex; align-items: center; gap: 8px; background: #08112f; padding: 6px 10px; box-shadow: inset 0 0 0 2px var(--px-ink-2); }
+#brand .search:focus-within { box-shadow: inset 0 0 0 2px var(--px-teal); }
+#brand .prompt { font: 400 22px var(--f-term); color: var(--px-red); }
+#brand #q { flex: 1; min-width: 0; background: none; border: 0; box-shadow: none; padding: 4px 0; font: 400 22px var(--f-term); color: var(--px-cream); }
+#brand #q::placeholder { color: var(--px-dim); }
+#brand #results { background: var(--px-ink); border: 0; box-shadow: 0 0 0 3px var(--px-cream); top: calc(100% + 8px); }
+#brand #results button { font: 400 20px var(--f-term); color: var(--px-cream); border-bottom: 1px dashed var(--px-ink-2); }
+#brand #results button:hover, #brand #results button:focus-visible { background: var(--px-ink-2); color: #fff; }
+#brand #results small { font: 400 16px var(--f-term); color: var(--px-dim); }
+/* places as a game menu list: ▶ marks the item under the pointer or focus */
+#brand #more { gap: 6px; }
+#brand .chips { display: grid; gap: 2px; }
+#brand .chip { all: unset; box-sizing: border-box; display: block; cursor: pointer; padding: 7px 8px 7px 26px; position: relative; font: 400 11px/1.4 var(--f-game); text-transform: uppercase; color: var(--px-cream); }
+#brand .chip::before { content: "▶"; position: absolute; left: 6px; top: 7px; font-size: 10px; color: var(--px-red); opacity: 0; }
+#brand .chip:hover, #brand .chip:focus-visible { background: var(--px-ink-2); color: #fff; }
+#brand .chip:hover::before, #brand .chip:focus-visible::before { opacity: 1; animation: blink .8s steps(1) infinite; }
+#brand .chip.go { color: var(--px-red); }
+#brand .chip.go::before { opacity: 1; }
+#brand #toggle { justify-self: start; font: 400 18px var(--f-term); color: var(--px-dim); text-decoration: none; padding-left: 26px; }
+#brand #toggle::before { content: "+ "; }
+#brand #toggle:hover { color: var(--px-cream); }
+.px-menu { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 12px; border-top: 2px dashed var(--px-ink-2); }
+.px-btn { font: 400 10px/1 var(--f-game); text-transform: uppercase; color: var(--px-ink); background: var(--px-cream); text-decoration: none; padding: 9px 10px 8px; box-shadow: inset -3px -3px 0 0 #c9c0ad, 3px 3px 0 0 #050a1f; }
+.px-btn:hover, .px-btn:focus-visible { background: #fff; outline: none; transform: translate(-1px, -1px); }
+.px-btn:active { transform: translate(2px, 2px); box-shadow: inset -3px -3px 0 0 #c9c0ad; }
+.px-btn.red { background: var(--px-red); color: #fff; box-shadow: inset -3px -3px 0 0 #9c2a20, 3px 3px 0 0 #050a1f; }
+/* the rest of the map HUD follows the same pixel look */
+#zoom.hud, #status.hud, #credit.hud, #card.hud, #maploading.hud { background: var(--px-ink); border: 0; box-shadow: 0 0 0 3px var(--px-cream), 6px 8px 0 0 rgba(4, 8, 24, .5); }
+.zbtn { font-family: var(--f-game); font-size: 16px; border-bottom: 3px solid var(--px-ink-2); }
+.zbtn:last-child { font-size: 10px; }
+#status { font-family: var(--f-term); font-size: 17px; }
+#credit { font: 400 15px/1.2 var(--f-term); }
+#card h2 { font: 400 13px/1.5 var(--f-game); }
+#maploading { font: 400 12px var(--f-game); }
+/* drawer: the old landing page as an in-game log screen */
+#drawer { position: fixed; z-index: 8; top: 0; right: 0; bottom: 0; width: min(470px, 100vw); box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain; background: var(--px-ink); color: var(--px-cream); border-left: 4px solid var(--px-cream); box-shadow: -10px 0 0 rgba(4, 8, 24, .45); padding: calc(14px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 18px; animation: drin .18s steps(4); }
+@keyframes drin { from { transform: translateX(60px); opacity: 0; } }
+.dr-head { display: flex; align-items: center; gap: 12px; }
+.dr-head img { width: 32px; height: 32px; image-rendering: pixelated; box-shadow: 0 0 0 3px var(--px-cream); }
+.dr-head span { font: 400 12px/1.4 var(--f-game); }
+.dr-head span b { font-weight: 400; color: var(--px-red); }
+.dr-tabs { position: sticky; top: calc(-14px - env(safe-area-inset-top, 0px)); z-index: 1; display: flex; gap: 8px; align-items: center; margin: 14px -18px 0; padding: 12px 18px; background: var(--px-ink); border-bottom: 2px dashed var(--px-ink-2); }
+.dr-tabs a.on { background: var(--px-red); color: #fff; box-shadow: inset -3px -3px 0 0 #9c2a20, 3px 3px 0 0 #050a1f; }
+.dr-x { margin-left: auto; width: 36px; height: 34px; background: var(--px-cream); border: 0; color: var(--px-ink); font: 400 14px var(--f-game); cursor: pointer; box-shadow: inset -3px -3px 0 0 #c9c0ad, 3px 3px 0 0 #050a1f; }
+.dr-sec { padding-top: 26px; scroll-margin-top: 64px; }
+.dr-sec h2 { margin: 0; font: 400 18px/1.3 var(--f-game); color: var(--px-cream); }
+.dr-sec h2::before { content: "▶ "; color: var(--px-red); font-size: 14px; }
+.dr-sub { margin: 8px 0 14px; font: 400 19px/1.15 var(--f-term); color: var(--px-dim); }
+#drawer .panel { background: transparent; border: 0; outline: 0; box-shadow: none; padding: 0; }
+#drawer .panel::before, #drawer .panel::after { display: none; }
+#drawer .coverage { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+#drawer .cov-fig { margin: 0; box-shadow: 0 0 0 3px var(--px-cream); background: #265e98; line-height: 0; }
+#drawer .cov-fig canvas { width: 100%; height: auto; image-rendering: pixelated; }
+#drawer .regions { gap: 10px; }
+#drawer .region { background: var(--px-ink-2); border: 0; padding: 12px; box-shadow: none; }
+#drawer .region h3 { font: 400 12px/1.4 var(--f-game); color: var(--px-cream); }
+#drawer .region p { font: 400 15px/1.5 var(--f-pixel); color: var(--px-dim); }
+#drawer .st { font: 400 17px var(--f-term); }
+#drawer .st.full { color: var(--px-red); } #drawer .st.overview { color: var(--px-teal); } #drawer .st.next { color: var(--px-dim); }
+#drawer .btn { font: 400 10px/1 var(--f-game); text-transform: uppercase; color: var(--px-ink); background: var(--px-cream); border: 0; padding: 9px 10px 8px; box-shadow: inset -3px -3px 0 0 #c9c0ad, 3px 3px 0 0 #050a1f; }
+#drawer .igfollow { border-bottom: 2px dashed var(--px-ink-2); }
+#drawer .igfollow p { font: 400 18px var(--f-term); color: var(--px-dim); }
+#drawer .igfollow strong { color: var(--px-teal); font-weight: 400; }
+#drawer .entry { grid-template-columns: minmax(0, 1fr); border-bottom: 2px dashed var(--px-ink-2); padding: 18px 0; }
+#drawer .entry .when { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font: 400 18px var(--f-term); color: var(--px-teal); }
+#drawer .entry .tag { font: 400 9px/1 var(--f-game); letter-spacing: 0; padding: 5px 6px 4px; background: var(--px-teal); color: var(--px-ink); }
+#drawer .entry .tag.yeni { background: var(--px-red); color: #fff; }
+#drawer .entry .tag.ig { background: var(--px-cream); color: var(--px-ink); }
+#drawer .entry h3 { font: 700 21px/1.2 var(--f-pixel); color: #fff; font-stretch: normal; }
+#drawer .entry p { font: 400 16px/1.55 var(--f-pixel); color: #dfe4f3; }
+#drawer .entry a { color: var(--px-red); font: 400 19px var(--f-term); }
+#drawer .entry .shot { border: 0; box-shadow: 0 0 0 3px var(--px-cream), 6px 6px 0 0 #050a1f; }
+#drawer .empty { color: var(--px-dim); font: 400 18px var(--f-term); }
+#drawer .legend li { font: 400 15px var(--f-pixel); color: var(--px-cream); }
+#drawer .sw { outline: 2px solid var(--px-ink-2); }
+#drawer .totals { font: 400 17px/1.3 var(--f-term); color: var(--px-dim); border-top: 2px dashed var(--px-ink-2); }
+.dr-foot { margin: 26px 0 0; font: 400 16px/1.3 var(--f-term); color: var(--px-dim); }
+.dr-foot a { color: var(--px-cream); }
+@media (max-width: 640px) {
+  #brand { top: calc(12px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: calc(100vw - 86px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); padding: 12px 12px 10px; gap: 10px; }
+  .px-title img { width: 30px; height: 30px; }
+  #brand .px-title h1 { font-size: 13px; }
+  #brand .tag { display: none; }
+  #brand .chips { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; }
+  #brand .chip { flex: none; font-size: 9px; padding: 7px 8px 7px 20px; }
+  #brand .chip::before { left: 5px; font-size: 8px; }
+  #brand #toggle { display: none; }
+  .px-menu { padding-top: 10px; gap: 6px; }
+  .px-btn { font-size: 9px; padding: 8px 8px 7px; }
+  #status { font-size: 15px; }
+  #drawer { border-left: 0; box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) { #brand .tag::after, #brand .chip:hover::before { animation: none; } #drawer { animation: none; } }
 </style>
+
 
 </head>
 <body>
-<main id="homeview">
-  <header class="bar">
-    <div class="wrap">
-      <a class="mark" href="#"><img src="assets/logo-wide.webp" alt="Piksel Harita" width="114" height="38"></a>
-      <nav class="nav" aria-label="Sayfa">
-        <a class="t" href="#pencere">Canlı pencere</a>
-        <a class="t" href="#kapsam">Kapsam</a>
-        <a class="t" href="#devlog">Devlog</a>
-        <a class="btn go sm" href="#harita">Haritaya gir</a>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero wrap">
-    <figure class="tile"><img src="assets/logo-tile.webp" alt="Piksel Harita çini logosu: lale ve karanfillerle bezeli piksel Türkiye haritası, ay yıldız ve fare imleci" width="900" height="900"></figure>
-    <div class="hero-copy">
-      <p class="eyebrow"><span class="plus" aria-hidden="true"></span>OpenStreetMap verisiyle</p>
-      <h1>Türkiye'yi <em>piksel piksel</em> keşfet</h1>
-      <p class="lede">Uzaktan bakınca kıyılar, dağlar ve göller. Yaklaştıkça gerçek sokaklar, binalar, camiler ve köprüler kendi yerlerinde beliriyor. Hiçbir bina uydurma değil.</p>
-      <div class="cta">
-        <a class="btn go" href="#harita">Haritaya gir →</a>
-        <a class="btn" href="#devlog">Neler eklendi?</a>
-      </div>
-      <ul class="ledger">
-        <li><span class="plus" aria-hidden="true"></span><span><b>811.474</b> gerçek bina</span></li>
-        <li><span class="plus" aria-hidden="true"></span><span><b>İstanbul</b> tam detay</span></li>
-        <li><span class="plus" aria-hidden="true"></span><span><b>Türkiye</b> genel görünüm</span></li>
-      </ul>
-    </div>
-  </section>
-
-  <div class="divider wrap"><canvas class="orn" data-orn="divider" aria-hidden="true"></canvas></div>
-
-  <section class="sec wrap" id="pencere">
-    <div class="sec-head">
-      <h2>Canlı pencere</h2>
-      <p>Aşağıdaki kare bir fotoğraf değil. Sultanahmet, OpenStreetMap verisinden şu anda senin ekranında çiziliyor.</p>
-    </div>
-    <div class="panel live">
-      <div class="frame">
-        <canvas id="heroMap" tabindex="0" role="button" aria-label="Sultanahmet'i haritada aç"></canvas>
-        <div class="frame-msg" id="frameMsg">Sultanahmet çiziliyor…</div>
-      </div>
-      <div class="live-copy">
-        <h3>Sultanahmet ve Ayasofya, 41.007° K · 28.978° D</h3>
-        <p>Kurşun gri çatılar camiler, kiremit renkli olanlar evler, kahverengi çizgi tarihî surlar. Her binanın şekli ve yeri OpenStreetMap'teki gerçek kayıttan geliyor.</p>
-        <p class="count" id="heroCount">Binalar yükleniyor…</p>
-        <div><button class="btn sm" type="button" id="heroOpen">Bu yeri haritada aç →</button></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec wrap" id="kapsam">
-    <div class="sec-head">
-      <h2>Kapsam</h2>
-      <p>Haritanın hangi bölgesi ne kadar ayrıntılı. Kırmızı çerçeve, her binanın tek tek çizildiği yerleri gösterir.</p>
-    </div>
-    <div class="panel coverage">
-      <figure class="cov-fig"><canvas id="covMap" aria-label="Türkiye üzerinde tam detaylı bölgeleri gösteren kapsam haritası"></canvas></figure>
-      <ol class="regions" id="regions"></ol>
-    </div>
-  </section>
-
-  <section class="sec wrap" id="lejant">
-    <div class="sec-head">
-      <h2>Lejant</h2>
-      <p>Haritadaki her rengin anlamı. Çatı rengi binanın türünü gösterir; şekli ve yeri her zaman gerçektir.</p>
-    </div>
-    <div class="panel">
-      <ul class="legend">
-        <li><span class="sw" style="background:#c4694a"></span>Ev (kiremit çatı)</li>
-        <li><span class="sw" style="background:#d0c7ba"></span>Apartman</li>
-        <li><span class="sw" style="background:#8f9dad"></span>Cami (kurşun kubbe)</li>
-        <li><span class="sw" style="background:#b6684e"></span>Kilise, sinagog</li>
-        <li><span class="sw" style="background:#d3ba8b"></span>Tarihî yapı, müze</li>
-        <li><span class="sw" style="background:#b8c1ca"></span>Ofis, ticari</li>
-        <li><span class="sw" style="background:#8fca6a"></span>Park, bahçe</li>
-        <li><span class="sw" style="background:#5a9a4a"></span>Orman, koru</li>
-        <li><span class="sw" style="background:#a2c295"></span>Mezarlık</li>
-        <li><span class="sw" style="background:#4aa0da"></span>Deniz, göl</li>
-        <li><span class="sw line" style="background:#f2a541"></span>Otoyol</li>
-        <li><span class="sw line" style="background:#fbe08f"></span>Ana cadde</li>
-        <li><span class="sw line" style="background:#8f6ea8"></span>Tramvay</li>
-        <li><span class="sw line" style="background:#6b6763"></span>Demiryolu</li>
-        <li><span class="sw line" style="background:#a5764a"></span>Sur</li>
-        <li><span class="sw line" style="background:#9fd2f2"></span>Vapur hattı</li>
-      </ul>
-      <p class="totals mono">İstanbul'da şu an: 811.474 bina · 289.941 yol, ray ve vapur hattı · 64.484 park, orman ve su alanı</p>
-    </div>
-  </section>
-
-  <div class="divider wrap"><canvas class="orn" data-orn="divider" aria-hidden="true"></canvas></div>
-
-  <section class="sec wrap" id="devlog">
-    <div class="sec-head">
-      <h2>Devlog</h2>
-      <p>Haritaya ne eklendi, ne değişti. Instagram'da paylaştığımız her gönderi burada da görünür; en yenisi en üstte.</p>
-    </div>
-    <div class="panel">
-      <div class="igfollow"><p>Gönderiler <strong>@piksel.harita</strong> hesabından geliyor.</p><a class="btn sm" href="https://www.instagram.com/piksel.harita/" target="_blank" rel="noopener">Instagram'da takip et</a></div>
-      <div class="log" id="log"><p class="empty">Kayıtlar yükleniyor…</p></div>
-    </div>
-  </section>
-
-  <footer class="foot">
-    <div class="wrap"><img src="assets/icon-180.png" alt="" width="56" height="56"><span>Harita verisi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap katkıcıları</a> (ODbL) · Natural Earth · Mapzen/AWS Terrain Tiles</span></div>
-  </footer>
-</main>
-
-<div id="mapview" hidden>
+<div id="mapview">
 <canvas id="map" aria-label="Yakınlaştırılabilir piksel harita"></canvas>
 <div id="maploading" class="hud" role="status">Harita yükleniyor…</div>
 
-<section id="brand" class="hud">
-  <a class="back" href="#">← Ana sayfa ve devlog</a>
-  <h1 class="hudlogo"><img src="assets/logo-wide.webp" alt="Piksel Harita" width="102" height="34"></h1>
-  <p>OpenStreetMap'teki gerçek sokak, bina, cami ve parklar piksel piksel. Sürükle, tekerlekle yakınlaştır, binaya tıkla.</p>
+<section id="brand" class="hud px" aria-label="Piksel Harita menüsü">
+  <div class="px-title"><img src="assets/icon-180.png" alt="" width="40" height="40"><h1>PİKSEL<br><span>HARİTA</span></h1></div>
+  <p class="tag">Türkiye, piksel piksel</p>
   <div class="search">
-    <input id="q" type="search" placeholder="Yer ara: Ayasofya, Kadıköy, Ankara…" autocomplete="off" aria-label="Yer ara">
+    <span class="prompt" aria-hidden="true">&gt;</span>
+    <input id="q" type="search" placeholder="yer ara" autocomplete="off" aria-label="Yer ara">
     <div id="results" hidden></div>
   </div>
   <div id="more">
     <div class="chips" id="chips"></div>
     <button id="toggle" type="button">Daha fazla yer</button>
   </div>
+  <nav class="px-menu" aria-label="Bölümler"><a class="px-btn red" href="#devlog">Devlog</a><a class="px-btn" href="#kapsam">Kapsam</a><a class="px-btn" href="#lejant">Lejant</a></nav>
 </section>
 
 <nav id="zoom" class="hud" aria-label="Yakınlaştırma">
@@ -355,6 +355,42 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
   <a id="clink" href="#" target="_blank" rel="noopener">OpenStreetMap'te aç ↗</a>
 </aside>
 </div>
+<aside id="drawer" hidden aria-label="Devlog ve kapsam">
+  <div class="dr-head">
+    <img src="assets/icon-180.png" alt="" width="32" height="32"><span>PİKSEL <b>HARİTA</b></span>
+  </div>
+  <nav class="dr-tabs" aria-label="Bölümler"><a class="px-btn" href="#devlog">Devlog</a><a class="px-btn" href="#kapsam">Kapsam</a><a class="px-btn" href="#lejant">Lejant</a><button class="dr-x" id="drx" type="button" aria-label="Haritaya dön">×</button></nav>
+  <section class="dr-sec" id="devlog"><h2>Devlog</h2><p class="dr-sub">Haritaya ne eklendi, ne değişti.</p><div class="panel">
+      <div class="igfollow"><p>Gönderiler <strong>@piksel.harita</strong> hesabından geliyor.</p><a class="btn sm" href="https://www.instagram.com/piksel.harita/" target="_blank" rel="noopener">Instagram'da takip et</a></div>
+      <div class="log" id="log"><p class="empty">Kayıtlar yükleniyor…</p></div>
+    </div></section>
+  <section class="dr-sec" id="kapsam"><h2>Kapsam</h2><p class="dr-sub">Kırmızı çerçeve, her binanın tek tek çizildiği yerler.</p><div class="panel coverage">
+      <figure class="cov-fig"><canvas id="covMap" aria-label="Türkiye üzerinde tam detaylı bölgeleri gösteren kapsam haritası"></canvas></figure>
+      <ol class="regions" id="regions"></ol>
+    </div></section>
+  <section class="dr-sec" id="lejant"><h2>Lejant</h2><p class="dr-sub">Çatı rengi binanın türünü gösterir; şekli ve yeri her zaman gerçek.</p><div class="panel">
+      <ul class="legend">
+        <li><span class="sw" style="background:#c4694a"></span>Ev (kiremit çatı)</li>
+        <li><span class="sw" style="background:#d0c7ba"></span>Apartman</li>
+        <li><span class="sw" style="background:#8f9dad"></span>Cami (kurşun kubbe)</li>
+        <li><span class="sw" style="background:#b6684e"></span>Kilise, sinagog</li>
+        <li><span class="sw" style="background:#d3ba8b"></span>Tarihî yapı, müze</li>
+        <li><span class="sw" style="background:#b8c1ca"></span>Ofis, ticari</li>
+        <li><span class="sw" style="background:#8fca6a"></span>Park, bahçe</li>
+        <li><span class="sw" style="background:#5a9a4a"></span>Orman, koru</li>
+        <li><span class="sw" style="background:#a2c295"></span>Mezarlık</li>
+        <li><span class="sw" style="background:#4aa0da"></span>Deniz, göl</li>
+        <li><span class="sw line" style="background:#f2a541"></span>Otoyol</li>
+        <li><span class="sw line" style="background:#fbe08f"></span>Ana cadde</li>
+        <li><span class="sw line" style="background:#8f6ea8"></span>Tramvay</li>
+        <li><span class="sw line" style="background:#6b6763"></span>Demiryolu</li>
+        <li><span class="sw line" style="background:#a5764a"></span>Sur</li>
+        <li><span class="sw line" style="background:#9fd2f2"></span>Vapur hattı</li>
+      </ul>
+      <p class="totals mono">İstanbul'da şu an: 811.474 bina · 289.941 yol, ray ve vapur hattı · 64.484 park, orman ve su alanı</p>
+    </div></section>
+  <p class="dr-foot">Harita verisi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap katkıcıları</a> (ODbL) · Natural Earth · Mapzen/AWS Terrain Tiles</p>
+</aside>
 
 <script>
 "use strict";
@@ -889,8 +925,8 @@ function hud() {
 let anim = null;
 function frame(t) {
   if (anim) { const done = anim(t); dirty = true; if (done) anim = null; }
-  if (dirty && meta && !mapView.hidden) { dirty = false; ensureChunks(); render(); hud(); }
-  else if (meta && mapView.hidden && (dirty || heroAnim)) { dirty = false; renderHero(t); }
+  else if (idle && meta && over && view.z > 14 && !reducedMotion && !document.hidden) drift(t);
+  if (dirty && meta) { dirty = false; ensureChunks(); render(); hud(); }
   requestAnimationFrame(frame);
 }
 function clampView() { view.z = Math.min(ZMAX, Math.max(ZMIN, view.z)); }
@@ -1044,9 +1080,19 @@ function drawChips() {
 document.getElementById('toggle').onclick = () => { showAll = !showAll; drawChips(); };
 drawChips();
 
-// ======================= views: home <-> map =======================
-const mapView = document.getElementById('mapview'), homeView = document.getElementById('homeview');
-let booted = null, mapStarted = false, pendingFly = null, lastMapCenter = null;
+// ======================= views: the map is the home page; devlog lives in a drawer =======================
+const mapView = document.getElementById('mapview'), drawer = document.getElementById('drawer');
+let booted = null, mapStarted = false, pendingFly = null;
+// idle drift: until the visitor touches anything, the camera glides slowly over the city
+let idle = true;
+const stopIdle = () => { idle = false; };
+for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) addEventListener(ev, stopIdle, { passive: true, capture: true });
+function drift(t) {
+  const s = Math.pow(2, view.z - ZQ), a = t * 0.00003;
+  const ox = Math.floor(view.x * s), oy = Math.floor(view.y * s);
+  view.x += Math.cos(a) * 0.14 / s; view.y += Math.sin(a * 0.7) * 0.08 / s;
+  if (Math.floor(view.x * s) !== ox || Math.floor(view.y * s) !== oy) dirty = true;
+}
 function ensureData() {
   if (!booted) booted = boot().then(() => { drawCoverage(); dirty = true; });
   return booted;
@@ -1059,27 +1105,27 @@ function startMap() {
     document.getElementById('maploading').hidden = true;
     resize(); view.x = lon2x(35.2); view.y = lat2y(39.0); view.z = homeZoom(); dirty = true;
     const p = pendingFly; pendingFly = null;
-    setTimeout(() => { if (p) flyTo(lon2x(p.lon), lat2y(p.lat), p.z); else if (!anim && view.z < 8) flyTo(lon2x(28.974), lat2y(41.0103), 15.6); }, p ? 600 : 1800);
+    setTimeout(() => { if (p) flyTo(lon2x(p.lon), lat2y(p.lat), p.z); else if (!anim && idle && view.z < 8) flyTo(lon2x(28.974), lat2y(41.0103), 15.2); }, p ? 300 : 900);
   }).catch(err => { document.getElementById('maploading').textContent = 'Harita verisi yüklenemedi (' + err.message + '). Sayfayı yenileyip tekrar dene.'; });
 }
+const DRAWER = ['devlog', 'kapsam', 'lejant'];
 function route() {
-  const h = location.hash.slice(1);
-  const onMap = h === 'harita';
-  if (!onMap && !mapView.hidden && meta) lastMapCenter = { lat: y2lat(view.y), lon: x2lon(view.x), z: Math.round(view.z * 10) / 10 };
-  mapView.hidden = !onMap; homeView.hidden = onMap;
-  document.documentElement.classList.toggle('map-on', onMap);
-  if (onMap) { resize(); startMap(); dirty = true; }
-  else {
-    const t = h && document.getElementById(h);
-    if (t) t.scrollIntoView(); else if (!h) window.scrollTo(0, 0);
-  }
+  const h = location.hash.slice(1), open = DRAWER.includes(h);
+  document.documentElement.classList.add('map-on');
+  drawer.hidden = !open;
+  if (open) { stopIdle(); const t = document.getElementById(h); if (t) t.scrollIntoView(); drawer.querySelectorAll('.dr-tabs a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + h)); }
+  if (!mapStarted) { resize(); startMap(); }
+  dirty = true;
 }
+function closeDrawer() { history.replaceState(null, '', location.pathname + location.search); route(); }
+document.getElementById('drx').onclick = closeDrawer;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
 addEventListener('hashchange', route);
 
 // ======================= devlog =======================
 let devlog = { regions: [], entries: [] }, igPosts = null;
 const fmtDate = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } };
-function openOnMap(p) { pendingFly = p; if (location.hash === '#harita') startMap(); else location.hash = 'harita'; }
+function openOnMap(p) { stopIdle(); if (!drawer.hidden) closeDrawer(); pendingFly = p; startMap(); }
 function renderHome() {
   const rg = document.getElementById('regions'); rg.innerHTML = '';
   const label = { full: 'tam detay', overview: 'genel görünüm', next: 'sırada' };
@@ -1165,56 +1211,7 @@ function renderInstagram(log) {
   }
 }
 
-// ---------- live window: the real city, rendered by the same engine ----------
-// Centred between Sultanahmet Camii and Ayasofya, wide enough to hold both.
-const HERO = { lat: 41.0068, lon: 28.9782, z0: 14.2, z1: 15.25 };
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const hero = { W: 0, H: 0, img: null, buf: null, bid: null, t0: 0, seen: false };
-let heroAnim = true;
-function renderHero(t) {
-  const c = document.getElementById('heroMap'), r = c.getBoundingClientRect();
-  if (!r.width || homeView.hidden) return;
-  // only draw while the window is (nearly) on screen
-  if (r.bottom < -200 || r.top > innerHeight + 200) { heroAnim = false; hero.seen = false; return; }
-  const dpr = window.devicePixelRatio || 1, k = Math.max(2, Math.round(3 * dpr));
-  const aw = Math.ceil(r.width * dpr / k), ah = Math.ceil(r.height * dpr / k);
-  if (hero.W !== aw || hero.H !== ah) {
-    hero.W = aw; hero.H = ah; hero.img = actx.createImageData(aw, ah);
-    hero.buf = new Uint32Array(hero.img.data.buffer); hero.bid = new Int32Array(aw * ah);
-    c.width = aw * k; c.height = ah * k;
-  }
-  const sv = { W, H, img, buf, bid, x: view.x, y: view.y, z: view.z };
-  let n = 0, ready = false, u = 0;
-  try {
-    W = hero.W; H = hero.H; img = hero.img; buf = hero.buf; bid = hero.bid;
-    if (art.width !== W || art.height !== H) { art.width = W; art.height = H; }
-    view.x = lon2x(HERO.lon); view.y = lat2y(HERO.lat);
-    ready = !!heroData;
-    heroMode = ready;
-    const now = t || performance.now();
-    if (ready && !hero.t0) hero.t0 = now;
-    u = !ready ? 0 : reducedMotion ? 1 : Math.min(1, (now - hero.t0) / 3000);
-    view.z = HERO.z0 + (HERO.z1 - HERO.z0) * (1 - Math.pow(1 - u, 3));
-    render(true);
-    n = frameB.length;
-    const hc = c.getContext('2d'); hc.imageSmoothingEnabled = false;
-    hc.drawImage(art, 0, 0, W, H, 0, 0, c.width, c.height);
-  } finally {
-    heroMode = false;
-    W = sv.W; H = sv.H; img = sv.img; buf = sv.buf; bid = sv.bid; view.x = sv.x; view.y = sv.y; view.z = sv.z;
-  }
-  heroAnim = !ready || u < 1;
-  if (ready && n) {
-    document.getElementById('frameMsg').hidden = true;
-    document.getElementById('heroCount').textContent = 'Bu karede ' + n.toLocaleString('tr-TR') + ' gerçek bina var.';
-  }
-}
-const openHero = () => openOnMap({ lat: HERO.lat, lon: HERO.lon, z: 16.4 });
-document.getElementById('heroMap').addEventListener('click', openHero);
-document.getElementById('heroMap').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHero(); } });
-document.getElementById('heroOpen').addEventListener('click', openHero);
-addEventListener('scroll', () => { if (!heroAnim && mapView.hidden) { const r = document.getElementById('heroMap').getBoundingClientRect(); if (r.bottom > -200 && r.top < innerHeight + 200 && !hero.seen) { hero.seen = true; dirty = true; } } }, { passive: true });
-
 // ---------- pixel ornaments: tulip between saz leaves, cobalt curls, red crosses (after the logo) ----------
 const ORN = {
   tulip: ['.....r.....', '....rrr....', '.r..rrr..r.', '.rr.rrr.rr.', '.rrrrrrrrr.', '..rrrrrrr..', '..rrrrrrr..', '...rrrrr...', '....rrr....', '.....b.....', '.....b.....', '....bbb....'],
@@ -1279,7 +1276,6 @@ async function loadDevlog() {
 
 resize();
 requestAnimationFrame(frame);
-loadHero().catch(() => { document.getElementById('frameMsg').textContent = 'Önizleme yüklenemedi. Haritaya girerek bakabilirsin.'; });
 ensureData();
 loadDevlog();
 route();
