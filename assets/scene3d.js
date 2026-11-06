@@ -12,7 +12,8 @@
   const back = u => { const c = 1.6; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
 
   function makeRenderer(canvas, pix) {
-    const r = new T.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+    // 'default' power: integrated GPUs on laptops are steadier than forcing the discrete one
+    const r = new T.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'default', failIfMajorPerformanceCaveat: false });
     r.setPixelRatio(1 / pix);   // linear output keeps the site's hex palette as written
     canvas.style.imageRendering = 'pixelated';
     return r;
@@ -26,8 +27,11 @@
   const hex = s => new T.Color('#' + s);
 
   /* ---------------- loading screen ---------------- */
-  function intro(canvas, grid) {
+  function intro(canvas, grid, onFail) {
     const renderer = makeRenderer(canvas, PIX);
+    let failed = false;
+    const fail = e => { if (failed) return; failed = true; try { stop(); } catch (e2) { /* already gone */ } if (onFail) onFail(e); };
+    canvas.addEventListener('webglcontextlost', ev => { ev.preventDefault(); fail(new Error('webgl context lost')); }, { once: true });
     const scene = new T.Scene();
     scene.background = new T.Color('#0F1C47');
     scene.fog = new T.Fog('#0F1C47', 150, 330);
@@ -65,6 +69,9 @@
     function finish(cb) { if (!finishing) { finishing = performance.now(); done = cb; } }
     function frame(now) {
       raf = requestAnimationFrame(frame);
+      try { step(now); } catch (e) { fail(e); }
+    }
+    function step(now) {
       fit(renderer, camera, canvas);
       const t = (now - t0) / 1000;
       // the rise always takes at least ~2.8 s, even when the data is already cached
@@ -106,7 +113,9 @@
       renderer.render(scene, camera);
     }
     raf = requestAnimationFrame(frame);
-    function stop() { cancelAnimationFrame(raf); renderer.dispose(); geo.dispose(); mat.dispose(); }
+    let stopped = false;
+    // frees the GPU context too: the intro never comes back, so its canvas can go for good
+    function stop() { if (stopped) return; stopped = true; cancelAnimationFrame(raf); geo.dispose(); mat.dispose(); renderer.dispose(); try { renderer.forceContextLoss(); } catch (e) { /* fine */ } }
     return { setProgress, finish, stop };
   }
 
@@ -116,7 +125,7 @@
     const k = 111320 * Math.cos(lm.lat * Math.PI / 180);
     return ([lon, lat]) => [(lon - lm.lon) * k, -(lat - lm.lat) * 110540];
   }
-  const DEF = { wall: '#d9ccb2', lead: '#8f9dad', roof: '#b9674e', stone: '#cdbb98' };
+  const DEF = { wall: '#EDE6D7', lead: '#8796BE', roof: '#C8553F', stone: '#D8C7A6' };   // site palette
   function partColour(p, lm) {
     const c = p.colour; if (c && /^#?[0-9a-f]{6}$/i.test(c)) return c[0] === '#' ? c : '#' + c;
     if (c) return c;   // css colour names are fine for THREE.Color
@@ -177,8 +186,11 @@
     return { group: g, maxH, ext: Math.max(ext, 10) };
   }
 
-  function viewer(canvas, lm) {
+  function viewer(canvas, lm, onFail) {
     const renderer = makeRenderer(canvas, 2);
+    let failed = false;
+    const fail = e => { if (failed) return; failed = true; try { api.stop(); } catch (e2) { /* already gone */ } if (onFail) onFail(e); };
+    canvas.addEventListener('webglcontextlost', ev => { ev.preventDefault(); fail(new Error('webgl context lost')); }, { once: true });
     const scene = new T.Scene();
     scene.background = new T.Color('#0F1C47');
     const camera = new T.PerspectiveCamera(32, 1, 0.5, 5000);
@@ -188,9 +200,9 @@
     scene.add(group);
     // ground: a cream map tile with a pixel grid
     const size = Math.ceil(ext * 2.6 / 10) * 10;
-    const tile = new T.Mesh(new T.BoxGeometry(size, 2, size), new T.MeshLambertMaterial({ color: '#a9b98a', flatShading: true }));
+    const tile = new T.Mesh(new T.BoxGeometry(size, 2, size), new T.MeshLambertMaterial({ color: '#A9CFC3', flatShading: true }));
     tile.position.y = -1; scene.add(tile);
-    const grid = new T.GridHelper(size, size / 5, '#93a476', '#9daf80'); grid.position.y = 0.02; scene.add(grid);
+    const grid = new T.GridHelper(size, size / 5, '#8CC2B6', '#97C8BC'); grid.position.y = 0.02; scene.add(grid);
     const rim = new T.Mesh(new T.BoxGeometry(size + 4, 4, size + 4), new T.MeshLambertMaterial({ color: '#1B3C8F', flatShading: true }));
     rim.position.y = -3.2; scene.add(rim);
 
@@ -208,6 +220,9 @@
     let built = 0;
     function frame(now) {
       raf = requestAnimationFrame(frame);
+      try { step(now); } catch (e) { fail(e); }
+    }
+    function step(now) {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       fit(renderer, camera, canvas);
       if (auto && !reduced) az += dt * 0.25;
@@ -218,16 +233,20 @@
       renderer.render(scene, camera);
     }
     raf = requestAnimationFrame(frame);
-    return {
+    let stopped = false;
+    const api = {
       zoom(f) { dist = Math.min(maxD, Math.max(minD, dist * f)); auto = false; },
       stop() {
+        if (stopped) return; stopped = true;
         cancelAnimationFrame(raf);
         canvas.removeEventListener('pointerdown', onDown); canvas.removeEventListener('pointermove', onMove);
         canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onUp); canvas.removeEventListener('wheel', onWheel);
         scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
         renderer.dispose();
+        try { renderer.forceContextLoss(); } catch (e) { /* fine: the page swaps in a fresh canvas next time */ }
       }
     };
+    return api;
   }
 
   window.PH3D = { intro, viewer, buildModel, ok: !!(T && (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })()) };
