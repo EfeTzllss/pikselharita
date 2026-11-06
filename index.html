@@ -461,7 +461,8 @@ const mixc = (c, t, a) => { // u32 ABGR mix
   const r = c & 255, g = c >> 8 & 255, b = c >> 16 & 255, r2 = t & 255, g2 = t >> 8 & 255, b2 = t >> 16 & 255;
   return (255 << 24 | Math.round(b + (b2 - b) * a) << 16 | Math.round(g + (g2 - g) * a) << 8 | Math.round(r + (r2 - r) * a)) >>> 0;
 };
-const WHITE = hex('#ffffff'), BLACK = hex('#140e1e');
+// pixel-art light: highlights lean warm, shadows lean cool purple, outlines are a deep hue-shifted tone
+const WHITE = hex('#fff6e0'), BLACK = hex('#1c1630'), LIGHT = hex('#fff2d0'), OUTLINE = hex('#231a35');
 const hi = c => mixc(c, WHITE, .28), sh = c => mixc(c, BLACK, .32);
 
 // ======================= palettes =======================
@@ -494,7 +495,7 @@ const BRIDGE_CASE = hex('#4a4038'), LANE = hex('#fffdf6');
 // ======================= canvas & view =======================
 const cv = document.getElementById('map'), ctx = cv.getContext('2d');
 const art = document.createElement('canvas'), actx = art.getContext('2d', { willReadFrequently: true });
-let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null, wall = null;
+let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null, wall = null, wmask = null;
 const view = { x: lon2x(35.2), y: lat2y(39.0), z: 6.2 };
 
 function resize() {
@@ -506,7 +507,7 @@ function resize() {
   // a hidden tab or a frame that has not been laid out yet reports 0×0; never let that crash start-up
   W = Math.max(1, Math.ceil(cv.width / PXD)); H = Math.max(1, Math.ceil(cv.height / PXD));
   art.width = W; art.height = H;
-  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H); wall = new Uint8Array(W * H);
+  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H); wall = new Uint8Array(W * H); wmask = new Uint8Array(W * H);
   dirty = true;
 }
 let dirty = true;
@@ -695,30 +696,99 @@ function sortN(a, n) { for (let i = 1; i < n; i++) { const v = a[i]; let j = i -
 function pSolid(y, a, b, c) { const o = y * W; buf.fill(c, o + a, o + b + 1); }
 function hash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return (h ^ (h >>> 16)) >>> 0; }
 let WOX = 0, WOY = 0; // integer world-art origin for textures
+// ---------- pixel-art ground textures ----------
+// Hand-made motifs on a jittered lattice (not random noise): grass tufts, tree crowns, gravestones, wave curls.
+// TEX_PX is how many metres one art pixel covers this frame; motifs only appear when they fit.
+let TEX_PX = 4;
+const isWater = cls => cls === 11 || cls === 12;
+function pArea(y, a, b, c, cls) {   // plain fill that also records water for the shoreline pass
+  const o = y * W; buf.fill(c, o + a, o + b + 1); wmask.fill(isWater(cls) ? 1 : 0, o + a, o + b + 1);
+}
+// tree crowns packed on a jittered grid: the forest is drawn tree by tree
+function canopy(wx, wy, g, base, dark, light) {
+  const cx0 = Math.floor(wx / g), cy0 = Math.floor(wy / g);
+  let best = 1e9, bx = 0, by = 0;
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const cx = cx0 + i, cy = cy0 + j, h = hash(cx * 31 + 7, cy * 17 + 3);
+    const px = (cx + 0.2 + (h & 255) / 255 * 0.6) * g, py = (cy + 0.2 + (h >> 8 & 255) / 255 * 0.6) * g;
+    const d = (wx + .5 - px) ** 2 + (wy + .5 - py) ** 2;
+    if (d < best) { best = d; bx = wx + .5 - px; by = wy + .5 - py; }
+  }
+  const r = g * 0.68, d = Math.sqrt(best);
+  if (d > r) return mixc(dark, BLACK, .25);                 // the shade between crowns
+  if (d > r - 1) return dark;                               // crown outline
+  const lit = (-bx - by) / (r * 1.41);                      // sun from the upper left
+  return lit > 0.45 ? light : lit > -0.15 ? base : mixc(base, dark, .55);
+}
 function pTex(y, a, b, c, cls) {
   const o = y * W, t = ATEX[cls], wy = y + WOY;
+  const fine = TEX_PX < 1.6;                                  // close enough for motifs
+  if (isWater(cls)) wmask.fill(1, o + a, o + b + 1); else wmask.fill(0, o + a, o + b + 1);
   for (let x = a; x <= b; x++) {
-    const h = hash(x + WOX, wy) & 255;
+    const wx = x + WOX, h = hash(wx, wy) & 255;
     let col = c;
-    if (cls === 7) { if (h < 46) col = t[0]; else if (h > 222) col = t[1]; }
+    if (cls === 7) {                                          // forest: individual crowns ~6 m across
+      const g = Math.min(11, Math.round(9 / TEX_PX));      // forest crowns ~9 m
+      col = g >= 3 ? canopy(wx, wy, g, c, t[0], t[1]) : (h < 46 ? t[0] : h > 222 ? t[1] : c);
+    } else if (cls === 5 || cls === 6 || cls === 8 || cls === 21) {   // lawn and scrub: little V tufts
+      col = c;
+      if (fine) {
+        const sx = cls === 8 ? 4 : 6, sy = cls === 8 ? 4 : 5, rowOff = (Math.floor(wy / sy) & 1) * (sx >> 1);
+        const cxl = Math.floor((wx + rowOff) / sx), cyl = Math.floor(wy / sy), hh = hash(cxl, cyl);
+        const lx = (wx + rowOff) - cxl * sx - (hh & 1), ly = wy - cyl * sy - (hh >> 1 & 1);
+        if ((hh >> 3 & 3) === 0) { /* some cells left bare, so the lawn does not look stamped */ }
+        else if ((ly === 1 && (lx === 0 || lx === 2)) || (cls === 8 && ly === 2 && lx === 1)) col = TUFT_D[cls] || t[0];
+        else if (ly === 0 && lx === 1) col = TUFT_L[cls] || t[1];
+        if (cls === 6 && h === 0 && (wy & 1)) col = FLOWERS[(wx >> 1) % 3];   // the odd wild flower in parks
+      } else if (h < 14) col = t[0];
+    } else if (cls === 9) {                                   // cemetery: rows of small stones on grass
+      col = h < 18 ? t[0] : c;
+      if (fine) {
+        const lx = ((wx % 4) + 4) % 4, ly = ((wy % 5) + 5) % 5, hh = hash(Math.floor(wx / 4), Math.floor(wy / 5));
+        if ((hh & 3) !== 0 && lx === 1 && (ly === 1 || ly === 2)) col = ly === 1 ? STONE_L : STONE_D;
+      }
+    }
     else if (cls === 4) { col = ((wy >> 1) & 3) === 0 ? t[0] : c; }
-    else if (cls === 15) { col = ((x + WOX) & 3) === 0 || (wy & 3) === 0 ? t[0] : c; }
-    else if (cls === 11) { if (h < 3) col = t[0]; }
+    else if (cls === 15) { col = ((wx) & 3) === 0 || (wy & 3) === 0 ? t[0] : c; }
+    else if (cls === 11) { col = waveAt(wx, wy, c, t[0], t[1]); }
     else if (cls === 12) { if (h < 40) col = t[0]; }
-    else if (cls === 13) { col = (((x + WOX) >> 2) & 1) ? t[1] : c; }
+    else if (cls === 13) { col = ((wx >> 2) & 1) ? t[1] : c; }
     else { if (h < 18) col = t[0]; else if (h > 244) col = t[1]; }
     buf[o + x] = col;
   }
 }
+// small wave curls on a staggered grid, the classic pixel-art sea
+function waveAt(wx, wy, sea, hi, lo) {
+  const sx = 14, sy = 6, off = (Math.floor(wy / sy) & 1) * 7;
+  const cx = Math.floor((wx + off) / sx), cy = Math.floor(wy / sy), h = hash(cx, cy);
+  if ((h & 3) === 0) return sea;                              // not every cell has a wave
+  const lx = (wx + off) - cx * sx - (h >> 2 & 3), ly = wy - cy * sy - (h >> 4 & 1);
+  if (ly === 0 && (lx === 1 || lx === 2)) return hi;
+  if (ly === 1 && (lx === 0 || lx === 3)) return hi;
+  if (ly === 1 && (lx === 1 || lx === 2)) return lo;
+  return sea;
+}
 function pSea(y, a, b) {
   const o = y * W, wy = y + WOY;
-  for (let x = a; x <= b; x++) {
-    const wx = x + WOX, h = hash(wx >> 1, wy) % 211;
-    buf[o + x] = h === 0 ? WAVE : (h === 1 ? WAVE2 : SEA);
+  wmask.fill(1, o + a, o + b + 1);
+  for (let x = a; x <= b; x++) buf[o + x] = waveAt(x + WOX, wy, SEA, WAVE, WAVE2);
+}
+// shoreline: a line of foam on the water's edge and a dithered band of shallow water behind it
+const FOAM = hex('#e8f5fb'), SHALLOW = hex('#6cb7e4'), STONE_L = hex('#ece8df'), STONE_D = hex('#9b968c');
+const TUFT_D = { 5: hex('#7fb560'), 6: hex('#5f9e46'), 8: hex('#6f8f4c'), 21: hex('#7fb560') }, TUFT_L = { 5: hex('#c5e79c'), 6: hex('#b3e08a'), 8: hex('#b9d48e'), 21: hex('#c5e79c') };
+const FLOWERS = [hex('#fff8e8'), hex('#f2d14b'), hex('#e0533d')];
+function shorelines() {
+  for (let y = 2; y < H - 2; y++) {
+    const o = y * W;
+    for (let x = 2; x < W - 2; x++) {
+      const i = o + x; if (!wmask[i]) continue;
+      if (!wmask[i - 1] || !wmask[i + 1] || !wmask[i - W] || !wmask[i + W]) { buf[i] = FOAM; continue; }
+      if (((x + y + WOX + WOY) & 1) === 0 && (!wmask[i - 2] || !wmask[i + 2] || !wmask[i - 2 * W] || !wmask[i + 2 * W])) buf[i] = SHALLOW;
+    }
   }
 }
 function pLand(y, a, b) {
-  const o = y * W;
+  const o = y * W; wmask.fill(0, o + a, o + b + 1);
   if (!crop) { buf.fill(LAND, o + a, o + b + 1); return; }
   const wy = (y + .5 + OY) / S, ry = Math.floor(wy / crop.k) - crop.y0;
   if (ry < 0 || ry >= crop.h) { buf.fill(LAND, o + a, o + b + 1); return; }
@@ -805,8 +875,8 @@ function render(snapshot) {
     }
     const d = actx.getImageData(0, 0, W, H); buf.set(new Uint32Array(d.data.buffer));
   }
-  bid.fill(0); frameB = [];
-  const mpa = metersPerArt();
+  bid.fill(0); frameB = []; wmask.fill(0);
+  const mpa = metersPerArt(); TEX_PX = mpa;
   // 2) Istanbul vector world
   if (meta && view.z >= 9 && (lo || over || heroMode)) {
     const vx0 = Math.max(0, Math.ceil(q[0] * S - OX)), vx1 = Math.min(W - 1, Math.floor(q[2] * S - OX)), vy0 = Math.max(0, Math.ceil(q[1] * S - OY)), vy1 = Math.min(H - 1, Math.floor(q[3] * S - OY));
@@ -818,10 +888,11 @@ function render(snapshot) {
         const cks = heroMode ? [heroData.ck] : view.z >= 13 ? visChunks() : [];
         for (const c of AORDER) {
           const tex = ATEX[c] && view.z >= 12.5;
-          const draw = f => { if (visible(f.bb, 1)) fillPoly(f.rings, tex ? pTex : pSolid, ACOL[c], c); };
+          const draw = f => { if (visible(f.bb, 1)) fillPoly(f.rings, tex ? pTex : pArea, ACOL[c], c); };
           (src.a[c] || []).forEach(draw);
           for (const ch of cks) (ch.a[c] || []).forEach(draw);
         }
+        if (view.z >= 12) shorelines();
         drawLines(src, cks, mpa);
         if (view.z >= 13.4) drawBuildings(cks, mpa);
         if (view.z >= 14.8) drawPoints(cks, mpa);
@@ -841,19 +912,25 @@ function visChunks() {
   return out;
 }
 function lw(cls, mpa) { const d = L[cls]; return Math.max(d[3], Math.min(60, d[2] / mpa)); }
+// close in, streets switch from map colours to what they really look like from above:
+// asphalt grey (darker for busier roads) with pale pavements, and stone paving for pedestrian streets
+const ASPH = { 1: hex('#5d5f66'), 2: hex('#62646a'), 3: hex('#686a6f'), 4: hex('#6f7075'), 5: hex('#76777b'), 6: hex('#7e7f82'), 7: hex('#878787'), 8: hex('#ddd3bf') };
+const PAVE = hex('#d6d0c5'), PAVE_PED = hex('#b9ad98');
 function drawLines(src, cks, mpa) {
-  const z = view.z;
+  const z = view.z, real = z >= 15;
   const each = (cls, fn) => { (src.l[cls] || []).forEach(fn); for (const ch of cks) (ch.l[cls] || []).forEach(fn); };
   const bridges = [];
-  // casings
+  // casings (pavements when close in)
   for (const cls of LORDER_CASE) {
     const d = L[cls]; if (z < d[4] || !d[1]) continue;
     const w = lw(cls, mpa); if (w < 2.2 && cls !== 18) continue;
-    each(cls, f => { if (f.br && z >= 13.5) return; if (visible(f.bb, w)) w + 2 > 2.5 ? lineThick(f.p, LC[cls][1], w + 2) : lineThin(f.p, LC[cls][1], 2); });
+    const road = real && ASPH[cls], cc = road ? (cls === 8 ? PAVE_PED : PAVE) : LC[cls][1];
+    const cw = road && cls !== 8 ? w + Math.max(2, Math.round(4.5 / mpa)) : w + 2;   // ~2.2 m of pavement each side
+    each(cls, f => { if (f.br && z >= 13.5) return; if (visible(f.bb, cw)) cw > 2.5 ? lineThick(f.p, cc, cw) : lineThin(f.p, cc, 2); });
   }
   for (const cls of LORDER_FILL) {
     const d = L[cls]; if (z < d[4]) continue;
-    const w = lw(cls, mpa), c = LC[cls][0];
+    const w = lw(cls, mpa), c = real && ASPH[cls] ? ASPH[cls] : LC[cls][0];
     each(cls, f => {
       if (!visible(f.bb, w + 2)) return;
       if (f.br && cls <= 11 && z >= 13.5) { bridges.push([cls, f, w]); return; }
@@ -878,7 +955,8 @@ function drawLines(src, cks, mpa) {
     }
     const ww = Math.max(w, 2);
     lineThick(f.p, BRIDGE_CASE, ww + 3);
-    lineThick(f.p, LC[cls][0], ww);
+    lineThick(f.p, view.z >= 15 && ASPH[cls] ? ASPH[cls] : LC[cls][0], ww);
+    if (cls <= 4 && ww >= 7) lineThin(f.p, LANE, 1, [5, 4]);
   }
 }
 function drawBuildings(cks, mpa) {
@@ -889,15 +967,52 @@ function drawBuildings(cks, mpa) {
     fillPoly(b.rings, pBuild, pal[b.v % pal.length]);
   }
 }
+// ---------- tree sprites ----------
+// Built once per size and colour: a round crown with a 1 px outline in its own darkest green, three light bands
+// from the upper-left sun, a speck of highlight and a few leaf clusters, so every tree reads as drawn by hand.
+const TREE_TONES = [
+  ['#24502c', '#3a7a3c', '#57a148', '#86c86a', '#c4e89a'],   // plane tree green
+  ['#2b4a26', '#46733a', '#6a9a4c', '#97bf6c', '#cfe3a0'],   // olive
+  ['#1d4433', '#2f6a4f', '#468f69', '#6cb588', '#b5e0b8']    // pine, blue-green
+].map(r => r.map(hex));
+const spriteCache = new Map();
+function treeSprite(d, v) {
+  const key = d * 4 + v; if (spriteCache.has(key)) return spriteCache.get(key);
+  const [OUT, DK, MD, LT, HL] = TREE_TONES[v], r = d / 2, px = new Uint32Array(d * d);
+  for (let y = 0; y < d; y++) for (let x = 0; x < d; x++) {
+    const dx = x + .5 - r, dy = y + .5 - r, dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > r) continue;
+    if (dist > r - 1) { px[y * d + x] = OUT; continue; }
+    const lit = (-dx - dy) / (r * 1.41) + ((hash(x * 3 + v, y * 5 + d) & 7) - 3.5) * 0.04;   // light from upper left, a little leafy noise
+    px[y * d + x] = lit > 0.55 ? HL : lit > 0.25 ? LT : lit > -0.25 ? MD : DK;
+  }
+  spriteCache.set(key, px); return px;
+}
+function stampTree(x, y, d, v) {
+  const px = treeSprite(d, v), r = d >> 1;
+  // soft drop shadow to the lower right, then the crown
+  for (let j = 0; j < d; j++) for (let i = 0; i < d; i++) {
+    if (!px[j * d + i]) continue;
+    const X = x - r + i + Math.max(1, d >> 2), Y = y - r + j + Math.max(1, d >> 2);
+    if (X >= 0 && Y >= 0 && X < W && Y < H && !bid[Y * W + X]) buf[Y * W + X] = mixc(buf[Y * W + X], BLACK, .32);
+  }
+  for (let j = 0; j < d; j++) for (let i = 0; i < d; i++) {
+    const c = px[j * d + i]; if (!c) continue;
+    const X = x - r + i, Y = y - r + j;
+    if (X >= 0 && Y >= 0 && X < W && Y < H) buf[Y * W + X] = c;
+  }
+}
 function drawPoints(cks, mpa) {
-  const z = view.z, tree = hex('#4f9a45'), treeD = hex('#2f6a33'), treeL = hex('#7cc265'), mina = hex('#f4f1e8'), minaD = hex('#6f6a63'), fnt = hex('#6fc3f0');
-  const r = Math.max(1, Math.min(4, 4 / mpa));
+  const z = view.z, tree = hex('#4f9a45'), treeD = hex('#2f6a33'), mina = hex('#f4f1e8'), minaD = hex('#6f6a63'), fnt = hex('#6fc3f0');
+  // a street tree crown is ~5-8 m: sprite diameter follows the real size, odd so it has a centre pixel
+  const dm = Math.round(6.5 / mpa) | 1;
   for (const ch of cks) for (const p of ch.p) {
     const x = Math.floor(p.x * S - OX), y = Math.floor(p.y * S - OY);
-    if (x < -6 || y < -6 || x > W + 6 || y > H + 6) continue;
+    if (x < -12 || y < -12 || x > W + 12 || y > H + 12) continue;
     if (p.c === 1) {
-      if (r >= 2) { disc(x + .5, y + 1.5, r, treeD); disc(x + .5, y + .5, r, tree); plot(x - 1, y - 1, treeL); plot(x, y - 1, treeL); }
-      else { plot(x, y, tree); plot(x, y + 1, treeD); }
+      const hv = hash(Math.round(p.x), Math.round(p.y)), d = Math.max(3, Math.min(15, dm + ((hv >> 3) % 3 - 1) * 2));
+      if (d >= 5) stampTree(x, y, d, hv % 3);
+      else { plot(x, y, tree); plot(x + 1, y + 1, treeD); }
     } else if (p.c === 2) { // minaret: slim white spire with a shadow
       const h = Math.max(2, Math.round(Math.min(10, 3 / mpa * 2)));
       for (let i = 1; i <= h; i++) plot(x + i, y + i, minaD);
@@ -1013,10 +1128,19 @@ function shade3d() {
       }
     }
   }
+  // pixel-art outline: close in, every roof gets a 1 px rim in its own darkest tone (hue-shifted, never black)
+  // and a 1 px light line just inside its upper and left edges
+  const outline = view.z >= 15;
   for (let y = H - 1; y >= 0; y--) {
     const o = y * W;
     for (let x = W - 1; x >= 0; x--) {
       const i = o + x, id = bid[i];
+      if (id && outline) {
+        const up = y > 0 ? bid[i - W] : id, dn = y + 1 < H ? bid[i + W] : id, lf = x > 0 ? bid[i - 1] : id, rt = x + 1 < W ? bid[i + 1] : id;
+        if (up !== id || dn !== id || lf !== id || rt !== id) buf[i] = mixc(buf[i], OUTLINE, .58);
+        else if ((y > 1 && bid[i - 2 * W] !== id) || (x > 1 && bid[i - 2] !== id)) buf[i] = mixc(buf[i], LIGHT, .22);
+        continue;
+      }
       if (id) {
         const down = y + 1 < H ? bid[i + W] : id, up = y > 0 ? bid[i - W] : id, right = x + 1 < W ? bid[i + 1] : id;
         if (down !== id || (thick === 2 && y + 2 < H && bid[i + 2 * W] !== id)) buf[i] = walls ? mixc(buf[i], BLACK, .12) : sh(buf[i]);
