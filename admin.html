@@ -154,6 +154,8 @@ if (!$('repo').value && location.hostname.endsWith('.github.io')) {
   const seg = location.pathname.split('/').filter(Boolean)[0];
   $('repo').value = location.hostname.split('.')[0] + '/' + (seg && !seg.endsWith('.html') ? seg : location.hostname);
 }
+// on the own domain (pikselharita.com) the address says nothing about the repo
+if (!$('repo').value) $('repo').value = 'EfeTzllss/pikselharita';
 $('date').value = new Date().toISOString().slice(0, 10);
 
 function say(el, msg, err) { const s = $(el); s.textContent = msg; s.hidden = !msg; s.classList.toggle('err', !!err); }
