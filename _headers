@@ -10,6 +10,12 @@
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
 
+/harita*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/izometrik*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /data/devlog.json
   Cache-Control: public, max-age=0, must-revalidate
 
