@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>İzometrik Silivri (deneme) · Piksel Harita</title>
+<meta name="description" content="Silivri merkezinin OpenStreetMap verisinden çizilen izometrik pixel art haritası (deneme sürümü).">
+<link rel="icon" href="assets/icon-180.png">
+<style>
+@font-face { font-family: "Piksel Oyun"; src: url("assets/fonts/pikseloyun.woff2") format("woff2"); font-display: swap; }
+:root {
+  --sir: #F6F2E9; --murekkep: #19203D; --kobalt: #1B3C8F; --mercan: #D2392C; --turkuaz: #2A9DA6; --soluk: #5A6079;
+  --ink: #0F1C47; --ink-2: #182A62; --muted: #AFBBD8;
+  --f-game: "Piksel Oyun", "Pixelify Sans", ui-monospace, monospace;
+  --f-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1a2140; color: var(--murekkep); font-family: var(--f-body); }
+#cv { position: fixed; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; cursor: grab; }
+#cv.drag { cursor: grabbing; }
+.hud { position: fixed; z-index: 5; }
+.pbtn { font-family: var(--f-game); font-size: 15px; line-height: 1; min-width: 40px; height: 40px; padding: 0 10px; border: 0; background: var(--sir); color: var(--kobalt);
+  box-shadow: inset 0 -3px 0 #d9d0bd, 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.pbtn:hover { background: #fffaf0; }
+.pbtn:active { transform: translate(2px, 2px); box-shadow: inset 0 -3px 0 #d9d0bd, 0 0 0 2px var(--kobalt), 1px 1px 0 2px var(--murekkep); }
+.pbtn.on { background: var(--kobalt); color: var(--sir); box-shadow: inset 0 -3px 0 #10286a, 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); }
+.pbtn.red { background: var(--mercan); color: var(--sir); box-shadow: inset 0 -3px 0 #9e2a20, 0 0 0 2px #9e2a20, 3px 3px 0 2px var(--murekkep); }
+#top { left: 12px; right: 12px; top: 12px; display: flex; gap: 10px; align-items: flex-start; pointer-events: none; }
+#top > * { pointer-events: auto; }
+#brand { display: flex; align-items: center; gap: 8px; background: var(--ink); color: var(--sir); padding: 6px 10px 6px 6px; text-decoration: none;
+  box-shadow: 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); font-family: var(--f-game); font-size: 15px; line-height: 1.05; white-space: nowrap; }
+#brand img { width: 30px; height: 30px; image-rendering: pixelated; }
+#brand b { color: #ff6b5c; font-weight: 400; }
+#brand small { display: block; color: #7fd6dc; font-size: 11px; }
+#search { position: relative; flex: 1 1 260px; max-width: 360px; }
+#q { width: 100%; height: 42px; border: 0; padding: 0 12px 0 30px; font: 15px var(--f-body); background: var(--sir); color: var(--murekkep);
+  box-shadow: 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); outline: none; }
+#q:focus { box-shadow: 0 0 0 2px var(--turkuaz), 3px 3px 0 2px var(--murekkep); }
+#search::before { content: ">"; position: absolute; left: 11px; top: 11px; font-family: var(--f-game); color: var(--mercan); font-size: 16px; }
+#res { position: absolute; left: 0; right: 0; top: 48px; background: var(--sir); box-shadow: 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); max-height: 50vh; overflow: auto; }
+#res button { display: flex; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: none; padding: 9px 12px; text-align: left; font: 14px var(--f-body); color: var(--murekkep); cursor: pointer; }
+#res button:hover, #res button.k { background: #e9e1cf; }
+#res small { color: var(--soluk); white-space: nowrap; }
+#tools { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+#ctrl { right: 12px; bottom: 34px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+#ctrl .row { display: flex; gap: 8px; }
+#compass { width: 40px; height: 40px; background: var(--ink); box-shadow: 0 0 0 2px var(--kobalt), 3px 3px 0 2px var(--murekkep); display: grid; place-items: center; cursor: pointer; border: 0; padding: 0; }
+#compass canvas { image-rendering: pixelated; width: 32px; height: 32px; }
+#status { left: 0; right: 0; bottom: 0; height: 24px; background: rgba(15, 28, 71, .88); color: #cdd6f0; font: 12px ui-monospace, "Cascadia Mono", monospace;
+  display: flex; gap: 14px; align-items: center; padding: 0 10px; white-space: nowrap; overflow: hidden; }
+#status a { color: #7fd6dc; }
+#status .sp { flex: 1; }
+#badge { left: 12px; bottom: 34px; background: var(--mercan); color: var(--sir); font-family: var(--f-game); font-size: 12px; padding: 5px 8px; box-shadow: 2px 2px 0 var(--murekkep); }
+.panel { background: var(--sir); box-shadow: 0 0 0 2px var(--kobalt), 4px 4px 0 2px var(--murekkep); padding: 14px 16px 16px; }
+.panel h2 { font-family: var(--f-game); font-weight: 400; font-size: 20px; color: var(--kobalt); margin: 0 26px 6px 0; line-height: 1.15; }
+.panel .x { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border: 0; background: none; font: 22px var(--f-game); color: var(--mercan); cursor: pointer; }
+#info { right: 12px; top: 68px; width: 340px; max-height: calc(100vh - 120px); overflow: auto; }
+#info .kind { font-family: var(--f-game); color: var(--turkuaz); font-size: 13px; margin-bottom: 4px; }
+dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; font-size: 14px; }
+dt { color: var(--soluk); }
+dd { margin: 0; overflow-wrap: anywhere; }
+.est { display: inline-block; font: 600 11.5px var(--f-body); background: #f3d9a4; color: #6a4a00; padding: 2px 5px; margin-left: 4px; vertical-align: 1px; }
+.real { display: inline-block; font: 600 11.5px var(--f-body); background: #cdeee9; color: #0d5a60; padding: 2px 5px; margin-left: 4px; vertical-align: 1px; }
+.note { font-size: 12.5px; color: var(--soluk); margin: 10px 0 0; line-height: 1.45; }
+.panel a { color: var(--kobalt); }
+#layers { right: 12px; top: 68px; width: 290px; }
+#layers label { display: flex; gap: 8px; align-items: center; padding: 5px 0; font-size: 14px; cursor: pointer; }
+#layers input { accent-color: var(--kobalt); width: 16px; height: 16px; }
+#about { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 80px); overflow: auto; font-size: 14px; line-height: 1.5; }
+#about h3 { font: 15px var(--f-game); color: var(--mercan); margin: 14px 0 4px; }
+#about table { border-collapse: collapse; width: 100%; font-size: 13px; }
+#about td { border-bottom: 1px solid #e2d9c6; padding: 4px 6px 4px 0; vertical-align: top; }
+#about td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+#toast { left: 50%; top: 70px; transform: translateX(-50%); background: var(--ink); color: var(--sir); padding: 8px 14px; font: 14px var(--f-body); box-shadow: 0 0 0 2px var(--turkuaz); }
+#loading { left: 50%; top: 50%; transform: translate(-50%, -50%); font: 18px var(--f-game); color: var(--sir); background: var(--ink); padding: 14px 18px; box-shadow: 0 0 0 2px var(--kobalt), 4px 4px 0 2px #000; }
+[hidden] { display: none !important; }
+.lbl { display: inline; }
+@media (max-width: 720px) {
+  #top { flex-wrap: wrap; left: 8px; right: 8px; top: 8px; gap: 8px; }
+  #brand small { display: none; }
+  #search { order: 3; flex: 1 1 100%; max-width: none; }
+  #tools { gap: 6px; }
+  .pbtn { min-width: 38px; height: 38px; padding: 0 8px; font-size: 14px; }
+  .lbl { display: none; }
+  #info, #layers { left: 8px; right: 8px; top: auto; bottom: 30px; width: auto; max-height: 52vh; }
+  #ctrl { right: 8px; bottom: 30px; }
+  #badge { left: 8px; bottom: 30px; }
+  #status { font-size: 11px; gap: 10px; }
+  #status .hm, #sCoord, #sDir { display: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Silivri merkezinin izometrik piksel haritası"></canvas>
+
+<div id="top" class="hud">
+  <a id="brand" href="./" title="Ana haritaya dön"><img src="assets/icon-180.png" alt=""><span>PİKSEL <b>HARİTA</b><small>İzometrik · Silivri (deneme)</small></span></a>
+  <div id="search"><input id="q" type="search" placeholder="Silivri'de sokak, bina, yer ara" autocomplete="off" aria-label="Ara"><div id="res" hidden></div></div>
+  <div id="tools">
+    <button class="pbtn" id="bNight" type="button" title="Gece / gündüz (N)" aria-label="Gece / gündüz">☾<span class="lbl">Gece</span></button>
+    <button class="pbtn" id="bLayers" type="button" title="Katmanlar" aria-label="Katmanlar">▤<span class="lbl">Katman</span></button>
+    <button class="pbtn" id="bShare" type="button" title="Konumu bağlantı olarak kopyala" aria-label="Konumu paylaş">⤴<span class="lbl">Paylaş</span></button>
+    <button class="pbtn" id="bShot" type="button" title="Ekran görüntüsü indir" aria-label="Ekran görüntüsü">▣</button>
+    <button class="pbtn red" id="bAbout" type="button" title="Veri kaynakları ve atıf" aria-label="Veri kaynakları">i</button>
+  </div>
+</div>
+
+<div id="ctrl" class="hud">
+  <div class="row"><button class="pbtn" id="bRotL" type="button" title="Sola döndür (Q)" aria-label="Sola döndür">⟲</button><button id="compass" type="button" title="Kuzeyi yukarı al" aria-label="Kuzeyi yukarı al"><canvas id="cmp" width="16" height="16"></canvas></button><button class="pbtn" id="bRotR" type="button" title="Sağa döndür (E)" aria-label="Sağa döndür">⟳</button></div>
+  <div class="row"><button class="pbtn" id="bHome" type="button" title="Kamerayı sıfırla" aria-label="Kamerayı sıfırla">⌂</button><button class="pbtn" id="bOut" type="button" title="Uzaklaştır (−)" aria-label="Uzaklaştır">−</button><button class="pbtn" id="bIn" type="button" title="Yakınlaştır (+)" aria-label="Yakınlaştır">+</button></div>
+</div>
+<div id="badge" class="hud">DENEME<span class="lbl"> · yalnızca Silivri merkezi</span></div>
+
+<aside id="info" class="hud panel" hidden aria-live="polite">
+  <button class="x" id="infoX" type="button" aria-label="Kapat">×</button>
+  <div class="kind" id="iKind"></div>
+  <h2 id="iName"></h2>
+  <dl id="iDl"></dl>
+  <p class="note" id="iNote"></p>
+</aside>
+
+<aside id="layers" class="hud panel" hidden>
+  <button class="x" id="layX" type="button" aria-label="Kapat">×</button>
+  <h2>Katmanlar</h2>
+  <label><input type="checkbox" id="lTrees" checked> Ağaçlar</label>
+  <label><input type="checkbox" id="lFurn" checked> Sokak objeleri (OSM noktaları)</label>
+  <label><input type="checkbox" id="lMs" checked> Microsoft ML binaları</label>
+  <label><input type="checkbox" id="lShadow" checked> Gölgeler</label>
+  <label><input type="checkbox" id="lWaves" checked> Deniz animasyonu</label>
+  <label><input type="checkbox" id="lEst"> Veri kaynağını renklendir</label>
+  <label><input type="checkbox" id="lFoot"> Taban izlerini göster (doğruluk kontrolü)</label>
+  <p class="note" id="lLegend"></p>
+</aside>
+
+<aside id="about" class="hud panel" hidden>
+  <button class="x" id="aboutX" type="button" aria-label="Kapat">×</button>
+  <h2>Veri kaynakları ve atıf</h2>
+  <div id="aboutBody">Yükleniyor…</div>
+</aside>
+<div id="toast" class="hud" hidden></div>
+<div id="loading" class="hud">Silivri yükleniyor…</div>
+
+<div id="status" class="hud">
+  <span id="sCoord"></span><span id="sZoom"></span><span id="sDir"></span><span class="hm" id="sMs"></span><span class="hm" id="sLoad"></span><span class="sp"></span>
+  <span>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap katkıcıları</a> · Microsoft <span class="hm">Building Footprints</span> (ODbL)</span>
+</div>
+
+<script>
+'use strict';
+// =====================================================================================
+//  İzometrik pixel art çizici (yazılımsal rasterleştirici, 2B canvas + nearest-neighbor)
+//  Dünya: yerel metre (x doğu, y kuzey). Görünüm: 2:1 izometri, 4 sabit yön.
+//  Ekran (sanat pikseli):  sx = (u − v)·k ,  sy = −(u + v)·k/2 − z·k·ZS
+//  Derinlik (görüş ışını boyunca, büyük = uzak):  D = u + v − z/ZS
+// =====================================================================================
+const BASE = 'data/iso/silivri/';
+const ZS = 1.2;                       // dikey ölçek
+const CELL = 0.5, GN = 512;           // zemin ızgarası: 0,5 m hücre, 256 m parça
+const ZL = [[0.5, 2], [1, 2], [1, 3], [2, 2], [2, 3], [2, 4]];   // [m başına sanat pikseli, sanat pikseli başına CSS pikseli]
+const HOME = { lat: 41.07395, lon: 28.24760 };
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false });
+const $ = id => document.getElementById(id);
+
+let META = null, SRC = null, SEARCH = null;
+let R_, KC, LON0, LAT0, MY0, WW = 0, WH = 0;
+const cam = { x: 0, y: 0, zi: 2, r: 0 };
+const opt = { trees: true, furn: true, ms: true, shadow: true, waves: true, est: false, foot: false };
+let night = 0, nightTarget = 0, wavePhase = 0, selected = null, dirty = true;
+let W = 0, H = 0, PX = 3, k = 1;
+let img = null, col = null, dep = null, ids = null, fid = null, emis = null, smask = null;
+let frameB = [], lastMs = 0, frameCount = 0, prof = {}, outBuf = null;
+
+function mercY(lat) { const s = Math.sin(lat * Math.PI / 180); return R_ * 0.5 * Math.log((1 + s) / (1 - s)); }
+function toM(lon, lat) { return [R_ * (lon - LON0) * Math.PI / 180 * KC, (mercY(lat) - MY0) * KC]; }
+function toLL(x, y) { return [LON0 + (x / KC / R_) * 180 / Math.PI, (2 * Math.atan(Math.exp((y / KC + MY0) / R_)) - Math.PI / 2) * 180 / Math.PI]; }
+
+// ---------- renk yardımcıları ----------
+const pk = (r, g, b) => ((255 << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0;
+const cr = c => c & 255, cg = c => (c >>> 8) & 255, cb = c => (c >>> 16) & 255;
+function hex(h) { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+// renk kaydırmalı ton: t>0 sıcak/aydınlık, t<0 soğuk/mor gölge
+function tone(c, t) {
+  let r = c[0], g = c[1], b = c[2];
+  if (t >= 0) { const a = t * 0.38; r += (255 - r) * a; g += (240 - g) * a; b += (196 - b) * a * 0.8; }
+  else { const a = -t; r = r * (1 - a * 0.40) + 8 * a; g = g * (1 - a * 0.40) + 8 * a; b = b * (1 - a * 0.33) + 22 * a; }
+  return pk(Math.round(r), Math.round(g), Math.round(b));
+}
+function tonePk(c, t) { return tone([cr(c), cg(c), cb(c)], t); }
+function hash2(x, y) { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return (h ^ (h >>> 16)) >>> 0; }
+function hashS(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+const CSS_COL = { white: '#f2f0ea', black: '#2a2a2a', grey: '#9a9a9a', gray: '#9a9a9a', red: '#b5483a', brown: '#8a5a3c', yellow: '#e8d27a', beige: '#e3d6b4',
+  orange: '#d98a4a', blue: '#5a7fb5', green: '#6d9a5a', pink: '#e7b3b0', cream: '#f0e6c8', maroon: '#7a2e2a', silver: '#c0c4c8', darkgrey: '#5a5a5a', lightgrey: '#cfcfcf' };
+function tagColor(v) { if (!v) return null; v = String(v).trim().toLowerCase(); if (/^#?[0-9a-f]{6}$|^#?[0-9a-f]{3}$/.test(v)) return hex(v); return CSS_COL[v] ? hex(CSS_COL[v]) : null; }
+
+// ---------- zemin paleti (gerçekçi tonlar) ----------
+// 0..19 veri sınıfları (meta.gcls), 20+ yol/çizgi yüzeyleri
+const GROUND = {
+  0: ['#b4ae88', '#aca680', '#bbb591'], 1: ['#2f6f9e'], 2: ['#e2cd96', '#dac38a', '#e8d6a2'], 3: ['#7fa955', '#77a04e', '#86b05c'], 4: ['#6ea24a', '#669a43', '#79ab53'],
+  5: ['#4c8240', '#467a3a', '#538a46'], 6: ['#8d9a58', '#859253', '#95a25f'], 7: ['#b7ab68', '#ada160'], 8: ['#c9c0aa', '#c2b9a2', '#cec6b1'], 9: ['#c3bdb4', '#bcb6ad'],
+  10: ['#aeaaa0', '#a6a298'], 11: ['#cdbd98', '#c6b690'], 12: ['#7c9a64', '#74925d'], 13: ['#5aa45c', '#529a54'], 14: ['#8a8b90', '#84858a'], 15: ['#d2c6ad', '#c9bda4'],
+  16: ['#9a7650', '#8c6a47'], 17: ['#b09a7a', '#a89272'], 18: ['#6f9575', '#678d6d'], 19: ['#97a07a', '#8f9873'],
+  20: ['#cdc8bc', '#c3beb2'], 21: ['#50535c', '#555861', '#4c4f57'], 22: ['#62646b', '#676970', '#5e6067'], 23: ['#c2bcad', '#b4ae9f'], 24: ['#d8c9a6', '#d0c19e'],
+  25: ['#ae9369', '#a68b62'], 26: ['#7b726a', '#736a62'], 27: ['#4a4440'], 28: ['#eceade'], 29: ['#e9c14b'], 30: ['#a9a69c'], 31: ['#9a7650', '#8a6744'],
+  32: ['#d6cbb2', '#cbbfa6'], 34: ['#3d80a8'], 35: ['#988b76'], 36: ['#6c7a52'], 37: ['#a86458', '#a05d52']
+};
+const GP = {}; for (const kk in GROUND) GP[kk] = GROUND[kk].map(h => { const c = hex(h); return pk(c[0], c[1], c[2]); });
+const VOID = [pk(26, 33, 64), pk(30, 38, 72)];
+
+// ---------- bina renkleri (stilize; OSM building:colour / roof:colour varsa o kullanılır) ----------
+const WALLS = {
+  generic: ['#e9dfc8', '#e4d3b0', '#efe6d2', '#dcd3c3', '#e8cfb2', '#f0e2c0', '#d9d4ca'],
+  apart: ['#efe5cf', '#e9d6b0', '#f1dfc9', '#dfd8cc', '#ecd2b6', '#f2e6b8', '#e2e0d8', '#e6c9a8'],
+  house: ['#f2ede2', '#efe0c2', '#f0d7c0', '#e8e2d2', '#f3e7c6'],
+  comm: ['#d8dadc', '#cfd5da', '#e2ddd2', '#c9ced6'], ind: ['#b9c0c6', '#aeb6bd', '#c4c4bc', '#a9b4b8'],
+  mosque: ['#ece4d0'], church: ['#e7dcc4'], historic: ['#d9c49a', '#d2bb8e'], public: ['#efe1bf', '#e7d9be', '#f0e6d6'], transport: ['#cdd2d6'],
+  roof: ['#a7a9a8'], ruins: ['#b8a585', '#ad9a7c'], tower: ['#e0d8c8']
+};
+const ROOFC = { tile: ['#b9573c', '#c0603f', '#a84e36', '#b5643f', '#9f4a35'], flat: ['#a9a49a', '#b3aea3', '#9e9a92', '#bab4a8'], ind: ['#c9cdd0', '#b8bec2', '#9fa8ad'], dome: ['#8796a3'] };
+const BL = {
+  generic: 'Bina (türü belirtilmemiş)', house: 'Müstakil ev / küçük yapı', apart: 'Apartman / konut', comm: 'Ticari bina', ind: 'Sanayi / depo', mosque: 'Cami',
+  church: 'Kilise / ibadethane', historic: 'Tarihî yapı', public: 'Kamu / eğitim / sağlık', transport: 'Ulaşım yapısı', roof: 'Sundurma / çatı', ruins: 'Harabe', tower: 'Kule'
+};
+const ROOFN = ['düz', 'kırma', 'beşik', 'piramit', 'kubbe', 'tek eğimli'];
+
+// =====================================================================================
+//  Parça yükleme
+// =====================================================================================
+const chunks = new Map();        // "i_j" -> {state, b:[], g:{cls,wd}, p:[]}
+let inflight = 0;
+async function fetchRetry(url, tries = 3) {
+  for (let t = 0; t < tries; t++) {
+    try {
+      const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 15000);
+      const r = await fetch(url, { signal: ac.signal }); clearTimeout(tm);
+      if (!r.ok) throw new Error(r.status);
+      return await r.json();
+    } catch (e) { if (t === tries - 1) throw e; await new Promise(r => setTimeout(r, 600 * (t + 1))); }
+  }
+}
+function wantChunk(i, j) {
+  const key = i + '_' + j; let c = chunks.get(key);
+  if (c) { c.used = frameCount; return c; }
+  if (!META.has.has(key)) { c = { state: 'empty', b: [], p: [], g: null, used: frameCount }; chunks.set(key, c); return c; }
+  c = { state: 'loading', b: [], p: [], g: null, used: frameCount, i, j };
+  chunks.set(key, c); inflight++;
+  fetchRetry(BASE + 'c/' + key + '.json').then(d => { buildChunk(c, d); c.state = 'ok'; })
+    .catch(() => { c.state = 'fail'; setTimeout(() => chunks.delete(key), 5000); })
+    .finally(() => { inflight--; dirty = true; });
+  return c;
+}
+
+function buildChunk(c, d) {
+  const ox = c.i * META.chunk, oy = c.j * META.chunk;
+  c.raw = d;
+  c.g = rasterGround(d, ox, oy);
+  c.b = d.b.map(r => makeBuilding(r, ox, oy)).filter(Boolean);
+  c.p = d.p.map(p => ({ t: p[0], x: ox + p[1] / 10, y: oy + p[2] / 10, s: p[3] }));
+}
+
+// ---------- tarama çizgisi poligon doldurma (çift-tek kuralı, piksel merkezi örnekleme) ----------
+// rings: [Float64Array|Array [x0,y0,x1,y1,...]] ekran/ızgara koordinatında; cb(y, xa, xb) kapsayıcı aralık
+const _xs = new Float64Array(4096);
+function scanFill(rings, w, h, cb) {
+  let y0 = Infinity, y1 = -Infinity;
+  for (const r of rings) for (let i = 1; i < r.length; i += 2) { if (r[i] < y0) y0 = r[i]; if (r[i] > y1) y1 = r[i]; }
+  let ya = Math.max(0, Math.ceil(y0 - 0.5)), yb = Math.min(h - 1, Math.ceil(y1 - 0.5) - 1);
+  for (let y = ya; y <= yb; y++) {
+    const yc = y + 0.5; let n = 0;
+    for (const r of rings) {
+      const m = r.length;
+      for (let i = 0; i < m; i += 2) {
+        const ax = r[i], ay = r[i + 1], j = (i + 2) % m, bx = r[j], by = r[j + 1];
+        if ((ay <= yc && by > yc) || (by <= yc && ay > yc)) { if (n < 4096) _xs[n++] = ax + (yc - ay) / (by - ay) * (bx - ax); }
+      }
+    }
+    if (n < 2) continue;
+    const s = _xs.subarray(0, n).sort();
+    for (let q = 0; q + 1 < n; q += 2) {
+      let xa = Math.ceil(s[q] - 0.5), xb = Math.ceil(s[q + 1] - 0.5) - 1;
+      if (xa < 0) xa = 0; if (xb > w - 1) xb = w - 1;
+      if (xa <= xb) cb(y, xa, xb);
+    }
+  }
+}
+
+// =====================================================================================
+//  Zemin ızgarası (dünyaya sabit, 0,5 m hücre)
+// =====================================================================================
+const APRI = { 8: 1, 9: 1, 10: 1, 19: 1, 7: 2, 11: 2, 17: 3, 0: 3, 6: 4, 3: 5, 12: 5, 5: 6, 4: 7, 13: 8, 14: 8, 15: 9, 2: 10, 18: 10, 1: 12, 16: 14 };
+// çizgi sınıfı -> [taşıt yolu genişliği m, kaldırım m, yüzey kodu, işaret]
+const LSTY = {
+  motorway: [15, 0, 21, 2], trunk: [12, 0, 21, 2], primary: [10, 2.2, 21, 1], secondary: [8.5, 2, 21, 1], tertiary: [7.5, 1.8, 22, 1], minor: [6, 1.5, 22, 0],
+  service: [3.6, 0, 22, 0], pedestrian: [5, 0, 32, 0], foot: [1.6, 0, 24, 0], steps: [2, 0, 23, 0], track: [3, 0, 25, 0], cycle: [1.8, 0, 37, 0],
+  rail: [3.4, 0, 26, 3], tram: [2.6, 0, 26, 3], river: [10, 0, 34, 0], stream: [2, 0, 34, 0], pier: [3, 0, 31, 0], wall: [0.6, 0, 35, 0], fence: [0.4, 0, 36, 0]
+};
+const LORDER = ['river', 'stream', 'track', 'foot', 'cycle', 'steps', 'pedestrian', 'service', 'minor', 'tertiary', 'secondary', 'primary', 'trunk', 'motorway', 'rail', 'tram', 'pier', 'wall', 'fence'];
+
+function rasterGround(d, ox, oy) {
+  const cls = new Uint8Array(GN * GN), wd = new Uint8Array(GN * GN);
+  const toG = (flat) => { const o = new Float64Array(flat.length); for (let i = 0; i < flat.length; i += 2) { o[i] = flat[i] / 10 / CELL; o[i + 1] = flat[i + 1] / 10 / CELL; } return o; };
+  const areas = d.a.slice().sort((a, b) => (APRI[a[0]] || 0) - (APRI[b[0]] || 0));
+  for (const a of areas) {
+    const ci = a[0]; const rings = a.slice(1).filter(r => r.length >= 6).map(toG);
+    if (!rings.length) continue;
+    scanFill(rings, GN, GN, (y, xa, xb) => { cls.fill(ci, y * GN + xa, y * GN + xb + 1); });
+  }
+  // çizgiler: önce kaldırımlar, sonra bordür, sonra yüzeyler, en son işaretler
+  const L = d.l.map(l => {
+    const name = META.lcls[l[0]], st = LSTY[name];
+    let w = st[0]; if (l[3] > 0) w = Math.min(30, l[3] / 10); else if (l[2] > 0 && st[2] === 21 || l[2] > 0 && st[2] === 22) w = Math.max(st[0] * 0.7, l[2] * 3.2);
+    return { name, st, w, fl: l[1], pts: l[4].map(v => v / 10) };
+  }).filter(l => l.pts.length >= 4);
+  L.sort((a, b) => LORDER.indexOf(a.name) - LORDER.indexOf(b.name));
+  for (const l of L) if (l.st[1] > 0) stroke(cls, l.pts, l.w / 2 + l.st[1], 20, 0);
+  for (const l of L) if (l.st[1] > 0) stroke(cls, l.pts, l.w / 2 + 0.45, 30, 0);
+  for (const l of L) stroke(cls, l.pts, l.w / 2, l.st[2], 0);
+  for (const l of L) {
+    if (l.st[3] === 1 && l.w >= 8) stroke(cls, l.pts, 0.3, 28, 1);
+    else if (l.st[3] === 2) { stroke(cls, l.pts, 0.3, 28, 1); stroke(cls, l.pts, l.w / 2 - 0.5, 28, 2); }
+    else if (l.st[3] === 3) stroke(cls, l.pts, 0.95, 27, 3);
+  }
+  // yaya geçitleri (gerçek OSM crossing düğümleri; çizgi yönü en yakın yoldan)
+  const roads = L.filter(l => l.st[2] === 21 || l.st[2] === 22);
+  for (const p of d.p) {
+    if (META.pcls[p[0]] !== 'crossing') continue;
+    const px = p[1] / 10, py = p[2] / 10; let best = null, bd = 4;
+    for (const l of roads) for (let i = 0; i + 3 < l.pts.length; i += 2) {
+      const ax = l.pts[i], ay = l.pts[i + 1], bx = l.pts[i + 2], by = l.pts[i + 3], dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2)), ex = ax + t * dx - px, ey = ay + t * dy - py, dd = Math.hypot(ex, ey);
+      if (dd < bd) { bd = dd; best = [dx / Math.sqrt(L2), dy / Math.sqrt(L2), l.w]; }
+    }
+    if (!best) continue;
+    const [ux, uy, w] = best, hw = w / 2, gx0 = Math.floor((px - hw - 2) / CELL), gx1 = Math.ceil((px + hw + 2) / CELL), gy0 = Math.floor((py - hw - 2) / CELL), gy1 = Math.ceil((py + hw + 2) / CELL);
+    for (let gy = Math.max(0, gy0); gy <= Math.min(GN - 1, gy1); gy++) for (let gx = Math.max(0, gx0); gx <= Math.min(GN - 1, gx1); gx++) {
+      const qx = (gx + 0.5) * CELL - px, qy = (gy + 0.5) * CELL - py, al = qx * ux + qy * uy, ac = -qx * uy + qy * ux;
+      if (Math.abs(ac) < 1.4 && Math.abs(al) < hw - 0.3) { const ii = gy * GN + gx; if (cls[ii] === 21 || cls[ii] === 22 || cls[ii] === 28) cls[ii] = (Math.floor((al + 50) / 0.5) & 1) ? 28 : cls[ii]; }
+    }
+  }
+  // su: kıyıya uzaklık (sığ su ve köpük için), iki geçişli şamfer
+  for (let i = 0; i < GN * GN; i++) wd[i] = (cls[i] === 1) ? 60 : 0;
+  for (let y = 0; y < GN; y++) for (let x = 0; x < GN; x++) {
+    const i = y * GN + x; if (!wd[i]) continue; let m = wd[i];
+    if (x > 0) m = Math.min(m, wd[i - 1] + 1); if (y > 0) m = Math.min(m, wd[i - GN] + 1); wd[i] = m;
+  }
+  for (let y = GN - 1; y >= 0; y--) for (let x = GN - 1; x >= 0; x--) {
+    const i = y * GN + x; if (!wd[i]) continue; let m = wd[i];
+    if (x < GN - 1) m = Math.min(m, wd[i + 1] + 1); if (y < GN - 1) m = Math.min(m, wd[i + GN] + 1); wd[i] = m;
+  }
+  return { cls, wd };
+}
+// kalın çizgi: hücre merkezinin doğru parçasına uzaklığı <= rad ise işaretle. mode 1: kesikli orta çizgi, 2: kenar çizgileri, 3: iki ray
+function stroke(cls, pts, rad, code, mode) {
+  let along = 0;
+  for (let i = 0; i + 3 < pts.length; i += 2) {
+    const ax = pts[i], ay = pts[i + 1], bx = pts[i + 2], by = pts[i + 3], dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+    if (len < 1e-6) continue;
+    const ux = dx / len, uy = dy / len, R2 = rad + 0.5;
+    const gx0 = Math.max(0, Math.floor((Math.min(ax, bx) - R2) / CELL)), gx1 = Math.min(GN - 1, Math.floor((Math.max(ax, bx) + R2) / CELL));
+    const gy0 = Math.max(0, Math.floor((Math.min(ay, by) - R2) / CELL)), gy1 = Math.min(GN - 1, Math.floor((Math.max(ay, by) + R2) / CELL));
+    for (let gy = gy0; gy <= gy1; gy++) for (let gx = gx0; gx <= gx1; gx++) {
+      const qx = (gx + 0.5) * CELL - ax, qy = (gy + 0.5) * CELL - ay;
+      let t = qx * ux + qy * uy; const off = -qx * uy + qy * ux;
+      if (t < 0 || t > len) { const ex = t < 0 ? qx : qx - dx, ey = t < 0 ? qy : qy - dy; if (mode || ex * ex + ey * ey > rad * rad) continue; }
+      const ao = Math.abs(off);
+      if (mode === 0) { if (ao <= rad) cls[gy * GN + gx] = code; }
+      else if (mode === 1) { if (ao <= rad && ((along + t) % 6) < 3) cls[gy * GN + gx] = code; }
+      else if (mode === 2) { if (ao <= rad + 0.25 && ao > rad - 0.25) cls[gy * GN + gx] = code; }
+      else if (mode === 3) { if (Math.abs(ao - 0.72) < 0.26) cls[gy * GN + gx] = code; }
+    }
+    along += len;
+  }
+}
+
+// =====================================================================================
+//  Binalar: taban poligonundan 3B yüzler (dünya koordinatında, yönden bağımsız)
+// =====================================================================================
+function makeBuilding(r, ox, oy) {
+  const [ref, ci, h10, hs, lv, rf0, rs, src, rect, btag, name, rings, extra] = r;
+  const cls = META.bcls[ci];
+  const R = rings.map(f => { const o = new Float64Array(f.length); for (let i = 0; i < f.length; i += 2) { o[i] = ox + f[i] / 10; o[i + 1] = oy + f[i + 1] / 10; } return o; });
+  const ex = R[0];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, area = 0;
+  for (let i = 0; i < ex.length; i += 2) { const x = ex[i], y = ex[i + 1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  for (const q of R) { let a = 0; for (let i = 0; i < q.length; i += 2) { const j = (i + 2) % q.length; a += q[i] * q[j + 1] - q[j] * q[i + 1]; } area += a / 2; }
+  let h = h10 / 10;
+  const [rcx, rcy, rl, rw, ra, rq] = [ox + rect[0] / 10, oy + rect[1] / 10, rect[2] / 10, rect[3] / 10, rect[4] / 1000, rect[5] / 100];
+  let rf = rf0;
+  if ((rf === 1 || rf === 2 || rf === 3) && (rq < 0.9 || rw < 3)) rf = 0;      // dikdörtgene yakın olmayan tabanda eğimli çatı taşar -> düz
+  if (rf === 5) rf = 0;
+  const key = hashS(ref);
+  const wallsPal = WALLS[cls] || WALLS.generic;
+  const wc = tagColor(extra && extra['building:colour']) || hex(wallsPal[key % wallsPal.length]);
+  let rc;
+  const rtag = tagColor(extra && extra['roof:colour']);
+  if (rtag) rc = rtag;
+  else if (rf === 4) rc = hex(ROOFC.dome[0]);
+  else if (rf === 0) rc = hex((cls === 'ind' || cls === 'transport' || cls === 'roof' ? ROOFC.ind : ROOFC.flat)[(key >>> 3) % 4 % (cls === 'ind' ? 3 : 4)]);
+  else rc = hex(ROOFC.tile[(key >>> 5) % ROOFC.tile.length]);
+  // eğimli çatı yüksekliği
+  const rh = (rf === 1 || rf === 2 || rf === 3) ? Math.min(rw * 0.5 * 0.62, 3.6) : 0;
+  let hw = h;                                   // duvar (saçak) yüksekliği
+  if (hs === 0 && rh) hw = Math.max(2.2, h - rh);
+  const levels = lv > 0 ? lv : Math.max(1, Math.round((hw - 0.6) / 3));
+  const fh = cls === 'mosque' || cls === 'church' ? hw : (cls === 'ind' || cls === 'transport') ? hw : Math.max(2.4, (hw - (cls === 'house' ? 0 : 0.6)) / levels);
+  const style = cls === 'ind' || cls === 'transport' ? 3 : cls === 'house' ? 1 : (cls === 'comm' ? 2 : (cls === 'mosque' || cls === 'church' || cls === 'historic' ? 4 : (cls === 'roof' ? 5 : (cls === 'ruins' ? 6 : 0))));
+  const b = { ref, cls, h, hs, lv, rf, rf0, rs, src, btag, name, extra, R, area, x0, y0, x1, y1, top: hw + rh + (rf === 4 ? Math.min(rw, rl) * 0.45 : 0), key, hw, fh, style, wc, rc, faces: [] };
+  // duvarlar (dış halka CCW, delikler CW => dışa normal = (dy, -dx))
+  for (const q of R) {
+    for (let i = 0; i < q.length; i += 2) {
+      const j = (i + 2) % q.length, ax = q[i], ay = q[i + 1], bx = q[j], by = q[j + 1], dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+      if (len < 0.05) continue;
+      b.faces.push({ t: 1, p: [ax, ay, 0, bx, by, 0, bx, by, hw, ax, ay, hw], n: [dy / len, -dx / len, 0], len, h: hw });
+    }
+  }
+  const ux = Math.cos(ra), uy = Math.sin(ra), vx = -uy, vy = ux, hl = rl / 2, hwid = rw / 2;
+  const P = (a, c, z) => [rcx + ux * a + vx * c, rcy + uy * a + vy * c, z];
+  const pushPlane = (pts, t) => {             // düzlemsel çatı yüzü, normal üç noktadan
+    const ax = pts[3] - pts[0], ay = pts[4] - pts[1], az = pts[5] - pts[2], bx = pts[6] - pts[0], by = pts[7] - pts[1], bz = pts[8] - pts[2];
+    let nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx; const nl = Math.hypot(nx, ny, nz) || 1;
+    if (nz < 0) { nx = -nx; ny = -ny; nz = -nz; }
+    b.faces.push({ t, p: pts, n: [nx / nl, ny / nl, nz / nl] });
+  };
+  if (rf === 1 && rl - rw > 0.2) {             // kırma: iki yamuk + iki üçgen
+    const e = hl - hwid, z = hw + rh;
+    pushPlane([...P(-hl, -hwid, hw), ...P(hl, -hwid, hw), ...P(e, 0, z), ...P(-e, 0, z)], 2);
+    pushPlane([...P(hl, hwid, hw), ...P(-hl, hwid, hw), ...P(-e, 0, z), ...P(e, 0, z)], 2);
+    pushPlane([...P(hl, -hwid, hw), ...P(hl, hwid, hw), ...P(e, 0, z)], 2);
+    pushPlane([...P(-hl, hwid, hw), ...P(-hl, -hwid, hw), ...P(-e, 0, z)], 2);
+  } else if (rf === 1 || rf === 3) {           // piramit
+    const z = hw + rh, c = [rcx, rcy, z], cs = [P(-hl, -hwid, hw), P(hl, -hwid, hw), P(hl, hwid, hw), P(-hl, hwid, hw)];
+    for (let i = 0; i < 4; i++) pushPlane([...cs[i], ...cs[(i + 1) % 4], ...c], 2);
+  } else if (rf === 2) {                       // beşik: iki dikdörtgen + iki üçgen alın duvarı
+    const z = hw + rh;
+    pushPlane([...P(-hl, -hwid, hw), ...P(hl, -hwid, hw), ...P(hl, 0, z), ...P(-hl, 0, z)], 2);
+    pushPlane([...P(hl, hwid, hw), ...P(-hl, hwid, hw), ...P(-hl, 0, z), ...P(hl, 0, z)], 2);
+    const g1 = [...P(hl, -hwid, hw), ...P(hl, hwid, hw), ...P(hl, 0, z)], g2 = [...P(-hl, hwid, hw), ...P(-hl, -hwid, hw), ...P(-hl, 0, z)];
+    for (const g of [g1, g2]) { const n = [ux * Math.sign(g[0] - rcx || 1) * Math.sign(ux * (g[0] - rcx) + uy * (g[1] - rcy)), 0, 0];
+      const ax = (g[0] + g[3]) / 2 - rcx, ay = (g[1] + g[4]) / 2 - rcy, l = Math.hypot(ax, ay) || 1; b.faces.push({ t: 5, p: g, n: [ax / l, ay / l, 0] }); }
+  } else {
+    b.faces.push({ t: 3, rings: R, z: hw, n: [0, 0, 1] });   // düz çatı (delikli olabilir)
+    if (rf === 4) {                            // kubbe: 12 kenarlı katmanlar
+      const rd = Math.max(1.5, Math.min(rl, rw) * 0.42), seg = 12, tiers = 4;
+      for (let t = 0; t < tiers; t++) {
+        const a0 = t / tiers * Math.PI / 2, a1 = (t + 1) / tiers * Math.PI / 2;
+        const r0 = rd * Math.cos(a0), r1 = rd * Math.cos(a1), z0 = hw + 0.4 + rd * Math.sin(a0) * 0.9, z1 = hw + 0.4 + rd * Math.sin(a1) * 0.9;
+        for (let s = 0; s < seg; s++) {
+          const b0 = s / seg * 2 * Math.PI, b1 = (s + 1) / seg * 2 * Math.PI;
+          const pts = [rcx + r0 * Math.cos(b0), rcy + r0 * Math.sin(b0), z0, rcx + r0 * Math.cos(b1), rcy + r0 * Math.sin(b1), z0];
+          if (r1 > 0.05) pts.push(rcx + r1 * Math.cos(b1), rcy + r1 * Math.sin(b1), z1, rcx + r1 * Math.cos(b0), rcy + r1 * Math.sin(b0), z1);
+          else pts.push(rcx, rcy, z1);
+          pushPlane(pts, 4);
+        }
+        // kasnak
+        if (t === 0) for (let s = 0; s < seg; s++) {
+          const b0 = s / seg * 2 * Math.PI, b1 = (s + 1) / seg * 2 * Math.PI, ax = rcx + rd * Math.cos(b0), ay = rcy + rd * Math.sin(b0), bx = rcx + rd * Math.cos(b1), by = rcy + rd * Math.sin(b1);
+          const dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy);
+          b.faces.push({ t: 1, p: [ax, ay, hw, bx, by, hw, bx, by, hw + 0.4, ax, ay, hw + 0.4], n: [dy / l, -dx / l, 0], len: l, h: 0.4, drum: 1 });
+        }
+      }
+    } else if ((cls === 'apart' || cls === 'generic') && area > 70 && rq > 0.75 && src === 0) {
+      // stilize çatı ayrıntısı: güneş enerjili su ısıtıcısı (gerçek konum değildir)
+      const a = ((key >>> 8) % 5 - 2) / 5 * (hl - 1.2), c = ((key >>> 12) % 3 - 1) / 3 * (hwid - 1);
+      const box = (a0, c0, la, wa, hz, t) => {
+        const c1 = P(a0 - la, c0 - wa, hw), c2 = P(a0 + la, c0 - wa, hw), c3 = P(a0 + la, c0 + wa, hw), c4 = P(a0 - la, c0 + wa, hw);
+        if (![c1, c2, c3, c4].every(pt => insideRings(R, pt[0], pt[1]))) return;
+        const cs = [c1, c2, c3, c4];
+        for (let i = 0; i < 4; i++) { const p0 = cs[i], p1 = cs[(i + 1) % 4], dx = p1[0] - p0[0], dy = p1[1] - p0[1], l = Math.hypot(dx, dy);
+          b.faces.push({ t: 6, p: [p0[0], p0[1], hw, p1[0], p1[1], hw, p1[0], p1[1], hw + hz, p0[0], p0[1], hw + hz], n: [dy / l, -dx / l, 0], dec: t }); }
+        b.faces.push({ t: 6, rings: [new Float64Array([c1[0], c1[1], c2[0], c2[1], c3[0], c3[1], c4[0], c4[1]])], z: hw + hz, n: [0, 0, 1], dec: t });
+      };
+      box(a, c, 0.9, 0.6, 0.5, 1); box(a, c + 1.1, 0.7, 0.3, 0.9, 2);
+    }
+  }
+  return b;
+}
+function insideRings(R, x, y) {
+  let ins = false;
+  for (const q of R) for (let i = 0, j = q.length - 2; i < q.length; j = i, i += 2) {
+    const xi = q[i], yi = q[i + 1], xj = q[j], yj = q[j + 1];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins;
+  }
+  return ins;
+}
+
+// =====================================================================================
+//  Kamera / projeksiyon
+// =====================================================================================
+let RC = 1, RS = 0, CX = 0, CY = 0, HW2 = 0, HH2 = 0;
+function setupFrame() {
+  [k, PX] = ZL[cam.zi];
+  const a = cam.r * Math.PI / 2; RC = Math.round(Math.cos(a)); RS = Math.round(Math.sin(a));
+  const u = RC * cam.x + RS * cam.y, v = -RS * cam.x + RC * cam.y;
+  const qx = k >= 2 ? 2 : 1;                  // kaydırma adımı: zemin hücre kafesine denk gelir (titreşim yok)
+  CX = Math.round((u - v) * k / qx) * qx; CY = Math.round(-(u + v) * k / 2);
+  HW2 = W >> 1; HH2 = H >> 1;
+}
+const projX = (u, v) => (u - v) * k - CX + HW2;
+const projY = (u, v, z) => -(u + v) * k * 0.5 - z * k * ZS - CY + HH2;
+function screenToWorld(px, py) {             // ekran pikseli (sanat) -> z=0 dünya (x,y)
+  const sx = px - HW2 + CX, sy = py - HH2 + CY, A = sx / k, B = -2 * sy / k, u = (A + B) / 2, v = (B - A) / 2;
+  return [RC * u - RS * v, RS * u + RC * v];
+}
+
+function resize() {
+  [k, PX] = ZL[cam.zi];
+  // a hidden tab or a not-yet-laid-out frame can report 0x0; keep at least 1 px so init never throws
+  const nw = Math.max(1, Math.ceil((innerWidth || 1) / PX)), nh = Math.max(1, Math.ceil((innerHeight || 1) / PX));
+  if (nw !== W || nh !== H || !img) {
+    W = nw; H = nh; cv.width = W; cv.height = H;
+    img = ctx.createImageData(W, H); col = new Uint32Array(img.data.buffer);
+    dep = new Float32Array(W * H); ids = new Int32Array(W * H); fid = new Int32Array(W * H); emis = new Uint8Array(W * H); smask = new Uint8Array(W * H);
+  }
+  cv.style.width = (W * PX) + 'px'; cv.style.height = (H * PX) + 'px';
+  dirty = true;
+}
+
+// =====================================================================================
+//  Çizim
+// =====================================================================================
+function render() {
+  const t0 = performance.now(); frameCount++;
+  setupFrame();
+  const N = W * H;
+  dep.fill(Infinity); ids.fill(-1); fid.fill(-1); emis.fill(0); smask.fill(0);
+  // görünür parçalar (alt kenardan yüksek binalar için pay)
+  const mb = 60 * k * ZS;
+  const cs = [screenToWorld(0, -10), screenToWorld(W, -10), screenToWorld(0, H + mb), screenToWorld(W, H + mb)];
+  let wx0 = Infinity, wy0 = Infinity, wx1 = -Infinity, wy1 = -Infinity;
+  for (const [x, y] of cs) { wx0 = Math.min(wx0, x); wx1 = Math.max(wx1, x); wy0 = Math.min(wy0, y); wy1 = Math.max(wy1, y); }
+  const CH = META.chunk, ci0 = Math.max(0, Math.floor(wx0 / CH) - 1), ci1 = Math.min(META.nx - 1, Math.floor(wx1 / CH) + 1);
+  const cj0 = Math.max(0, Math.floor(wy0 / CH) - 1), cj1 = Math.min(META.ny - 1, Math.floor(wy1 / CH) + 1);
+  const vis = [];
+  for (let i = ci0; i <= ci1; i++) for (let j = cj0; j <= cj1; j++) vis.push(wantChunk(i, j));
+  groundPass();
+  // görünür binalar
+  frameB = [];
+  for (const c of vis) for (const b of c.b) {
+    if (!opt.ms && b.src === 1) continue;
+    if (b.x1 < wx0 - 80 || b.x0 > wx1 + 80 || b.y1 < wy0 - 80 || b.y0 > wy1 + 80) continue;
+    // ekran sınır kutusu
+    let sx0 = Infinity, sx1 = -Infinity, sy0 = Infinity, sy1 = -Infinity;
+    for (const [x, y] of [[b.x0, b.y0], [b.x1, b.y0], [b.x0, b.y1], [b.x1, b.y1]]) {
+      const u = RC * x + RS * y, v = -RS * x + RC * y, px = projX(u, v), py = projY(u, v, 0);
+      sx0 = Math.min(sx0, px); sx1 = Math.max(sx1, px); sy1 = Math.max(sy1, py); sy0 = Math.min(sy0, py - b.top * k * ZS);
+    }
+    if (sx1 < -2 || sx0 > W + 2 || sy1 < -2 || sy0 > H + 2) continue;
+    frameB.push(b);
+  }
+  const t1 = performance.now();
+  if (opt.shadow) shadowPass(vis);
+  if (night > 0) lampPools(vis);
+  const t2 = performance.now();
+  for (let bi = 0; bi < frameB.length; bi++) drawBuilding(frameB[bi], bi);
+  const t3 = performance.now();
+  if (opt.trees || opt.furn) pointPass(vis);
+  const t4 = performance.now();
+  outlinePass();
+  if (opt.foot) footPass();
+  compose();
+  const t5 = performance.now();
+  ctx.putImageData(img, 0, 0);
+  prof = { ground: t1 - t0, shadow: t2 - t1, build: t3 - t2, points: t4 - t3, post: t5 - t4, put: performance.now() - t5 };
+  lastMs = performance.now() - t0;
+  status(vis);
+}
+
+// ---------- zemin: her piksel z=0 düzleminden dünyaya ters izdüşüm ----------
+function groundPass() {
+  const CH = META.chunk, Wm = META.size[0], Hm = META.size[1], ph = wavePhase;
+  let lastKey = -1, g = null, gox = 0, goy = 0;
+  for (let y = 0; y < H; y++) {
+    // satır başı dünya koordinatı ve piksel başına artış (doğrusal)
+    const sy = y + 0.5 - HH2 + CY, B = -2 * sy / k;
+    const sx0 = 0.5 - HW2 + CX, A0 = sx0 / k, dA = 1 / k;
+    let u = (A0 + B) / 2, v = (B - A0) / 2; const du = dA / 2, dv = -dA / 2;
+    let x = RC * u - RS * v, wy = RS * u + RC * v; const dx = RC * du - RS * dv, dy = RS * du + RC * dv;
+    let o = y * W;
+    for (let i = 0; i < W; i++, o++, x += dx, wy += dy) {
+      if (x < 0 || wy < 0 || x >= Wm || wy >= Hm) { col[o] = VOID[((Math.floor(x / 8) + Math.floor(wy / 8)) & 1)]; continue; }
+      const ci = (x / CH) | 0, cj = (wy / CH) | 0, key = ci * 1000 + cj;
+      if (key !== lastKey) { lastKey = key; const c = chunks.get(ci + '_' + cj); g = c && c.g; gox = ci * CH; goy = cj * CH; }
+      if (!g) { col[o] = VOID[0]; continue; }
+      const gx = ((x - gox) / CELL) | 0, gy = ((wy - goy) / CELL) | 0, gi = gy * GN + gx;
+      const c = g.cls[gi], hx = ci * GN + gx, hy = cj * GN + gy;
+      let p;
+      if (c === 1 || c === 34) {                           // su: derin -> sığ, dünyaya sabit dalga, kıyı köpüğü
+        const d = c === 34 ? 8 : g.wd[gi];
+        const sh = d < 3 ? 0 : d < 8 ? 1 : d < 18 ? 2 : 3;
+        let r = [72, 52, 42, 36][sh], gg = [160, 136, 112, 98][sh], bb = [184, 170, 160, 150][sh];
+        const wv = (hx * 2 + hy * 3 + ((hash2(hx >> 3, hy >> 2) & 7)) + ph) % 23;
+        if (d > 2 && wv === 0) { r += 30; gg += 34; bb += 30; }
+        if (d <= 2 && ((hx + hy + ph) & 3) !== 0) { r = 214; gg = 234; bb = 236; }
+        else if (d <= 4 && ((hx * 3 + hy + ph) % 7) === 0) { r = 168; gg = 210; bb = 218; }
+        p = pk(r, gg, bb);
+      } else {
+        const pal = GP[c] || GP[0], hsh = hash2(hx, hy);
+        if (c === 20 || c === 15 || c === 32) p = pal[((hx & 1) === 0 || (hy & 1) === 0) ? 1 : 0];       // 1 m karo
+        else if (c === 7) p = pal[(hy >> 1) & 1];                                                       // tarla sürüm izi
+        else if (c === 13) p = pal[(hx >> 3) & 1];                                                      // saha biçme şeridi
+        else if (c === 16 || c === 31) p = pal[hx & 1];                                                 // iskele tahtası
+        else if (c === 14) p = (hx % 6 === 0) ? GP[28][0] : pal[0];                                     // otopark çizgileri
+        else if (c === 23) p = pal[hy & 1];
+        else p = pal[hsh % pal.length];
+        if ((c === 3 || c === 4 || c === 5 || c === 12) && (hsh & 63) === 1) p = tonePk(p, 0.4);        // ot ışığı
+      }
+      col[o] = p;
+    }
+  }
+}
+
+// ---------- gölge: taban izinin ışığın tersine (ekranda sağ-alt) süpürülmesi ----------
+function shadowPass(vis) {
+  const SH = 0.42;
+  const darken = (y, xa, xb) => { let o = y * W + xa; for (let x = xa; x <= xb; x++, o++) if (!smask[o]) { smask[o] = 1; const c = col[o]; col[o] = pk(cr(c) * 0.62 + 10, cg(c) * 0.64 + 12, cb(c) * 0.72 + 30); } };
+  for (const b of frameB) {
+    const s = b.top * SH;
+    for (const q of b.R) {
+      const n = q.length, P0 = new Float64Array(n), P1 = new Float64Array(n);
+      for (let i = 0; i < n; i += 2) {
+        const u = RC * q[i] + RS * q[i + 1], v = -RS * q[i] + RC * q[i + 1];
+        P0[i] = projX(u, v); P0[i + 1] = projY(u, v, 0); P1[i] = projX(u, v - s); P1[i + 1] = projY(u, v - s, 0);
+      }
+      scanFill([P1], W, H, darken);
+      for (let i = 0; i < n; i += 2) { const j = (i + 2) % n; scanFill([[P0[i], P0[i + 1], P0[j], P0[j + 1], P1[j], P1[j + 1], P1[i], P1[i + 1]]], W, H, darken); }
+    }
+  }
+  if (opt.trees) for (const c of vis) for (const p of c.p) {
+    if (p.t !== 0) continue;
+    const u = RC * p.x + RS * p.y, v = -RS * p.x + RC * p.y - 2.2, px = projX(u, v), py = projY(u, v, 0), rx = 2.4 * k * 1.1, ry = rx * 0.5;
+    if (px < -rx || px > W + rx || py < -ry || py > H + ry) continue;
+    for (let y = Math.max(0, Math.ceil(py - ry - 0.5)); y <= Math.min(H - 1, Math.floor(py + ry)); y++) {
+      const dy = (y + 0.5 - py) / ry, w = rx * Math.sqrt(Math.max(0, 1 - dy * dy));
+      const xa = Math.max(0, Math.ceil(px - w - 0.5)), xb = Math.min(W - 1, Math.ceil(px + w - 0.5) - 1);
+      if (xa <= xb) darken(y, xa, xb);
+    }
+  }
+}
+function lampPools(vis) {
+  for (const c of vis) for (const p of c.p) {
+    if (p.t !== 1) continue;
+    const u = RC * p.x + RS * p.y, v = -RS * p.x + RC * p.y, px = projX(u, v), py = projY(u, v, 0), rx = 6 * k * 1.1, ry = rx * 0.5;
+    if (px < -rx || px > W + rx || py < -ry || py > H + ry) continue;
+    for (let y = Math.max(0, Math.ceil(py - ry - 0.5)); y <= Math.min(H - 1, Math.floor(py + ry)); y++) {
+      const dy = (y + 0.5 - py) / ry, w = rx * Math.sqrt(Math.max(0, 1 - dy * dy));
+      for (let x = Math.max(0, Math.ceil(px - w - 0.5)); x <= Math.min(W - 1, Math.ceil(px + w - 0.5) - 1); x++) {
+        const dd = Math.hypot((x + 0.5 - px) / rx, dy), o = y * W + x;
+        emis[o] = Math.max(emis[o], dd < 0.45 ? 3 : dd < 0.75 ? 2 : 1);
+      }
+    }
+  }
+}
+
+// ---------- düzlemsel yüz doldurma (z-tamponu) ----------
+const VW = [0, 0, 0];
+function drawBuilding(b, bi) {
+  const estMode = opt.est;
+  for (let fi = 0; fi < b.faces.length; fi++) {
+    const f = b.faces[fi];
+    const nu = RC * f.n[0] + RS * f.n[1], nv = -RS * f.n[0] + RC * f.n[1], nz = f.n[2];
+    if (nu + nv - nz / ZS > -1e-4) continue;                     // arka yüz
+    // ışık: ekranın sol üstünden (u-v-z çerçevesinde sabit)
+    const lt = (-0.72 * nu + 0.34 * nv + 0.86 * nz);
+    let t = Math.max(-1, Math.min(1, (lt - 0.35) * 1.2)); t = Math.round(t * 4) / 4;
+    const pkey = t * 8 + (estMode ? 100 : 0);
+    let pal = f._pk === pkey ? f._pal : null;
+    if (!pal) {
+      let base;
+      if (f.t === 1 || f.t === 5) base = b.wc; else if (f.t === 6) base = f.dec === 1 ? [52, 74, 120] : [226, 226, 222]; else base = b.rc;
+      if (estMode) base = b.src === 1 ? [170, 120, 200] : (b.hs === 2 ? [236, 190, 90] : (b.hs === 3 ? [200, 150, 220] : [90, 180, 170]));
+      pal = f._pal = facePal(base, t, f, b); f._pk = pkey;
+    }
+    const gid = (bi << 8) | fi;
+    if (f.rings) fillRings(f, b, bi, gid, pal); else fillQuad(f, b, bi, gid, pal);
+  }
+}
+function facePal(base, t, f, b) {
+  // [0] ana, [1] koyu bant/kiremit sırası, [2] cam, [3] cam parıltı, [4] balkon korkuluk, [5] balkon döşeme, [6] vitrin, [7] gece pencere
+  return [tone(base, t), tone(base, t - 0.32), tone([58, 72, 92], t * 0.5), tone([132, 160, 186], t * 0.6), tone([238, 236, 228], t), tone(base, t - 0.55), tone([70, 96, 112], t * 0.5), pk(255, 206, 112)];
+}
+// dörtgen/üçgen yüz: P0 + a·(P1−P0) + c·(P3−P0) parametreleri; duvarlarda a = kenar boyu oranı, c = yükseklik oranı
+function fillQuad(f, b, bi, gid, pal) {
+  const p = f.p, n = p.length / 3, scr = new Float64Array(n * 2);
+  const U = new Float64Array(n), V = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = p[i * 3], y = p[i * 3 + 1], z = p[i * 3 + 2], u = RC * x + RS * y, v = -RS * x + RC * y;
+    U[i] = u; V[i] = v; scr[i * 2] = projX(u, v); scr[i * 2 + 1] = projY(u, v, z);
+  }
+  // ekran -> (a, c) afin dönüşüm (P0, P1, P_last)
+  const l = n - 1;
+  const e1x = scr[2] - scr[0], e1y = scr[3] - scr[1], e2x = scr[l * 2] - scr[0], e2y = scr[l * 2 + 1] - scr[1];
+  const det = e1x * e2y - e1y * e2x; if (Math.abs(det) < 1e-6) return;
+  const ia = [e2y / det, -e2x / det], ic = [-e1y / det, e1x / det];
+  const dU1 = U[1] - U[0], dV1 = V[1] - V[0], dZ1 = p[5] - p[2], dU2 = U[l] - U[0], dV2 = V[l] - V[0], dZ2 = p[l * 3 + 2] - p[2];
+  const D0 = U[0] + V[0] - p[2] / ZS, Da = dU1 + dV1 - dZ1 / ZS, Dc = dU2 + dV2 - dZ2 / ZS;
+  const wall = f.t === 1, len = f.len || 0, hgt = f.h || 0, st = b.style, fh = b.fh, lod = k < 0.75;
+  const bay = st === 1 ? 3.2 : st === 4 ? 3.4 : 2.7, nb = Math.max(1, Math.floor((len - 0.6) / bay)), off = (len - nb * bay) / 2;
+  const isN = night > 0.5, key = b.key, Z0 = p[2], drum = f.drum;
+  const sx0 = scr[0], sy0 = scr[1];
+  scanFill([scr], W, H, (y, xa, xb) => {
+    const Y = y + 0.5 - sy0;
+    let o = y * W + xa;
+    for (let x = xa; x <= xb; x++, o++) {
+      const X = x + 0.5 - sx0, a = ia[0] * X + ia[1] * Y, c = ic[0] * X + ic[1] * Y;
+      const D = D0 + Da * a + Dc * c;
+      if (D >= dep[o] - 1e-3) continue;
+      dep[o] = D; ids[o] = bi; fid[o] = gid;
+      let px = pal[0], em = 0;
+      if (wall && !drum) {
+        const s = a * len, z = c * hgt;
+        if (st === 3) {                                           // sanayi: oluklu sac + üst bant pencere
+          px = (Math.floor(s / 0.6) & 1) ? pal[0] : pal[1];
+          if (!lod && z > hgt - 1.7 && z < hgt - 0.8 && hgt > 4) px = pal[2];
+        } else if (st === 5 || st === 6) {
+          if (st === 6 && (hash2(Math.floor(s / 0.6), Math.floor(z / 0.4)) & 3) === 0) px = pal[1];
+        } else if (lod) {
+          if ((z % fh) < 0.35 && z > 0.5) px = pal[1];
+        } else if (z > hgt - 0.35 && st !== 1) px = pal[4];          // korniş
+        else {
+          const fi = Math.floor(z / fh), fz = z - fi * fh, bs = s - off, bi2 = Math.floor(bs / bay), ls = bs - bi2 * bay;
+          if (bs >= 0 && bi2 < nb) {
+            if (st === 4) {                                       // cami/tarihî: kemerli yüksek pencereler, taş sıraları
+              const top = Math.min(hgt - 1.2, 4.6);
+              if (ls > bay * 0.33 && ls < bay * 0.67 && z > 1.2 && z < top - Math.abs(ls - bay / 2) * 0.9) px = pal[2];
+              else if ((Math.floor(z / 0.55) & 1)) px = pal[1] === pal[0] ? px : tone([cr(pal[0]), cg(pal[0]), cb(pal[0])], -0.08);
+            } else if (st === 2 && fi === 0) {                    // ticari: zemin kat vitrini
+              if (fz > 0.35 && fz < 2.5 && ls > bay * 0.1 && ls < bay * 0.9) { px = fz > 2.2 ? pal[3] : pal[6]; if (isN) em = 1; }
+            } else {
+              const win = fz > 0.85 && fz < 2.05 && ls > bay * 0.26 && ls < bay * 0.74;
+              const balc = st === 0 && fi >= 1 && (hash2(key, bi2) % 3) !== 0 && fz < 0.95 && ls > bay * 0.1 && ls < bay * 0.9;
+              if (balc) px = fz < 0.16 ? pal[5] : (fz > 0.8 ? pal[4] : (win ? pal[2] : pal[4]));
+              else if (win) { px = fz > 1.85 ? pal[3] : pal[2]; if (isN && (hash2(key ^ fi * 977, bi2) % 5) < 2) { px = pal[7]; em = 1; } }
+              else if (fz < 0.2 && fi > 0 && st === 0) px = pal[1];
+            }
+          }
+        }
+      } else if (f.t === 2) {                                     // kiremit sıraları (yüksekliğe göre, dünyaya sabit)
+        const z = Z0 + (dZ1 * a + dZ2 * c);
+        if (!lod && (Math.floor(z / 0.42) & 1)) px = pal[1];
+      } else if (f.t === 4) {
+        const z = Z0 + (dZ1 * a + dZ2 * c); if (!lod && (Math.floor(z / 0.6) & 1)) px = pal[1];
+      }
+      col[o] = px; emis[o] = em ? 4 : 0;
+    }
+  });
+}
+// düz yatay yüz (çatı, delikli olabilir): sabit z
+function fillRings(f, b, bi, gid, pal) {
+  const z = f.z, rings = [];
+  for (const q of f.rings) {
+    const o = new Float64Array(q.length);
+    for (let i = 0; i < q.length; i += 2) { const u = RC * q[i] + RS * q[i + 1], v = -RS * q[i] + RC * q[i + 1]; o[i] = projX(u, v); o[i + 1] = projY(u, v, z); }
+    rings.push(o);
+  }
+  // ekran -> D: u+v = −2(sy + z·k·ZS + CY − HH2)/k
+  const lod = k < 0.75;
+  scanFill(rings, W, H, (y, xa, xb) => {
+    const sy = y + 0.5 - HH2 + CY, D = -2 * (sy + z * k * ZS) / k - z / ZS;
+    let o = y * W + xa;
+    for (let x = xa; x <= xb; x++, o++) {
+      if (D >= dep[o] - 1e-3) continue;
+      dep[o] = D; ids[o] = bi; fid[o] = gid;
+      let px = pal[0];
+      if (!lod && f.dec === undefined) {                           // düz çatı: hafif beton dokusu (dünyaya sabit)
+        const [wx, wy] = screenToWorldZ(x + 0.5, y + 0.5, z);
+        if ((hash2(Math.floor(wx / 0.5), Math.floor(wy / 0.5)) & 15) === 0) px = pal[1];
+      } else if (f.dec === 1) px = ((x + y) & 1) ? pal[0] : pal[3];
+      col[o] = px; emis[o] = 0;
+    }
+  });
+}
+function screenToWorldZ(px, py, z) {
+  const sx = px - HW2 + CX, sy = py - HH2 + CY + z * k * ZS, A = sx / k, B = -2 * sy / k, u = (A + B) / 2, v = (B - A) / 2;
+  return [RC * u - RS * v, RS * u + RC * v];
+}
+
+// ---------- ağaç ve sokak objesi sprite'ları ----------
+const spriteCache = new Map();
+function sprite(kind, variant) {
+  const key = kind + ':' + variant + ':' + k;
+  let s = spriteCache.get(key); if (s) return s;
+  const kk = k * 1.12;
+  let w, h, ax, ay, px;
+  const put = (x, y, c) => { if (x >= 0 && y >= 0 && x < w && y < h) px[y * w + x] = c; };
+  if (kind === 'round' || kind === 'pine' || kind === 'cypress') {
+    const greens = { round: [[92, 150, 64], [78, 136, 58], [104, 158, 70]], pine: [[62, 112, 66], [56, 102, 60]], cypress: [[44, 88, 56], [40, 80, 52]] }[kind];
+    const g = greens[variant % greens.length];
+    const rr = kind === 'cypress' ? Math.max(1, 1.1 * kk) : Math.max(1.4, (kind === 'pine' ? 3.0 : 2.5) * kk), ry = kind === 'cypress' ? Math.max(2.5, 4.2 * kk) : rr * (kind === 'pine' ? 0.7 : 0.95);
+    const trunkH = (kind === 'cypress' ? 1.2 : kind === 'pine' ? 4.5 : 2.2) * k * ZS;
+    w = Math.ceil(rr * 2) + 3; h = Math.ceil(ry * 2 + trunkH) + 3; ax = w >> 1; ay = h - 1; px = new Uint32Array(w * h);
+    const cyc = ay - trunkH - ry;
+    const tw = Math.max(1, Math.round(0.45 * k));
+    for (let y = Math.floor(cyc); y <= ay; y++) for (let x = ax - (tw >> 1); x < ax - (tw >> 1) + tw; x++) put(x, y, pk(96, 70, 48));
+    const cA = tone(g, 0.5), cB = tone(g, 0), cC = tone(g, -0.55), cD = tone(g, -1);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = (x + 0.5 - ax - 0.5) / rr, dy = (y + 0.5 - cyc) / ry, d = dx * dx + dy * dy;
+      if (d > 1) continue;
+      const l = -dx * 0.6 - dy * 0.8 + ((hash2(x * 7 + variant, y * 3) & 3) - 1.5) * 0.12;
+      let c = l > 0.35 ? cA : l > -0.25 ? cB : cC;
+      if (d > 0.72 && l < -0.1) c = cD;
+      put(x, y, c);
+    }
+    // seçici kontur
+    const cp = px.slice();
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (!cp[y * w + x]) continue;
+      const edge = x === 0 || y === 0 || x === w - 1 || y === h - 1 || !cp[y * w + x - 1] || !cp[y * w + x + 1] || !cp[(y - 1) * w + x] || !cp[(y + 1) * w + x];
+      if (edge && k >= 1 && y < cyc + ry * 0.4) px[y * w + x] = tonePk(cp[y * w + x], -0.6);
+    }
+  } else if (kind === 'lamp') {
+    const hh = Math.max(4, Math.round(5 * k * ZS)); w = 3; h = hh + 2; ax = 1; ay = h - 1; px = new Uint32Array(w * h);
+    for (let y = 2; y <= ay; y++) put(1, y, pk(70, 74, 82)); put(0, 1, pk(70, 74, 82)); put(1, 1, pk(244, 226, 150)); put(2, 1, pk(70, 74, 82));
+  } else if (kind === 'bench') {
+    w = Math.max(2, Math.round(1.8 * k)); h = 2; ax = w >> 1; ay = 1; px = new Uint32Array(w * h);
+    for (let x = 0; x < w; x++) { put(x, 0, pk(140, 96, 60)); put(x, 1, pk(96, 66, 42)); }
+  } else if (kind === 'bus_stop') {
+    w = Math.max(3, Math.round(3 * k)); const hh = Math.max(3, Math.round(2.6 * k * ZS)); h = hh + 1; ax = w >> 1; ay = h - 1; px = new Uint32Array(w * h);
+    for (let x = 0; x < w; x++) put(x, 0, pk(30, 60, 140)); for (let y = 1; y < h; y++) { put(0, y, pk(90, 96, 104)); put(w - 1, y, pk(90, 96, 104)); for (let x = 1; x < w - 1; x++) put(x, y, pk(150, 190, 210)); }
+  } else if (kind === 'signals') {
+    const hh = Math.max(3, Math.round(4 * k * ZS)); w = 1; h = hh; ax = 0; ay = h - 1; px = new Uint32Array(w * h);
+    for (let y = 0; y < h; y++) put(0, y, pk(50, 52, 56)); put(0, 0, pk(220, 60, 50)); if (h > 2) put(0, 1, pk(240, 190, 60)); if (h > 3) put(0, 2, pk(80, 200, 90));
+  } else if (kind === 'waste') {
+    w = 1; h = 2; ax = 0; ay = 1; px = new Uint32Array(2); px[0] = pk(80, 120, 80); px[1] = pk(60, 90, 60);
+  } else if (kind === 'fountain') {
+    w = Math.max(3, Math.round(2 * k)); h = 2; ax = w >> 1; ay = 1; px = new Uint32Array(w * h); for (let x = 0; x < w; x++) { put(x, 0, pk(120, 200, 230)); put(x, 1, pk(170, 170, 160)); }
+  } else if (kind === 'flagpole') {
+    const hh = Math.max(5, Math.round(9 * k * ZS)); w = 4; h = hh; ax = 0; ay = h - 1; px = new Uint32Array(w * h);
+    for (let y = 0; y < h; y++) put(0, y, pk(200, 200, 205)); for (let y = 0; y < 2; y++) for (let x = 1; x < 4; x++) put(x, y, pk(227, 10, 23)); put(2, 0, pk(250, 240, 240));
+  } else if (kind === 'minaret') {
+    // minare: konum gerçek (OSM düğümü), yükseklik stilize (25 m)
+    const r = Math.max(1, 1.1 * kk), hh = Math.round(25 * k * ZS), cone = Math.max(2, Math.round(3 * k * ZS));
+    w = Math.ceil(r * 2) + 2; h = hh + cone + 2; ax = w >> 1; ay = h - 1; px = new Uint32Array(w * h);
+    const st = [236, 230, 214];
+    for (let y = cone + 1; y <= ay; y++) for (let x = 0; x < w; x++) { const dx = (x + 0.5 - ax - 0.5) / r; if (Math.abs(dx) <= 1) put(x, y, tone(st, dx < 0 ? 0.3 : -0.4)); }
+    const by = cone + 1 + Math.round(hh * 0.25); for (let x = 0; x < w; x++) put(x, by, tone(st, -0.7));
+    for (let y = 1; y <= cone; y++) { const ww = r * (y / cone); for (let x = 0; x < w; x++) if (Math.abs(x + 0.5 - ax - 0.5) <= ww + 0.01) put(x, y, tone([126, 144, 158], x <= ax ? 0.2 : -0.4)); }
+    put(ax, 0, pk(222, 190, 90));
+  } else { w = 1; h = 1; ax = 0; ay = 0; px = new Uint32Array(1); }
+  s = { w, h, ax, ay, px }; spriteCache.set(key, s); return s;
+}
+const FURN = { 1: 'lamp', 2: 'bench', 3: 'bus_stop', 4: 'waste', 5: 'signals', 7: 'minaret', 8: 'fountain', 9: 'flagpole' };
+function pointPass(vis) {
+  for (const c of vis) for (const p of c.p) {
+    let kind;
+    if (p.t === 0) {
+      if (!opt.trees) continue;
+      const hh = hash2(Math.round(p.x * 10), Math.round(p.y * 10));
+      kind = (hh % 10) < 7 ? 'round' : (hh % 10) < 9 ? 'pine' : 'cypress';
+    } else if (p.t === 6) continue;
+    else { if (!opt.furn && p.t !== 7) continue; kind = FURN[p.t]; if (!kind) continue; if (k < 1 && p.t !== 7) continue; }
+    const s = sprite(kind, hash2(Math.round(p.x), Math.round(p.y)) % 3);
+    const u = RC * p.x + RS * p.y, v = -RS * p.x + RC * p.y, bx = Math.round(projX(u, v) - 0.5), by = Math.round(projY(u, v, 0) - 0.5);
+    if (bx + s.w < 0 || bx - s.w > W || by - s.h > H || by < 0 && by + 2 < 0) continue;
+    const D0 = u + v;
+    for (let yy = 0; yy < s.h; yy++) {
+      const sy = by - s.ay + yy; if (sy < 0 || sy >= H) continue;
+      const zr = (s.ay - yy) / (k * ZS), D = D0 - zr / ZS - 0.05;
+      for (let xx = 0; xx < s.w; xx++) {
+        const c2 = s.px[yy * s.w + xx]; if (!c2) continue;
+        const sx = bx - s.ax + xx; if (sx < 0 || sx >= W) continue;
+        const o = sy * W + sx; if (D >= dep[o]) continue;
+        dep[o] = D; col[o] = c2; ids[o] = -2; fid[o] = -2; emis[o] = (kind === 'lamp' && yy === 1 && xx === 1) ? 4 : 0;
+      }
+    }
+  }
+}
+
+// ---------- 1 px seçici kontur + seçim ----------
+function outlinePass() {
+  const selI = selected ? frameB.indexOf(selected) : -1;
+  if (!outBuf || outBuf.length !== W * H) outBuf = new Uint8Array(W * H);
+  const out = outBuf; out.fill(0);
+  for (let y = 1; y < H - 1; y++) for (let x = 1, o = y * W + 1; x < W - 1; x++, o++) {
+    const id = ids[o]; if (id < 0) continue;
+    const d = dep[o] + 0.6;
+    if ((ids[o - 1] !== id && dep[o - 1] > d) || (ids[o + 1] !== id && dep[o + 1] > d) || (ids[o - W] !== id && dep[o - W] > d) || (ids[o + W] !== id && dep[o + W] > d)) out[o] = id === selI ? 3 : 1;
+    else if (ids[o + W] === id && fid[o + W] !== fid[o]) out[o] = 2;
+  }
+  const coral = pk(255, 86, 66);
+  for (let o = 0; o < W * H; o++) {
+    const m = out[o]; if (!m) continue;
+    if (m === 3) col[o] = coral;
+    else if (m === 1) col[o] = pk(cr(col[o]) * 0.5, cg(col[o]) * 0.5, cb(col[o]) * 0.62 + 10);
+    else col[o] = pk(Math.min(255, cr(col[o]) * 0.82), Math.min(255, cg(col[o]) * 0.82), Math.min(255, cb(col[o]) * 0.86));
+  }
+  if (selI >= 0) {                             // seçili bina: hafif sıcak vurgu
+    for (let o = 0; o < W * H; o++) if (ids[o] === selI && out[o] !== 3) { const c = col[o]; col[o] = pk(Math.min(255, cr(c) * 0.9 + 30), cg(c) * 0.92 + 8, cb(c) * 0.9); }
+  }
+}
+// doğruluk kontrolü: taban izlerini z=0'da mercan renginde çiz (binaların üzerinde)
+function footPass() {
+  const c = pk(255, 64, 160);
+  for (const b of frameB) for (const q of b.R) {
+    for (let i = 0; i < q.length; i += 2) {
+      const j = (i + 2) % q.length;
+      const u0 = RC * q[i] + RS * q[i + 1], v0 = -RS * q[i] + RC * q[i + 1], u1 = RC * q[j] + RS * q[j + 1], v1 = -RS * q[j] + RC * q[j + 1];
+      const x0 = projX(u0, v0), y0 = projY(u0, v0, 0), x1 = projX(u1, v1), y1 = projY(u1, v1, 0), n = Math.ceil(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0))) + 1;
+      for (let s = 0; s <= n; s++) { const x = Math.floor(x0 + (x1 - x0) * s / n), y = Math.floor(y0 + (y1 - y0) * s / n); if (x >= 0 && y >= 0 && x < W && y < H) col[y * W + x] = c; }
+    }
+  }
+}
+// ---------- gece / gündüz birleştirme ----------
+function compose() {
+  if (night <= 0.001) return;
+  const n = night, N = W * H;
+  const mr = 1 - n * 0.72, mg = 1 - n * 0.66, mb = 1 - n * 0.42, ar = 6 * n, ag = 10 * n, ab = 34 * n;
+  for (let o = 0; o < N; o++) {
+    const c = col[o], e = emis[o];
+    if (e === 4) continue;
+    let r = cr(c) * mr + ar, g = cg(c) * mg + ag, b = cb(c) * mb + ab;
+    if (e) { const a = n * [0, 0.25, 0.45, 0.65][e]; r += (255 - r) * a * 0.8; g += (205 - g) * a * 0.7; b += (130 - b) * a * 0.4; }
+    col[o] = pk(r, g, b);
+  }
+}
+
+// =====================================================================================
+//  Etkileşim
+// =====================================================================================
+function status(vis) {
+  const [lon, lat] = toLL(cam.x, cam.y);
+  $('sCoord').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
+  $('sZoom').textContent = 'yakınlık ' + (cam.zi + 1) + '/' + ZL.length;
+  $('sDir').textContent = 'yön ' + ['K', 'B', 'G', 'D'][cam.r] + ' yukarı';
+  $('sMs').textContent = lastMs.toFixed(1) + ' ms/kare · ' + frameB.length + ' bina';
+  const ld = vis.filter(c => c.state === 'loading').length;
+  $('sLoad').textContent = ld ? 'yükleniyor ' + ld : '';
+  drawCompass();
+}
+function drawCompass() {
+  const c = $('cmp').getContext('2d'); c.clearRect(0, 0, 16, 16);
+  // kuzey (0,1) -> ekran yönü
+  const u = RS * 1, v = RC * 1, dx = (u - v), dy = -(u + v) / 2, l = Math.hypot(dx, dy);
+  const ex = 8 + dx / l * 6, ey = 8 + dy / l * 6;
+  c.fillStyle = '#F6F2E9'; c.fillRect(7, 7, 2, 2);
+  for (let s = 0; s <= 6; s++) { c.fillStyle = s > 3 ? '#D2392C' : '#AFBBD8'; c.fillRect(Math.round(8 - dx / l * 6 + (dx / l * 12) * s / 6) - 1, Math.round(8 - dy / l * 6 + (dy / l * 12) * s / 6) - 1, 2, 2); }
+  c.fillStyle = '#F6F2E9'; c.font = '7px monospace'; c.fillText('K', Math.max(0, Math.min(11, ex - 2)), Math.max(6, Math.min(16, ey + 3)));
+}
+
+let drag = null; const pointers = new Map();
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pointers.size === 1) drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false, t: performance.now() };
+  else if (pointers.size === 2) { const p = [...pointers.values()]; drag = { pinch: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]), zi: cam.zi }; }
+});
+cv.addEventListener('pointermove', e => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, [e.clientX, e.clientY]);
+  if (!drag) return;
+  if (drag.pinch) {
+    const p = [...pointers.values()]; if (p.length < 2) return;
+    const r = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) / drag.pinch;
+    const target = Math.max(0, Math.min(ZL.length - 1, drag.zi + Math.round(Math.log(r) / Math.log(1.45))));
+    if (target !== cam.zi) setZoom(target);
+    return;
+  }
+  const dx = (e.clientX - drag.sx) / PX, dy = (e.clientY - drag.sy) / PX;
+  if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 5) { drag.moved = true; cv.classList.add('drag'); }
+  if (!drag.moved) return;
+  // ekran kayması -> dünya kayması (z=0)
+  const A = -dx / k, B = 2 * dy / k, du = (A + B) / 2, dv = (B - A) / 2;
+  cam.x = drag.cx + RC * du - RS * dv; cam.y = drag.cy + RS * du + RC * dv; clampCam(); dirty = true;
+});
+const endPtr = e => {
+  pointers.delete(e.pointerId); cv.classList.remove('drag');
+  if (drag && !drag.pinch && !drag.moved && e.type === 'pointerup') pick(e.clientX, e.clientY);
+  if (pointers.size === 0) { drag = null; writeHash(); }
+  else if (drag && drag.pinch) drag = null;
+};
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const now = performance.now(); if (now - (cv._wt || 0) < 140) return; cv._wt = now;
+  const zi = Math.max(0, Math.min(ZL.length - 1, cam.zi + (e.deltaY < 0 ? 1 : -1)));
+  if (zi === cam.zi) return;
+  // imleç altındaki nokta sabit kalsın
+  setupFrame(); const [wx, wy] = screenToWorld(e.clientX / PX, e.clientY / PX);
+  setZoom(zi); setupFrame(); const [nx, ny] = screenToWorld(e.clientX / PX, e.clientY / PX);
+  cam.x += wx - nx; cam.y += wy - ny; clampCam(); dirty = true; writeHash();
+}, { passive: false });
+
+function clampCam() { cam.x = Math.max(-200, Math.min(META.size[0] + 200, cam.x)); cam.y = Math.max(-200, Math.min(META.size[1] + 200, cam.y)); }
+function setZoom(zi) { cam.zi = zi; spriteCache.clear(); resize(); writeHash(); }
+function rotate(d) { cam.r = (cam.r + d + 4) % 4; spriteCache.clear(); dirty = true; writeHash(); }
+
+function pick(cx, cy) {
+  const x = Math.floor(cx / PX), y = Math.floor(cy / PX);
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  const id = ids[y * W + x];
+  selected = id >= 0 ? frameB[id] : null; dirty = true; showInfo(selected);
+}
+function fmt(n, d = 1) { return Number(n).toLocaleString('tr-TR', { maximumFractionDigits: d }); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function showInfo(b) {
+  $('layers').hidden = true;
+  if (!b) { $('info').hidden = true; return; }
+  let cx = 0, cy = 0; const q = b.R[0]; for (let i = 0; i < q.length; i += 2) { cx += q[i]; cy += q[i + 1]; } cx /= q.length / 2; cy /= q.length / 2;
+  const [lon, lat] = toLL(cx, cy);
+  const priv = b.cls === 'house' || b.cls === 'apart' || b.cls === 'generic';
+  $('iKind').textContent = BL[b.cls] + (b.btag && b.btag !== 'yes' ? ' · building=' + b.btag : '');
+  $('iName').textContent = (!priv || b.cls === 'generic') && b.name ? b.name : (b.src === 1 ? 'Adsız bina (Microsoft ML)' : 'Adsız bina');
+  const rows = [];
+  rows.push(['Konum', `${lat.toFixed(6)}, ${lon.toFixed(6)} <span class="real">gerçek</span>`]);
+  rows.push(['Taban alanı', `${fmt(Math.abs(b.area), 0)} m² <span class="real">poligondan</span>`]);
+  const lvTxt = b.hs === 1 || (b.hs === 0 && b.lv) ? `${fmt(b.lv)} <span class="real">OSM</span>` : `bilinmiyor <span class="est">görselde ~${Math.max(1, Math.round((b.hw - 0.6) / 3))} kat tahmini</span>`;
+  rows.push(['Kat sayısı', lvTxt]);
+  const hTxt = b.hs === 0 ? `${fmt(b.h)} m <span class="real">OSM height</span>` : b.hs === 1 ? `~${fmt(b.h)} m <span class="est">kat sayısından hesaplandı</span>` :
+    b.hs === 3 ? `~${fmt(b.h)} m <span class="est">Microsoft ML tahmini</span>` : `bilinmiyor <span class="est">görsel yükseklik ${fmt(b.h)} m tahmini</span>`;
+  rows.push(['Yükseklik', hTxt]);
+  rows.push(['Çatı', b.rs === 0 ? `${ROOFN[b.rf0]} <span class="real">OSM</span>` : `bilinmiyor <span class="est">${ROOFN[b.rf]} olarak stilize</span>`]);
+  if (b.extra) {
+    const ex = b.extra;
+    if (ex.amenity) rows.push(['amenity', esc(ex.amenity)]);
+    if (ex.religion) rows.push(['religion', esc(ex.religion)]);
+    if (ex['addr:street']) rows.push(['Adres', esc(ex['addr:street'] + (ex['addr:housenumber'] ? ' ' + ex['addr:housenumber'] : ''))]);
+    if (ex.start_date) rows.push(['Yapım', esc(ex.start_date)]);
+    if (ex.heritage) rows.push(['Koruma', 'heritage=' + esc(ex.heritage)]);
+    if (ex['building:colour']) rows.push(['Cephe rengi', esc(ex['building:colour']) + ' <span class="real">OSM</span>']);
+    if (ex['roof:colour']) rows.push(['Çatı rengi', esc(ex['roof:colour']) + ' <span class="real">OSM</span>']);
+  }
+  const osmUrl = b.src === 0 ? `https://www.openstreetmap.org/${b.ref[0] === 'w' ? 'way' : 'relation'}/${b.ref.slice(1)}` : null;
+  rows.push(['Kaynak', b.src === 0 ? `OpenStreetMap · <a href="${osmUrl}" target="_blank" rel="noopener">${b.ref[0] === 'w' ? 'way' : 'relation'} ${b.ref.slice(1)} ↗</a>` :
+    'Microsoft Global ML Building Footprints (makine öğrenmesiyle çıkarılmış taban; OSM\'de karşılığı yok)']);
+  $('iDl').innerHTML = rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+  $('iNote').textContent = 'Pencere, balkon ve çatı ayrıntıları piksel sanatı stilizasyonudur; binanın belgelenmiş mimarisi değildir. "Tahmini" yazan değerler gerçek veri değildir.' +
+    (priv ? ' Özel konutlar için kişisel bilgi gösterilmez.' : '');
+  $('info').hidden = false;
+}
+
+// ---------- arama ----------
+const norm = s => s.toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i');
+let resSel = 0, resList = [];
+$('q').addEventListener('input', () => {
+  const q = norm($('q').value.trim()); const box = $('res');
+  if (q.length < 2 || !SEARCH) { box.hidden = true; return; }
+  const KN = { street: 'sokak', place: 'yer', park: 'park', edu: 'eğitim', pitch: 'spor', cem: 'mezarlık', square: 'meydan' };
+  resList = SEARCH.filter(r => r.n.includes(q)).sort((a, b) => (a.n.startsWith(q) ? 0 : 1) - (b.n.startsWith(q) ? 0 : 1) || a.r[0].length - b.r[0].length).slice(0, 12);
+  resSel = 0;
+  box.innerHTML = resList.length ? resList.map((r, i) => `<button type="button" data-i="${i}" class="${i === 0 ? 'k' : ''}"><span>${esc(r.r[0])}</span><small>${esc(KN[r.r[3]] || (r.r[3].startsWith('b:') ? BL[r.r[3].slice(2)] : r.r[3]))}</small></button>`).join('')
+    : '<button type="button" disabled>Sonuç yok (yalnızca Silivri merkezi)</button>';
+  box.hidden = false;
+});
+$('q').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); resSel = (resSel + (e.key === 'ArrowDown' ? 1 : -1) + resList.length) % Math.max(1, resList.length);
+    [...$('res').children].forEach((c, i) => c.classList.toggle('k', i === resSel)); }
+  else if (e.key === 'Enter' && resList[resSel]) goResult(resList[resSel]);
+  else if (e.key === 'Escape') { $('res').hidden = true; $('q').blur(); }
+});
+$('res').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b) goResult(resList[+b.dataset.i]); });
+function goResult(r) {
+  $('res').hidden = true; $('q').value = r.r[0]; $('q').blur();
+  cam.x = r.r[1]; cam.y = r.r[2]; if (cam.zi < 2) cam.zi = 2; resize(); writeHash();
+  selected = null; $('info').hidden = true;
+  const ref = r.r[4];
+  if (ref && r.r[3].startsWith('b:')) {           // ilgili binayı yüklenince seç
+    const tryPick = (n) => { for (const c of chunks.values()) for (const b of c.b) if (b.ref === ref) { selected = b; showInfo(b); dirty = true; return; } if (n > 0) setTimeout(() => tryPick(n - 1), 300); };
+    setTimeout(() => tryPick(15), 50);
+  }
+}
+
+// ---------- URL ve düğmeler ----------
+function writeHash() {
+  const [lon, lat] = toLL(cam.x, cam.y);
+  history.replaceState(null, '', '#' + lat.toFixed(5) + ',' + lon.toFixed(5) + ',' + (cam.zi + 1) + ',' + cam.r);
+}
+function readHash() {
+  const m = location.hash.slice(1).split(',').map(Number);
+  if (m.length >= 2 && isFinite(m[0]) && isFinite(m[1])) {
+    [cam.x, cam.y] = toM(m[1], m[0]);
+    if (m[2] >= 1 && m[2] <= ZL.length) cam.zi = m[2] - 1;
+    if (m[3] >= 0 && m[3] <= 3) cam.r = m[3] | 0;
+    return true;
+  }
+  return false;
+}
+function home() { [cam.x, cam.y] = toM(HOME.lon, HOME.lat); cam.r = 0; cam.zi = innerWidth < 720 ? 1 : 2; spriteCache.clear(); resize(); writeHash(); }
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => el.hidden = true, 2200); }
+$('bIn').onclick = () => setZoom(Math.min(ZL.length - 1, cam.zi + 1));
+$('bOut').onclick = () => setZoom(Math.max(0, cam.zi - 1));
+$('bRotL').onclick = () => rotate(-1); $('bRotR').onclick = () => rotate(1);
+$('compass').onclick = () => { cam.r = 0; spriteCache.clear(); dirty = true; writeHash(); };
+$('bHome').onclick = home;
+$('bNight').onclick = () => { nightTarget = nightTarget ? 0 : 1; $('bNight').classList.toggle('on', !!nightTarget); };
+$('bLayers').onclick = () => { $('info').hidden = true; $('layers').hidden = !$('layers').hidden; };
+$('layX').onclick = () => $('layers').hidden = true;
+$('infoX').onclick = () => { selected = null; dirty = true; $('info').hidden = true; };
+$('aboutX').onclick = () => $('about').hidden = true;
+$('bAbout').onclick = () => { $('about').hidden = !$('about').hidden; };
+$('bShare').onclick = async () => { writeHash(); try { await navigator.clipboard.writeText(location.href); toast('Bağlantı kopyalandı'); } catch (e) { toast(location.href); } };
+$('bShot').onclick = () => {
+  const c = document.createElement('canvas'); c.width = W * PX; c.height = H * PX; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(cv, 0, 0, c.width, c.height);
+  g.fillStyle = 'rgba(15,28,71,.8)'; g.fillRect(0, c.height - 22, c.width, 22); g.fillStyle = '#F6F2E9'; g.font = '12px sans-serif';
+  g.fillText('pikselharita.com · © OpenStreetMap katkıcıları (ODbL) · Microsoft Building Footprints (ODbL)', 8, c.height - 7);
+  c.toBlob(bl => { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'pikselharita-silivri.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+};
+for (const [id, key] of [['lTrees', 'trees'], ['lFurn', 'furn'], ['lMs', 'ms'], ['lShadow', 'shadow'], ['lWaves', 'waves'], ['lEst', 'est'], ['lFoot', 'foot']])
+  $(id).onchange = e => { opt[key] = e.target.checked; dirty = true; legend(); };
+function legend() {
+  $('lLegend').innerHTML = opt.est ? '<b style="color:#2a8f87">■</b> yüksekliği OSM\'den &nbsp; <b style="color:#d8a43a">■</b> yüksekliği tahmini &nbsp; <b style="color:#9b6fc0">■</b> Microsoft ML binası'
+    : 'Ağaçların bir kısmı park/orman sınırı içinde stilize yerleştirilmiştir; sokak objeleri yalnızca OSM\'de işaretli olanlardır.';
+}
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  const step = 40 / k;
+  if (e.key === '+' || e.key === '=') setZoom(Math.min(ZL.length - 1, cam.zi + 1));
+  else if (e.key === '-') setZoom(Math.max(0, cam.zi - 1));
+  else if (e.key === 'q' || e.key === 'Q') rotate(-1); else if (e.key === 'e' || e.key === 'E') rotate(1);
+  else if (e.key === 'n' || e.key === 'N') $('bNight').click();
+  else if (e.key.startsWith('Arrow')) {
+    const sx = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0, sy = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
+    const A = sx * step, B = -2 * sy * step / 2, du = (A + B) / 2, dv = (B - A) / 2;
+    cam.x += RC * du - RS * dv; cam.y += RS * du + RC * dv; clampCam(); dirty = true; writeHash();
+  } else if (e.key === 'Escape') { selected = null; $('info').hidden = true; $('about').hidden = true; $('layers').hidden = true; dirty = true; }
+});
+addEventListener('resize', resize);
+addEventListener('hashchange', () => { if (readHash()) { spriteCache.clear(); resize(); } });
+
+// ---------- döngü ----------
+let lastWave = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  if (!META) return;
+  if (Math.abs(night - nightTarget) > 0.001) { night += Math.sign(nightTarget - night) * Math.min(Math.abs(nightTarget - night), 0.06); dirty = true; }
+  if (opt.waves && t - lastWave > 650 && !drag && lastMs < 45) { lastWave = t; wavePhase = (wavePhase + 1) % 2300; dirty = true; }
+  if (!dirty) return;
+  dirty = false;
+  try { render(); } catch (err) { console.error(err); }
+  // kullanılmayan zemin ızgaralarını boşalt
+  if (chunks.size > 140) for (const [key, c] of chunks) if (frameCount - c.used > 120) chunks.delete(key);
+}
+
+async function init() {
+  try {
+    [META, SRC] = await Promise.all([fetchRetry(BASE + 'meta.json'), fetchRetry(BASE + 'sources.json')]);
+  } catch (e) { $('loading').textContent = 'Veri yüklenemedi. Sayfayı yenileyin.'; return; }
+  const pj = META.projection; R_ = pj.R; KC = Math.cos(pj.latc * Math.PI / 180); LON0 = pj.lon0; LAT0 = pj.lat0; MY0 = mercY(LAT0);
+  META.nx = Math.ceil(META.size[0] / META.chunk); META.ny = Math.ceil(META.size[1] / META.chunk);
+  META.has = new Set(META.chunks.map(c => c[0] + '_' + c[1]));
+  if (!readHash()) home(); else resize();
+  legend(); aboutPanel();
+  $('loading').hidden = true;
+  fetchRetry(BASE + 'search.json').then(s => { SEARCH = s.map(r => ({ r, n: norm(r[0]) })); }).catch(() => {});
+  requestAnimationFrame(loop);
+}
+function aboutPanel() {
+  const s = META.stats, hs = s.height_src, tr = s.trees, tot = s.buildings || 1, pc = n => fmt(n / tot * 100, 1) + '%';
+  $('sMs').textContent = '';
+  $('aboutBody').innerHTML = `
+  <p>Bu sayfa PikselHarita'nın <b>izometrik deneme</b> sürümüdür ve yalnızca <b>Silivri merkezini</b> (boylam ${META.bbox[0]}–${META.bbox[2]}, enlem ${META.bbox[1]}–${META.bbox[3]}) kapsar. Kapsam dışı koyu ızgara ile gösterilir; boş yerler hayalî yapılarla doldurulmaz.</p>
+  <h3>Kaynaklar</h3>
+  <p><b>${esc(SRC.osm.attribution)}</b> — <a href="${SRC.osm.url}" target="_blank" rel="noopener">ODbL 1.0</a>. Dosya: ${esc(SRC.osm.file)}, veri tarihi ${esc(SRC.osm.data_timestamp || '?')}.<br>
+  <b>Microsoft Global ML Building Footprints</b> — <a href="${SRC.microsoft.url}" target="_blank" rel="noopener">ODbL 1.0</a>, sürüm ${esc(SRC.microsoft.release)}. ${esc(SRC.microsoft.rule)}</p>
+  <h3>Bu bölgedeki veri durumu</h3>
+  <table>
+   <tr><td>Toplam bina</td><td>${fmt(s.buildings, 0)}</td></tr>
+   <tr><td>OSM binası</td><td>${fmt(s.osm_buildings, 0)}</td></tr>
+   <tr><td>Microsoft ML ile eklenen (OSM'de olmayan)</td><td>${fmt(s.ms_buildings != null ? s.ms_buildings : s.ms.eklenen, 0)}</td></tr>
+   <tr><td>Microsoft binası, OSM ile örtüştüğü için eklenmedi</td><td>${fmt(s.ms.osm_ile_ortusen, 0)}</td></tr>
+   <tr><td>Yüksekliği OSM'de (height)</td><td>${fmt(hs.osm_height, 0)} (${pc(hs.osm_height)})</td></tr>
+   <tr><td>Kat sayısı OSM'de (building:levels)</td><td>${fmt(hs.osm_levels, 0)} (${pc(hs.osm_levels)})</td></tr>
+   <tr><td>Yüksekliği <b>tahmini</b> (türe ve alana göre)</td><td>${fmt(hs.tahmin + hs.ms_tahmin, 0)} (${pc(hs.tahmin + hs.ms_tahmin)})</td></tr>
+   <tr><td>Çatı şekli OSM'de</td><td>${fmt(s.roof_src.osm, 0)}</td></tr>
+   <tr><td>Ağaç: OSM tekil / OSM ağaç sırası / stilize</td><td>${fmt(tr.osm, 0)} / ${fmt(tr.osm_sira, 0)} / ${fmt(tr.stilize, 0)}</td></tr>
+  </table>
+  <h3>Neler gerçek, neler stilize?</h3>
+  <p><b>Gerçek:</b> bina konumları ve taban şekilleri, yollar, kıyı çizgisi, park ve alan sınırları, OSM'de işaretli ağaçlar, lambalar, banklar, duraklar, yaya geçitleri ve minareler (konum).<br>
+  <b>Stilize / tahmin:</b> etiketi olmayan binaların kat ve yüksekliği, çatı şekli ve rengi, cephe rengi, pencere/balkon desenleri, çatıdaki güneş enerjili ısıtıcılar, park içindeki ağaçların yeri, kaldırım genişlikleri, minare yüksekliği, gece pencere ışıkları ve deniz animasyonu.</p>
+  <p class="note">Hesaplama: ${esc(SRC.built)} · Projeksiyon: Web Mercator, ${fmt(META.projection.latc, 3)}° enleminde gerçek metreye ölçeklenmiş. <a href="./">Ana haritaya dön</a></p>`;
+}
+// test kancaları
+window.ISO = { cam, opt, get ms() { return lastMs; }, get prof() { return prof; }, get frameB() { return frameB; }, chunks, render: () => { render(); return lastMs; }, setZoom, rotate,
+  toM, toLL, pickAt: (x, y) => { const id = ids[y * W + x]; return id >= 0 ? frameB[id].ref : null; }, depthAt: (x, y) => dep[y * W + x],
+  depthOf: (x, y, z) => { setupFrame(); const u = RC * x + RS * y, v = -RS * x + RC * y; return u + v - z / ZS; },
+  projectWorld: (x, y, z) => { setupFrame(); const u = RC * x + RS * y, v = -RS * x + RC * y; return [projX(u, v), projY(u, v, z)]; },
+  get size() { return [W, H, PX, k]; }, get pixels() { return col; }, get inflight() { return inflight; }, set night(v) { night = nightTarget = v; dirty = true; },
+  set waves(v) { opt.waves = v; } };
+init();
+</script>
+</body>
+</html>
