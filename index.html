@@ -309,6 +309,35 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
   #drawer { border-left: 0; box-shadow: none; }
 }
 @media (prefers-reduced-motion: reduce) { #brand .tag::after, #brand .chip:hover::before { animation: none; } #drawer { animation: none; } }
+/* 3D loading screen */
+#intro { position: fixed; inset: 0; z-index: 30; background: var(--px-ink); transition: opacity .38s steps(5); }
+#intro.out { opacity: 0; pointer-events: none; }
+#introCv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.in-box { position: absolute; left: 50%; bottom: calc(44px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(380px, calc(100vw - 48px)); box-sizing: border-box; padding: 16px 18px 14px; display: grid; gap: 12px; }
+.in-name { margin: 0; font: 400 16px/1.45 var(--f-game); color: var(--px-cream); }
+.in-name span { color: var(--px-red); }
+.in-bar { height: 14px; background: #08112f; box-shadow: 0 0 0 3px var(--px-cream); }
+.in-bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--px-red) 0 10px, #c23a2e 10px 12px); transition: width .2s steps(4); }
+.in-txt { margin: 0; display: flex; justify-content: space-between; gap: 10px; font: 400 19px/1.1 var(--f-term); color: var(--px-teal); }
+.in-txt b { font-weight: 400; color: var(--px-cream); }
+.in-skip { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); border: 0; cursor: pointer; }
+/* 3D landmark viewer */
+#v3d { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(6, 11, 32, .62); padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.v3d-box { width: min(760px, 100%); max-height: calc(100vh - 40px); box-sizing: border-box; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 16px 18px; gap: 12px; animation: drin .18s steps(4); }
+.v3d-top { display: flex; align-items: flex-start; gap: 14px; }
+.v3d-top > div { flex: 1; min-width: 0; }
+.v3d-kind { margin: 0 0 6px; font: 400 17px var(--f-term); color: var(--px-teal); }
+.v3d-top h2 { margin: 0; font: 400 18px/1.45 var(--f-game); color: var(--px-cream); text-transform: uppercase; text-wrap: balance; }
+.v3d-stage { position: relative; min-height: 0; height: min(56vh, 460px); box-shadow: 0 0 0 3px var(--px-cream); background: var(--px-ink); }
+#v3dCv { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#v3dCv:active { cursor: grabbing; }
+.v3d-zoom { position: absolute; right: 10px; bottom: 10px; display: grid; gap: 8px; }
+.v3d-zoom .px-btn { border: 0; cursor: pointer; font-size: 12px; padding: 8px 10px; }
+.v3d-info p { margin: 0; }
+#v3dFacts { font: 400 16px/1.5 var(--f-pixel); color: #dfe4f3; }
+.v3d-meta { margin-top: 6px !important; font: 400 17px var(--f-term); color: var(--px-dim); }
+.v3d-hint { margin-top: 2px !important; font: 400 16px var(--f-term); color: var(--px-dim); }
+@media (max-width: 640px) { .v3d-stage { height: 46vh; } .v3d-top h2 { font-size: 13px; } .v3d-hint { display: none; } }
 </style>
 
 
@@ -392,6 +421,31 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
   <p class="dr-foot">Harita verisi © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap katkıcıları</a> (ODbL) · Natural Earth · Mapzen/AWS Terrain Tiles</p>
 </aside>
 
+<div id="intro" hidden>
+  <canvas id="introCv" aria-hidden="true"></canvas>
+  <div class="in-box px" role="status" aria-live="polite">
+    <div class="px-title"><img src="assets/icon-180.png" alt="" width="34" height="34"><p class="in-name">PİKSEL <span>HARİTA</span></p></div>
+    <div class="in-bar" aria-hidden="true"><i id="inFill"></i></div>
+    <p class="in-txt"><span id="inTxt">Türkiye piksel piksel yükseliyor</span> <b id="inPct">0%</b></p>
+  </div>
+  <button class="px-btn in-skip" id="inSkip" type="button">Atla ▶</button>
+</div>
+
+<div id="v3d" hidden role="dialog" aria-modal="true" aria-labelledby="v3dName">
+  <div class="v3d-box px">
+    <div class="v3d-top">
+      <div><p class="v3d-kind">3B · OpenStreetMap yapı parçaları</p><h2 id="v3dName"></h2></div>
+      <button class="dr-x" id="v3dX" type="button" aria-label="Kapat">×</button>
+    </div>
+    <div class="v3d-stage"><canvas id="v3dCv" aria-label="Döndürülebilir 3B model"></canvas>
+      <div class="v3d-zoom"><button class="px-btn" type="button" id="v3dIn" aria-label="Yakınlaştır">+</button><button class="px-btn" type="button" id="v3dOut" aria-label="Uzaklaştır">−</button></div>
+    </div>
+    <div class="v3d-info"><p id="v3dFacts"></p><p class="v3d-meta" id="v3dMeta"></p><p class="v3d-hint">Sürükle: döndür · Tekerlek: yakınlaştır</p></div>
+  </div>
+</div>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/scene3d.js"></script>
 <script>
 "use strict";
 // ======================= constants & projection =======================
@@ -439,7 +493,7 @@ const BRIDGE_CASE = hex('#4a4038');
 // ======================= canvas & view =======================
 const cv = document.getElementById('map'), ctx = cv.getContext('2d');
 const art = document.createElement('canvas'), actx = art.getContext('2d', { willReadFrequently: true });
-let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null;
+let W = 0, H = 0, PXD = 3, img = null, buf = null, bid = null, wall = null;
 const view = { x: lon2x(35.2), y: lat2y(39.0), z: 6.2 };
 
 function resize() {
@@ -451,7 +505,7 @@ function resize() {
   // a hidden tab or a frame that has not been laid out yet reports 0×0; never let that crash start-up
   W = Math.max(1, Math.ceil(cv.width / PXD)); H = Math.max(1, Math.ceil(cv.height / PXD));
   art.width = W; art.height = H;
-  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H);
+  img = actx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); bid = new Int32Array(W * H); wall = new Uint8Array(W * H);
   dirty = true;
 }
 let dirty = true;
@@ -825,21 +879,60 @@ function drawPoints(cks, mpa) {
     else if (p.c === 4) { plot(x, y, hex('#ffffff')); plot(x, y - 1, hex('#d33')); plot(x, y + 1, hex('#ffffff')); }
   }
 }
+// typical height in metres per building class (index = BNAME), used when OSM has no building:levels
+const BHEIGHT = [9, 6.5, 15, 16, 9, 14, 12, 10, 12, 9, 3, 3, 24];
+const WIN = hex('#4a5d86'), WIN_LIT = hex('#f3d27a'), GOLD = hex('#F4C542'), GOLD_D = hex('#a8761c');
 function shade3d() {
-  const thick = view.z >= 16.6 ? 2 : 1;
+  const thick = view.z >= 16.6 ? 2 : 1, mpa = metersPerArt(), walls = view.z >= 14.6;
+  wall.fill(0);
+  if (walls) {
+    // south-facing walls: each building hangs its real (or typical) height below its roof, oblique-map style.
+    // Walls stop at anything already drawn below them, so nearer (lower on screen) buildings stay in front.
+    const kOf = new Uint8Array(frameB.length + 1);
+    for (let j = 0; j < frameB.length; j++) {
+      const [b, ch] = frameB[j], k = b.info && ch.k ? ch.k[b.info - 1] : null, lv = k && k[3] ? parseFloat(k[3]) : 0;
+      const hm = lv > 0 && lv < 80 ? lv * 3.1 : BHEIGHT[b.c] || 9;
+      kOf[j + 1] = Math.max(1, Math.min(10, Math.round(hm / mpa * 0.5)));
+    }
+    for (let y = H - 2; y >= 0; y--) {
+      const o = y * W;
+      for (let x = 0; x < W; x++) {
+        const i = o + x, id = bid[i];
+        if (!id || bid[i + W] === id) continue;
+        const k = kOf[id], base = buf[i], wc = mixc(base, BLACK, .3), foot = mixc(base, BLACK, .5);
+        for (let d = 1; d <= k && y + d < H; d++) {
+          const j = i + d * W;
+          if (bid[j] || wall[j]) break;
+          let c = d === k ? foot : wc;
+          if (k >= 4 && d > 1 && d < k && ((x + WOX) % 3) === 1 && ((y + d + WOY) & 1) === 0) c = (hash(x + WOX, y + d + WOY) & 7) === 0 ? WIN_LIT : WIN;
+          buf[j] = c; wall[j] = 1;
+        }
+      }
+    }
+  }
   for (let y = H - 1; y >= 0; y--) {
     const o = y * W;
     for (let x = W - 1; x >= 0; x--) {
       const i = o + x, id = bid[i];
       if (id) {
         const down = y + 1 < H ? bid[i + W] : id, up = y > 0 ? bid[i - W] : id, right = x + 1 < W ? bid[i + 1] : id;
-        if (down !== id || (thick === 2 && y + 2 < H && bid[i + 2 * W] !== id)) buf[i] = sh(buf[i]);
+        if (down !== id || (thick === 2 && y + 2 < H && bid[i + 2 * W] !== id)) buf[i] = walls ? mixc(buf[i], BLACK, .12) : sh(buf[i]);
         else if (up !== id) buf[i] = hi(buf[i]);
         else if (right !== id) buf[i] = mixc(buf[i], BLACK, .14);
         else if (x > 0 && bid[i - 1] !== id) buf[i] = mixc(buf[i], WHITE, .12);
-      } else if (y > 0 && x > 0 && (bid[i - W - 1] || (thick === 2 && y > 1 && x > 1 && bid[i - 2 * W - 2]))) {
+      } else if (!wall[i] && y > 0 && x > 0 && (bid[i - W - 1] || wall[i - W - 1] || (thick === 2 && y > 1 && x > 1 && (bid[i - 2 * W - 2] || wall[i - 2 * W - 2])))) {
         buf[i] = mixc(buf[i], BLACK, .26);
       }
+    }
+  }
+  // landmarks with a 3D model get a gold rim, so they read as "special" before the label is noticed
+  if (view.z >= 14 && typeof LANDMARKS !== 'undefined') {
+    const isLm = new Uint8Array(frameB.length + 1); let any = false;
+    for (let j = 0; j < frameB.length; j++) if (buildingLandmark(frameB[j][0])) { isLm[j + 1] = 1; any = true; }
+    if (any) for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const i = y * W + x; if (isLm[bid[i]]) continue;
+      const n = isLm[bid[i - 1]] | isLm[bid[i + 1]] | isLm[bid[i - W]] | isLm[bid[i + W]];
+      if (n) buf[i] = ((x + y + WOX + WOY) & 3) === 0 ? GOLD_D : GOLD;
     }
   }
 }
@@ -874,6 +967,30 @@ function drawLabels() {
     ctx.fillStyle = opt.color || '#fff'; ctx.fillText(text, tx, ty);
     labelsDrawn.push({ box: bx, item: opt.item });
   };
+  // landmarks with a 3D model: a pixel flag above the building, drawn first so it always wins the space
+  if (z >= 13.6 && typeof LANDMARKS !== 'undefined') {
+    const pad = 6 * dpr, hh = Math.round(24 * dpr), tf = Math.round(10 * dpr), nf = Math.round(14 * dpr);
+    for (const l of LANDMARKS) {
+      const x = sx(l.x), y = sy(l.y);
+      if (x < -200 || y < -60 || x > cv.width + 200 || y > cv.height + 60) continue;
+      ctx.font = tf + 'px "Piksel Oyun", monospace'; const tw = ctx.measureText('3D').width;
+      ctx.font = '700 ' + nf + 'px "Pixelify Sans", monospace'; const nw = ctx.measureText(l.name).width;
+      const bw = Math.round(pad * 3 + tw + nw), lift = Math.round(30 * dpr);
+      const bx = Math.round(x - bw / 2), by = Math.round(y - lift - hh);
+      ctx.fillStyle = 'rgba(11,18,48,.55)'; ctx.fillRect(bx + 3 * dpr, by + 3 * dpr, bw, hh);
+      ctx.fillStyle = '#0F1C47'; ctx.fillRect(bx - 2 * dpr, by - 2 * dpr, bw + 4 * dpr, hh + 4 * dpr);
+      ctx.fillStyle = '#F6F2E9'; ctx.fillRect(bx, by, bw, hh);
+      ctx.fillStyle = '#E2483A'; ctx.fillRect(bx, by, Math.round(tw + pad * 2), hh);
+      // stem down to the building
+      ctx.fillStyle = '#0F1C47'; ctx.fillRect(Math.round(x - 2 * dpr), by + hh, Math.round(4 * dpr), lift - Math.round(6 * dpr));
+      ctx.fillStyle = '#E2483A'; ctx.fillRect(Math.round(x - 4 * dpr), Math.round(y - 8 * dpr), Math.round(8 * dpr), Math.round(8 * dpr));
+      ctx.textBaseline = 'middle';
+      ctx.font = tf + 'px "Piksel Oyun", monospace'; ctx.fillStyle = '#fff'; ctx.fillText('3D', bx + pad, by + hh / 2 + dpr);
+      ctx.font = '700 ' + nf + 'px "Pixelify Sans", monospace'; ctx.fillStyle = '#0F1C47'; ctx.fillText(l.name, bx + pad * 2 + tw + pad, by + hh / 2);
+      const box = [bx - 2 * dpr, by - 2 * dpr, bx + bw + 2 * dpr, y];
+      boxes.push(box); labelsDrawn.push({ box, item: { kind: 'landmark3d', lm: l } });
+    }
+  }
   // Turkey-wide
   for (const s of SEAS) {
     const [n, lon, lat, k] = s;
@@ -1005,11 +1122,18 @@ addEventListener('keydown', e => {
 // picking: building under cursor, or a label
 function pick(cx, cy) {
   const dpr = cv.width / innerWidth, px = cx * dpr, py = cy * dpr;
-  for (const l of labelsDrawn) if (l.item && px >= l.box[0] - 6 && px <= l.box[2] && py >= l.box[1] && py <= l.box[3]) { showItem(l.item); return; }
+  for (const l of labelsDrawn) if (l.item && px >= l.box[0] - 6 && px <= l.box[2] && py >= l.box[1] && py <= l.box[3]) {
+    if (l.item.kind === 'landmark3d') { open3D(l.item.lm); return; }
+    showItem(l.item); return;
+  }
   const ax = Math.floor(px / PXD), ay = Math.floor(py / PXD);
   if (ax >= 0 && ay >= 0 && ax < W && ay < H) {
     const id = bid[ay * W + ax];
-    if (id && frameB[id - 1]) { const [b, ch] = frameB[id - 1]; showBuilding(b, ch); return; }
+    if (id && frameB[id - 1]) {
+      const [b, ch] = frameB[id - 1], lm = buildingLandmark(b);
+      if (lm && lm.has3d !== false) { showBuilding(b, ch); open3D(lm); return; }
+      showBuilding(b, ch); return;
+    }
   }
   document.getElementById('card').hidden = true;
 }
@@ -1104,8 +1228,10 @@ function startMap() {
   ensureData().then(() => {
     document.getElementById('maploading').hidden = true;
     resize(); view.x = lon2x(35.2); view.y = lat2y(39.0); view.z = homeZoom(); dirty = true;
-    const p = pendingFly; pendingFly = null;
-    setTimeout(() => { if (p) flyTo(lon2x(p.lon), lat2y(p.lat), p.z); else if (!anim && idle && view.z < 8) flyTo(lon2x(28.974), lat2y(41.0103), 15.2); }, p ? 300 : 900);
+    introDone.then(() => {
+      const p = pendingFly; pendingFly = null;
+      setTimeout(() => { if (p) flyTo(lon2x(p.lon), lat2y(p.lat), p.z); else if (!anim && idle && view.z < 8) flyTo(lon2x(28.974), lat2y(41.0103), 15.2); }, p ? 300 : 500);
+    });
   }).catch(err => { document.getElementById('maploading').textContent = 'Harita verisi yüklenemedi (' + err.message + '). Sayfayı yenileyip tekrar dene.'; });
 }
 const DRAWER = ['devlog', 'kapsam', 'lejant'];
@@ -1273,6 +1399,85 @@ async function loadDevlog() {
   devlog = d; igPosts = ig && Array.isArray(ig.posts) ? ig.posts : null;
   renderHome();
 }
+
+// ======================= 3D loading screen =======================
+// Turkey rises out of the sea from real elevation data while the map data loads, then the camera
+// glides down over Istanbul and fades into the 2D map, which takes over with its own fly-in.
+let introEnd; const introDone = new Promise(r => { introEnd = r; });
+(function startIntro() {
+  const el = document.getElementById('intro');
+  if (!window.PH3D || !PH3D.ok) { introEnd(); return; }
+  el.hidden = false; document.getElementById('maploading').hidden = true;
+  const fill = document.getElementById('inFill'), pct = document.getElementById('inPct'), txt = document.getElementById('inTxt');
+  const t0 = performance.now(); let scene = null, ended = false, timer = 0;
+  const end = () => {
+    if (ended) return; ended = true; clearInterval(timer);
+    const go = () => { el.classList.add('out'); setTimeout(() => { el.hidden = true; if (scene) scene.stop(); }, 380); introEnd(); };
+    if (scene) scene.finish(go); else go();
+  };
+  document.getElementById('inSkip').onclick = () => { if (scene) scene.stop(); scene = null; end(); };
+  getJSON('data/loader.json').then(grid => { if (!ended) scene = PH3D.intro(document.getElementById('introCv'), grid); }).catch(() => end());
+  const steps = () => (meta ? .14 : 0) + (baseImg && baseImg.complete ? .22 : 0) + (lo ? .22 : 0) + (over ? .32 : 0) + (searchIx.length ? .1 : 0);
+  let shown = 0;
+  timer = setInterval(() => {
+    const el2 = (performance.now() - t0) / 1000, real = steps();
+    shown = Math.max(shown, Math.min(real + 0.08 * (1 - Math.exp(-el2 / 3)), real >= .999 ? 1 : .97, el2 / 2.8));
+    if (scene) scene.setProgress(shown);
+    fill.style.width = Math.round(shown * 100) + '%'; pct.textContent = Math.round(shown * 100) + '%';
+    txt.textContent = !baseImg || !baseImg.complete ? 'Türkiye piksel piksel yükseliyor' : !lo ? 'Kıyılar ve dağlar çiziliyor' : !over ? "İstanbul'un 811.474 binası diziliyor" : 'Haritaya iniyoruz';
+    if ((real >= .999 && el2 > 4.2) || el2 > 16) end();
+  }, 90);
+})();
+
+// ======================= landmarks: highlighted on the map, 3D on click =======================
+const LANDMARKS = [
+  { id: 'ayasofya', name: 'Ayasofya', lat: 41.00858, lon: 28.98014, r: 95, z: 17.2, facts: "537'de tamamlandı. Ana kubbesi yerden yaklaşık 55 metre yüksekte, çapı 31 metreye yakın." },
+  { id: 'sultanahmet', name: 'Sultanahmet Camii', lat: 41.00543, lon: 28.97685, r: 110, z: 17, facts: '1609–1616 arasında yapıldı. Altı minaresi var.' },
+  { id: 'suleymaniye', name: 'Süleymaniye Camii', lat: 41.01605, lon: 28.96398, r: 110, z: 17, facts: "Mimar Sinan'ın eseri, 1550–1557. Kubbesi yerden 53 metre yüksekte." },
+  { id: 'galata', name: 'Galata Kulesi', lat: 41.02562, lon: 28.97418, r: 25, z: 17.6, facts: "1348'de Cenevizliler yaptı. Yüksekliği yaklaşık 63 metre." },
+  { id: 'kizkulesi', name: 'Kız Kulesi', lat: 41.0211, lon: 29.00412, r: 45, z: 17.4, facts: "Üsküdar açığında küçük bir adacıkta. Bugünkü yapı büyük ölçüde 18. yüzyıldan." }
+];
+// only places whose OpenStreetMap record has real 3D parts (heights, domes, minarets) get a model;
+// more are added as their OSM data is mapped (tools/extract_landmarks.py + tools/build_landmarks.py)
+for (const l of LANDMARKS) { l.x = lon2x(l.lon); l.y = lat2y(l.lat); }
+let lmData = null, viewer3d = null, lastFocus = null;
+const lmModels = () => lmData || (lmData = getJSON('data/landmarks.json'));
+// which landmark (if any) a building belongs to; cached on the building
+function buildingLandmark(b) {
+  if (b.lm !== undefined) return b.lm;
+  const bx = (b.bb[0] + b.bb[2]) / 2, by = (b.bb[1] + b.bb[3]) / 2, mz = metersPerZQ();
+  b.lm = null;
+  for (const l of LANDMARKS) if (Math.hypot(bx - l.x, by - l.y) * mz <= l.r) { b.lm = l; break; }
+  return b.lm;
+}
+async function open3D(l) {
+  const box = document.getElementById('v3d');
+  if (!window.PH3D || !PH3D.ok) { showCard('3B görünüm', l.name, 'Bu tarayıcı 3B çizimi (WebGL) desteklemiyor.', null); return; }
+  lastFocus = document.activeElement;
+  document.getElementById('v3dName').textContent = l.name;
+  document.getElementById('v3dFacts').textContent = l.facts;
+  document.getElementById('v3dMeta').textContent = 'Yükleniyor…';
+  box.hidden = false; stopIdle();
+  document.getElementById('v3dX').focus();
+  try {
+    const all = await lmModels(), m = all[l.id];
+    if (box.hidden) return;
+    if (viewer3d) viewer3d.stop();
+    viewer3d = PH3D.viewer(document.getElementById('v3dCv'), m);
+    const parts = m.parts.length, tall = Math.max(...m.parts.map(p => p.h || 0));
+    document.getElementById('v3dMeta').textContent = parts + ' yapı parçası' + (tall ? ' · en yüksek nokta ' + Math.round(tall) + ' m' : '') + ' · veri: OpenStreetMap';
+  } catch (e) { document.getElementById('v3dMeta').textContent = '3B veri yüklenemedi.'; }
+}
+function close3D() {
+  const box = document.getElementById('v3d'); if (box.hidden) return;
+  box.hidden = true; if (viewer3d) { viewer3d.stop(); viewer3d = null; }
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+document.getElementById('v3dX').onclick = close3D;
+document.getElementById('v3d').addEventListener('click', e => { if (e.target.id === 'v3d') close3D(); });
+document.getElementById('v3dIn').onclick = () => viewer3d && viewer3d.zoom(0.8);
+document.getElementById('v3dOut').onclick = () => viewer3d && viewer3d.zoom(1.25);
+addEventListener('keydown', e => { if (e.key === 'Escape') close3D(); });
 
 resize();
 requestAnimationFrame(frame);
