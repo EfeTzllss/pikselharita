@@ -125,7 +125,7 @@
     const k = 111320 * Math.cos(lm.lat * Math.PI / 180);
     return ([lon, lat]) => [(lon - lm.lon) * k, -(lat - lm.lat) * 110540];
   }
-  const DEF = { wall: '#EDE6D7', lead: '#8796BE', roof: '#C8553F', stone: '#D8C7A6' };   // site palette
+  const DEF = { wall: '#d9ccb2', lead: '#8f9dad', roof: '#b9674e', stone: '#cdbb98' };   // real materials
   function partColour(p, lm) {
     const c = p.colour; if (c && /^#?[0-9a-f]{6}$/i.test(c)) return c[0] === '#' ? c : '#' + c;
     if (c) return c;   // css colour names are fine for THREE.Color
@@ -200,9 +200,9 @@
     scene.add(group);
     // ground: a cream map tile with a pixel grid
     const size = Math.ceil(ext * 2.6 / 10) * 10;
-    const tile = new T.Mesh(new T.BoxGeometry(size, 2, size), new T.MeshLambertMaterial({ color: '#A9CFC3', flatShading: true }));
+    const tile = new T.Mesh(new T.BoxGeometry(size, 2, size), new T.MeshLambertMaterial({ color: '#b9c29a', flatShading: true }));
     tile.position.y = -1; scene.add(tile);
-    const grid = new T.GridHelper(size, size / 5, '#8CC2B6', '#97C8BC'); grid.position.y = 0.02; scene.add(grid);
+    const grid = new T.GridHelper(size, size / 5, '#a6b087', '#afb890'); grid.position.y = 0.02; scene.add(grid);
     const rim = new T.Mesh(new T.BoxGeometry(size + 4, 4, size + 4), new T.MeshLambertMaterial({ color: '#1B3C8F', flatShading: true }));
     rim.position.y = -3.2; scene.add(rim);
 
