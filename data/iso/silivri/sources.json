@@ -1,0 +1,24 @@
+{
+ "osm": {
+  "name": "OpenStreetMap",
+  "license": "ODbL 1.0",
+  "attribution": "© OpenStreetMap katkıcıları",
+  "url": "https://www.openstreetmap.org/copyright",
+  "file": "Geofabrik turkey-latest.osm.pbf",
+  "data_timestamp": "2026-11-04T21:21:03Z",
+  "downloaded": "2026-11-06"
+ },
+ "microsoft": {
+  "name": "Microsoft Global ML Building Footprints",
+  "license": "ODbL 1.0",
+  "url": "https://github.com/microsoft/GlobalMLBuildingFootprints",
+  "release": "2026-02-03",
+  "file_date": "2026-02-23",
+  "quadkeys": [
+   "120323222"
+  ],
+  "used": true,
+  "rule": "Yalnızca hiçbir OSM binasıyla %10'dan fazla örtüşmeyen ve merkezi OSM binası içinde kalmayan, 15–6000 m² arası binalar eklendi."
+ },
+ "built": "2026-11-07 00:17"
+}
