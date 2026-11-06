@@ -359,7 +359,7 @@ html:not(.map-on) body::before { content: ""; position: fixed; inset: 0 0 auto; 
     <div class="chips" id="chips"></div>
     <button id="toggle" type="button">Daha fazla yer</button>
   </div>
-  <nav class="px-menu" aria-label="Bölümler"><a class="px-btn red" href="#devlog">Devlog</a><a class="px-btn" href="#kapsam">Kapsam</a><a class="px-btn" href="#lejant">Lejant</a><a class="px-btn" href="izometrik.html">İzometrik (deneme)</a></nav>
+  <nav class="px-menu" aria-label="Bölümler"><a class="px-btn red" href="#devlog">Devlog</a><a class="px-btn" href="#kapsam">Kapsam</a><a class="px-btn" href="#lejant">Lejant</a><a class="px-btn" href="izometrik.html" onclick="try{this.href='izometrik.html#'+y2lat(view.y).toFixed(5)+','+x2lon(view.x).toFixed(5)+',2,0'}catch(e){}">İzometrik (deneme)</a></nav>
 </section>
 
 <nav id="zoom" class="hud" aria-label="Yakınlaştırma">

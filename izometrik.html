@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>İzometrik Silivri (deneme) · Piksel Harita</title>
-<meta name="description" content="Silivri merkezinin OpenStreetMap verisinden çizilen izometrik pixel art haritası (deneme sürümü).">
+<title>İzometrik İstanbul (deneme) · Piksel Harita</title>
+<meta name="description" content="İstanbul'un OpenStreetMap verisinden çizilen izometrik pixel art haritası (deneme sürümü).">
 <link rel="icon" href="assets/icon-180.png">
 <style>
 @font-face { font-family: "Piksel Oyun"; src: url("assets/fonts/pikseloyun.woff2") format("woff2"); font-display: swap; }
@@ -91,11 +91,11 @@ dd { margin: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
-<canvas id="cv" aria-label="Silivri merkezinin izometrik piksel haritası"></canvas>
+<canvas id="cv" aria-label="İstanbul'un izometrik piksel haritası"></canvas>
 
 <div id="top" class="hud">
-  <a id="brand" href="./" title="Ana haritaya dön"><img src="assets/icon-180.png" alt=""><span>PİKSEL <b>HARİTA</b><small>İzometrik · Silivri (deneme)</small></span></a>
-  <div id="search"><input id="q" type="search" placeholder="Silivri'de sokak, bina, yer ara" autocomplete="off" aria-label="Ara"><div id="res" hidden></div></div>
+  <a id="brand" href="./" title="Ana haritaya dön"><img src="assets/icon-180.png" alt=""><span>PİKSEL <b>HARİTA</b><small>İzometrik · İstanbul (deneme)</small></span></a>
+  <div id="search"><input id="q" type="search" placeholder="İstanbul'da sokak, bina, yer ara" autocomplete="off" aria-label="Ara"><div id="res" hidden></div></div>
   <div id="tools">
     <button class="pbtn" id="bNight" type="button" title="Gece / gündüz (N)" aria-label="Gece / gündüz">☾<span class="lbl">Gece</span></button>
     <button class="pbtn" id="bLayers" type="button" title="Katmanlar" aria-label="Katmanlar">▤<span class="lbl">Katman</span></button>
@@ -109,7 +109,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <div class="row"><button class="pbtn" id="bRotL" type="button" title="Sola döndür (Q)" aria-label="Sola döndür">⟲</button><button id="compass" type="button" title="Kuzeyi yukarı al" aria-label="Kuzeyi yukarı al"><canvas id="cmp" width="16" height="16"></canvas></button><button class="pbtn" id="bRotR" type="button" title="Sağa döndür (E)" aria-label="Sağa döndür">⟳</button></div>
   <div class="row"><button class="pbtn" id="bHome" type="button" title="Kamerayı sıfırla" aria-label="Kamerayı sıfırla">⌂</button><button class="pbtn" id="bOut" type="button" title="Uzaklaştır (−)" aria-label="Uzaklaştır">−</button><button class="pbtn" id="bIn" type="button" title="Yakınlaştır (+)" aria-label="Yakınlaştır">+</button></div>
 </div>
-<div id="badge" class="hud">DENEME<span class="lbl"> · yalnızca Silivri merkezi</span></div>
+<div id="badge" class="hud">DENEME<span class="lbl"> · İstanbul</span></div>
 
 <aside id="info" class="hud panel" hidden aria-live="polite">
   <button class="x" id="infoX" type="button" aria-label="Kapat">×</button>
@@ -138,7 +138,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <div id="aboutBody">Yükleniyor…</div>
 </aside>
 <div id="toast" class="hud" hidden></div>
-<div id="loading" class="hud">Silivri yükleniyor…</div>
+<div id="loading" class="hud">İstanbul yükleniyor…</div>
 
 <div id="status" class="hud">
   <span id="sCoord"></span><span id="sZoom"></span><span id="sDir"></span><span class="hm" id="sMs"></span><span class="hm" id="sLoad"></span><span class="sp"></span>
@@ -153,11 +153,11 @@ dd { margin: 0; overflow-wrap: anywhere; }
 //  Ekran (sanat pikseli):  sx = (u − v)·k ,  sy = −(u + v)·k/2 − z·k·ZS
 //  Derinlik (görüş ışını boyunca, büyük = uzak):  D = u + v − z/ZS
 // =====================================================================================
-const BASE = 'data/iso/silivri/';
+const BASE = 'data/iso/istanbul/';
 const ZS = 1.2;                       // dikey ölçek
 const CELL = 0.5, GN = 512;           // zemin ızgarası: 0,5 m hücre, 256 m parça
 const ZL = [[0.5, 2], [1, 2], [1, 3], [2, 2], [2, 3], [2, 4]];   // [m başına sanat pikseli, sanat pikseli başına CSS pikseli]
-const HOME = { lat: 41.07395, lon: 28.24760 };
+const HOME = { lat: 41.00560, lon: 28.97700 };          // Sultanahmet
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false });
 const $ = id => document.getElementById(id);
 
@@ -202,7 +202,7 @@ const GROUND = {
   16: ['#9a7650', '#8c6a47'], 17: ['#b09a7a', '#a89272'], 18: ['#6f9575', '#678d6d'], 19: ['#97a07a', '#8f9873'],
   20: ['#cdc8bc', '#c3beb2'], 21: ['#50535c', '#555861', '#4c4f57'], 22: ['#62646b', '#676970', '#5e6067'], 23: ['#c2bcad', '#b4ae9f'], 24: ['#d8c9a6', '#d0c19e'],
   25: ['#ae9369', '#a68b62'], 26: ['#7b726a', '#736a62'], 27: ['#4a4440'], 28: ['#eceade'], 29: ['#e9c14b'], 30: ['#a9a69c'], 31: ['#9a7650', '#8a6744'],
-  32: ['#d6cbb2', '#cbbfa6'], 34: ['#3d80a8'], 35: ['#988b76'], 36: ['#6c7a52'], 37: ['#a86458', '#a05d52']
+  32: ['#d6cbb2', '#cbbfa6'], 34: ['#3d80a8'], 35: ['#988b76'], 36: ['#6c7a52'], 37: ['#a86458', '#a05d52'], 38: ['#b9b3a6', '#b2ac9f']
 };
 const GP = {}; for (const kk in GROUND) GP[kk] = GROUND[kk].map(h => { const c = hex(h); return pk(c[0], c[1], c[2]); });
 const VOID = [pk(26, 33, 64), pk(30, 38, 72)];
@@ -226,8 +226,34 @@ const ROOFN = ['düz', 'kırma', 'beşik', 'piramit', 'kubbe', 'tek eğimli'];
 // =====================================================================================
 //  Parça yükleme
 // =====================================================================================
-const chunks = new Map();        // "i_j" -> {state, b:[], g:{cls,wd}, p:[]}
-let inflight = 0;
+const chunks = new Map();        // "i_j" -> {state, m, b:[], g:{cls,wd}, p:[]}
+const bundles = new Map();       // "bi_bj" -> {state, data, used}
+let inflight = 0, MASK = null, buildBudget = 0, SEARCHG = {}, pendingC = 0;
+// gzip'li ikili dosya -> JSON (sunucu sıkıştırmasından bağımsız)
+async function fetchGz(url, tries = 3) {
+  for (let t = 0; t < tries; t++) {
+    try {
+      const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 20000);
+      const r = await fetch(url, { signal: ac.signal });
+      if (!r.ok) { clearTimeout(tm); throw new Error(r.status); }
+      const buf = new Uint8Array(await r.arrayBuffer()); clearTimeout(tm);
+      if (buf[0] !== 0x1f || buf[1] !== 0x8b) return buf;           // sunucu zaten açmış
+      const ds = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return new Uint8Array(await new Response(ds).arrayBuffer());
+    } catch (e) { if (t === tries - 1) throw e; await new Promise(r => setTimeout(r, 700 * (t + 1))); }
+  }
+}
+const fetchGzJson = async url => JSON.parse(new TextDecoder().decode(await fetchGz(url)));
+const maskAt = (i, j) => (i < 0 || j < 0 || i >= META.nx || j >= META.ny) ? 0 : MASK[j * META.nx + i];
+function wantBundle(bk) {
+  let b = bundles.get(bk);
+  if (b) { b.used = frameCount; return b; }
+  b = { state: 'loading', data: null, used: frameCount }; bundles.set(bk, b); inflight++;
+  fetchGzJson(BASE + 'b/' + bk + '.bin').then(d => { b.data = d; b.state = 'ok'; })
+    .catch(() => { b.state = 'fail'; setTimeout(() => bundles.delete(bk), 5000); })
+    .finally(() => { inflight--; dirty = true; });
+  return b;
+}
 async function fetchRetry(url, tries = 3) {
   for (let t = 0; t < tries; t++) {
     try {
@@ -238,24 +264,41 @@ async function fetchRetry(url, tries = 3) {
     } catch (e) { if (t === tries - 1) throw e; await new Promise(r => setTimeout(r, 600 * (t + 1))); }
   }
 }
+const EMPTYC = { state: 'loading', b: [], p: [], g: null };
 function wantChunk(i, j) {
   const key = i + '_' + j; let c = chunks.get(key);
   if (c) { c.used = frameCount; return c; }
-  if (!META.has.has(key)) { c = { state: 'empty', b: [], p: [], g: null, used: frameCount }; chunks.set(key, c); return c; }
-  c = { state: 'loading', b: [], p: [], g: null, used: frameCount, i, j };
-  chunks.set(key, c); inflight++;
-  fetchRetry(BASE + 'c/' + key + '.json').then(d => { buildChunk(c, d); c.state = 'ok'; })
-    .catch(() => { c.state = 'fail'; setTimeout(() => chunks.delete(key), 5000); })
-    .finally(() => { inflight--; dirty = true; });
+  const m = maskAt(i, j);
+  if (m !== 2) { c = { state: 'static', m, b: [], p: [], g: null, used: frameCount }; chunks.set(key, c); return c; }
+  const bs = META.bundle, bd = wantBundle((Math.floor(i / bs)) + '_' + (Math.floor(j / bs)));
+  if (bd.state !== 'ok') { pendingC++; return EMPTYC; }
+  if (buildBudget <= 0) { dirty = true; pendingC++; return EMPTYC; }          // kare başına sınırlı parça kurulumu (takılma olmasın)
+  buildBudget--;
+  c = { state: 'ok', m, b: [], p: [], g: null, used: frameCount, i, j };
+  buildChunk(c, bd.data[key] || { b: [], a: [], l: [], p: [] });
+  chunks.set(key, c);
   return c;
 }
 
 function buildChunk(c, d) {
   const ox = c.i * META.chunk, oy = c.j * META.chunk;
-  c.raw = d;
-  c.g = rasterGround(d, ox, oy);
-  c.b = d.b.map(r => makeBuilding(r, ox, oy)).filter(Boolean);
+  d.a = d.a || []; d.l = d.l || []; d.p = d.p || []; d.b = d.b || []; d.v = d.v || [];
+  c.b = d.b.map(r => { try { return makeBuilding(r, ox, oy); } catch (e) { console.warn('bina atlandı', r[0], e); return null; } }).filter(Boolean);
+  c.g = rasterGround(d, ox, oy, c.b);
   c.p = d.p.map(p => ({ t: p[0], x: ox + p[1] / 10, y: oy + p[2] / 10, s: p[3] }));
+  // stilize ağaçlar: park/orman/mezarlık/fundalık hücrelerinde dünyaya sabit kafes + karma kaydırma (gerçek konum değildir)
+  const g = c.g.cls, GI = c.i * GN, GJ = c.j * GN;
+  for (const [cl, step] of [[5, 5], [4, 9], [12, 8], [6, 11]]) {
+    const n = Math.floor(META.chunk / step);
+    for (let a = 0; a < n; a++) for (let b2 = 0; b2 < n; b2++) {
+      const wx = ox + (a + 0.5) * step, wy = oy + (b2 + 0.5) * step, h = hash2(Math.floor(wx / step) * 7 + cl, Math.floor(wy / step));
+      const x = wx + ((h & 255) / 255 - 0.5) * step * 0.7, y = wy + (((h >>> 8) & 255) / 255 - 0.5) * step * 0.7;
+      const gx = Math.floor((x - ox) / CELL), gy = Math.floor((y - oy) / CELL);
+      if (gx < 2 || gy < 2 || gx >= GN - 2 || gy >= GN - 2) continue;
+      const q = gy * GN + gx;
+      if (g[q] === cl && g[q - 3] === cl && g[q + 3] === cl && g[q - 3 * GN] === cl && g[q + 3 * GN] === cl) c.p.push({ t: 0, x, y, s: 2 });
+    }
+  }
 }
 
 // ---------- tarama çizgisi poligon doldurma (çift-tek kuralı, piksel merkezi örnekleme) ----------
@@ -296,7 +339,7 @@ const LSTY = {
 };
 const LORDER = ['river', 'stream', 'track', 'foot', 'cycle', 'steps', 'pedestrian', 'service', 'minor', 'tertiary', 'secondary', 'primary', 'trunk', 'motorway', 'rail', 'tram', 'pier', 'wall', 'fence'];
 
-function rasterGround(d, ox, oy) {
+function rasterGround(d, ox, oy, blist) {
   const cls = new Uint8Array(GN * GN), wd = new Uint8Array(GN * GN);
   const toG = (flat) => { const o = new Float64Array(flat.length); for (let i = 0; i < flat.length; i += 2) { o[i] = flat[i] / 10 / CELL; o[i + 1] = flat[i + 1] / 10 / CELL; } return o; };
   const areas = d.a.slice().sort((a, b) => (APRI[a[0]] || 0) - (APRI[b[0]] || 0));
@@ -304,6 +347,12 @@ function rasterGround(d, ox, oy) {
     const ci = a[0]; const rings = a.slice(1).filter(r => r.length >= 6).map(toG);
     if (!rings.length) continue;
     scanFill(rings, GN, GN, (y, xa, xb) => { cls.fill(ci, y * GN + xa, y * GN + xb + 1); });
+  }
+  // bina tabanları (ağaçlar bina içine düşmesin; görünmez, binalar üstünü örter)
+  if (blist) for (const b of blist) {
+    if (b.zmin > 0.5) continue;
+    const rings = b.R.map(q => { const o = new Float64Array(q.length); for (let i = 0; i < q.length; i += 2) { o[i] = (q[i] - ox) / CELL; o[i + 1] = (q[i + 1] - oy) / CELL; } return o; });
+    scanFill(rings, GN, GN, (y, xa, xb) => { cls.fill(38, y * GN + xa, y * GN + xb + 1); });
   }
   // çizgiler: önce kaldırımlar, sonra bordür, sonra yüzeyler, en son işaretler
   const L = d.l.map(l => {
@@ -337,6 +386,8 @@ function rasterGround(d, ox, oy) {
       if (Math.abs(ac) < 1.4 && Math.abs(al) < hw - 0.3) { const ii = gy * GN + gx; if (cls[ii] === 21 || cls[ii] === 22 || cls[ii] === 28) cls[ii] = (Math.floor((al + 50) / 0.5) & 1) ? 28 : cls[ii]; }
     }
   }
+  // il sınırı dışı (kara): kapsam dışı deseni
+  for (const v of d.v) { const rings = v.filter(r => r.length >= 6).map(toG); if (rings.length) scanFill(rings, GN, GN, (y, xa, xb) => { cls.fill(40, y * GN + xa, y * GN + xb + 1); }); }
   // su: kıyıya uzaklık (sığ su ve köpük için), iki geçişli şamfer
   for (let i = 0; i < GN * GN; i++) wd[i] = (cls[i] === 1) ? 60 : 0;
   for (let y = 0; y < GN; y++) for (let x = 0; x < GN; x++) {
@@ -376,7 +427,8 @@ function stroke(cls, pts, rad, code, mode) {
 //  Binalar: taban poligonundan 3B yüzler (dünya koordinatında, yönden bağımsız)
 // =====================================================================================
 function makeBuilding(r, ox, oy) {
-  const [ref, ci, h10, hs, lv, rf0, rs, src, rect, btag, name, rings, extra] = r;
+  const [ref, ci, h10, hs, lv, rf0, rs, src, rect, btag, name, rings, extra0, zmin10, rh10] = r;
+  const extra = extra0 || null, zmin = (zmin10 || 0) / 10;
   const cls = META.bcls[ci];
   const R = rings.map(f => { const o = new Float64Array(f.length); for (let i = 0; i < f.length; i += 2) { o[i] = ox + f[i] / 10; o[i + 1] = oy + f[i + 1] / 10; } return o; });
   const ex = R[0];
@@ -386,7 +438,8 @@ function makeBuilding(r, ox, oy) {
   let h = h10 / 10;
   const [rcx, rcy, rl, rw, ra, rq] = [ox + rect[0] / 10, oy + rect[1] / 10, rect[2] / 10, rect[3] / 10, rect[4] / 1000, rect[5] / 100];
   let rf = rf0;
-  if ((rf === 1 || rf === 2 || rf === 3) && (rq < 0.9 || rw < 3)) rf = 0;      // dikdörtgene yakın olmayan tabanda eğimli çatı taşar -> düz
+  const osmPoly = rs === 0 && (rf === 3 || rf === 4);                          // OSM kubbe/koni: gerçek taban üzerinde
+  if ((rf === 1 || rf === 2 || (rf === 3 && !osmPoly)) && (rq < 0.9 || rw < 3)) rf = 0;      // dikdörtgene yakın olmayan tabanda eğimli çatı taşar -> düz
   if (rf === 5) rf = 0;
   const key = hashS(ref);
   const wallsPal = WALLS[cls] || WALLS.generic;
@@ -395,22 +448,24 @@ function makeBuilding(r, ox, oy) {
   const rtag = tagColor(extra && extra['roof:colour']);
   if (rtag) rc = rtag;
   else if (rf === 4) rc = hex(ROOFC.dome[0]);
-  else if (rf === 0) rc = hex((cls === 'ind' || cls === 'transport' || cls === 'roof' ? ROOFC.ind : ROOFC.flat)[(key >>> 3) % 4 % (cls === 'ind' ? 3 : 4)]);
+  else if (rf === 0) { const ra_ = cls === 'ind' || cls === 'transport' || cls === 'roof' ? ROOFC.ind : ROOFC.flat; rc = hex(ra_[(key >>> 3) % ra_.length]); }
   else rc = hex(ROOFC.tile[(key >>> 5) % ROOFC.tile.length]);
   // eğimli çatı yüksekliği
-  const rh = (rf === 1 || rf === 2 || rf === 3) ? Math.min(rw * 0.5 * 0.62, 3.6) : 0;
+  let rh = (rf === 1 || rf === 2 || rf === 3) ? Math.min(rw * 0.5 * 0.62, 3.6) : 0;
   let hw = h;                                   // duvar (saçak) yüksekliği
-  if (hs === 0 && rh) hw = Math.max(2.2, h - rh);
+  if (osmPoly) { rh = (rh10 || 0) / 10 || Math.min(rl, rw) * (rf === 4 ? 0.5 : 1.2); hw = Math.max(zmin + 0.3, h - rh); rh = h - hw; }
+  else if (hs === 0 && rh) hw = Math.max(zmin + 2.2, h - rh);
   const levels = lv > 0 ? lv : Math.max(1, Math.round((hw - 0.6) / 3));
   const fh = cls === 'mosque' || cls === 'church' ? hw : (cls === 'ind' || cls === 'transport') ? hw : Math.max(2.4, (hw - (cls === 'house' ? 0 : 0.6)) / levels);
   const style = cls === 'ind' || cls === 'transport' ? 3 : cls === 'house' ? 1 : (cls === 'comm' ? 2 : (cls === 'mosque' || cls === 'church' || cls === 'historic' ? 4 : (cls === 'roof' ? 5 : (cls === 'ruins' ? 6 : 0))));
-  const b = { ref, cls, h, hs, lv, rf, rf0, rs, src, btag, name, extra, R, area, x0, y0, x1, y1, top: hw + rh + (rf === 4 ? Math.min(rw, rl) * 0.45 : 0), key, hw, fh, style, wc, rc, faces: [] };
+  const b = { ref, cls, h, hs, lv, rf, rf0, rs, src, btag, name, extra, R, area, x0, y0, x1, y1, zmin, top: osmPoly ? h : hw + rh + (rf === 4 ? Math.min(rw, rl) * 0.45 : 0), key, hw, fh, style, wc, rc, faces: [] };
   // duvarlar (dış halka CCW, delikler CW => dışa normal = (dy, -dx))
   for (const q of R) {
     for (let i = 0; i < q.length; i += 2) {
       const j = (i + 2) % q.length, ax = q[i], ay = q[i + 1], bx = q[j], by = q[j + 1], dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
       if (len < 0.05) continue;
-      b.faces.push({ t: 1, p: [ax, ay, 0, bx, by, 0, bx, by, hw, ax, ay, hw], n: [dy / len, -dx / len, 0], len, h: hw });
+      if (hw - zmin < 0.05) continue;
+      b.faces.push({ t: 1, p: [ax, ay, zmin, bx, by, zmin, bx, by, hw, ax, ay, hw], n: [dy / len, -dx / len, 0], len, h: hw - zmin, z0: zmin });
     }
   }
   const ux = Math.cos(ra), uy = Math.sin(ra), vx = -uy, vy = ux, hl = rl / 2, hwid = rw / 2;
@@ -421,7 +476,24 @@ function makeBuilding(r, ox, oy) {
     if (nz < 0) { nx = -nx; ny = -ny; nz = -nz; }
     b.faces.push({ t, p: pts, n: [nx / nl, ny / nl, nz / nl] });
   };
-  if (rf === 1 && rl - rw > 0.2) {             // kırma: iki yamuk + iki üçgen
+  if (osmPoly && rf === 3) {                   // OSM koni/piramit (minare külahı vb.): gerçek taban kenarlarından tepe noktasına
+    let cx = 0, cy = 0; const n = ex.length / 2; for (let i = 0; i < ex.length; i += 2) { cx += ex[i]; cy += ex[i + 1]; } cx /= n; cy /= n;
+    for (let i = 0; i < ex.length; i += 2) { const j = (i + 2) % ex.length; pushPlane([ex[i], ex[i + 1], hw, ex[j], ex[j + 1], hw, cx, cy, h], 2); }
+  } else if (osmPoly && rf === 4) {            // OSM kubbe: taban dairesine oturan, roof:height yüksekliğinde
+    b.faces.push({ t: 3, rings: R, z: hw, n: [0, 0, 1] });
+    const rd = Math.max(0.5, Math.min(rl, rw) / 2), seg = rd > 6 ? 16 : 12, tiers = rd > 6 ? 5 : 4;
+    for (let t = 0; t < tiers; t++) {
+      const a0 = t / tiers * Math.PI / 2, a1 = (t + 1) / tiers * Math.PI / 2;
+      const r0 = rd * Math.cos(a0), r1 = rd * Math.cos(a1), z0 = hw + rh * Math.sin(a0), z1 = hw + rh * Math.sin(a1);
+      for (let s = 0; s < seg; s++) {
+        const b0 = s / seg * 2 * Math.PI, b1 = (s + 1) / seg * 2 * Math.PI;
+        const pts = [rcx + r0 * Math.cos(b0), rcy + r0 * Math.sin(b0), z0, rcx + r0 * Math.cos(b1), rcy + r0 * Math.sin(b1), z0];
+        if (r1 > 0.05) pts.push(rcx + r1 * Math.cos(b1), rcy + r1 * Math.sin(b1), z1, rcx + r1 * Math.cos(b0), rcy + r1 * Math.sin(b0), z1);
+        else pts.push(rcx, rcy, z1);
+        pushPlane(pts, 4);
+      }
+    }
+  } else if (rf === 1 && rl - rw > 0.2) {             // kırma: iki yamuk + iki üçgen
     const e = hl - hwid, z = hw + rh;
     pushPlane([...P(-hl, -hwid, hw), ...P(hl, -hwid, hw), ...P(e, 0, z), ...P(-e, 0, z)], 2);
     pushPlane([...P(hl, hwid, hw), ...P(-hl, hwid, hw), ...P(-e, 0, z), ...P(e, 0, z)], 2);
@@ -520,6 +592,7 @@ function resize() {
 // =====================================================================================
 function render() {
   const t0 = performance.now(); frameCount++;
+  buildBudget = 8; pendingC = 0;
   setupFrame();
   const N = W * H;
   dep.fill(Infinity); ids.fill(-1); fid.fill(-1); emis.fill(0); smask.fill(0);
@@ -568,7 +641,7 @@ function render() {
 // ---------- zemin: her piksel z=0 düzleminden dünyaya ters izdüşüm ----------
 function groundPass() {
   const CH = META.chunk, Wm = META.size[0], Hm = META.size[1], ph = wavePhase;
-  let lastKey = -1, g = null, gox = 0, goy = 0;
+  let lastKey = -1, g = null, gox = 0, goy = 0, mst = 0;
   for (let y = 0; y < H; y++) {
     // satır başı dünya koordinatı ve piksel başına artış (doğrusal)
     const sy = y + 0.5 - HH2 + CY, B = -2 * sy / k;
@@ -578,14 +651,14 @@ function groundPass() {
     let o = y * W;
     for (let i = 0; i < W; i++, o++, x += dx, wy += dy) {
       if (x < 0 || wy < 0 || x >= Wm || wy >= Hm) { col[o] = VOID[((Math.floor(x / 8) + Math.floor(wy / 8)) & 1)]; continue; }
-      const ci = (x / CH) | 0, cj = (wy / CH) | 0, key = ci * 1000 + cj;
-      if (key !== lastKey) { lastKey = key; const c = chunks.get(ci + '_' + cj); g = c && c.g; gox = ci * CH; goy = cj * CH; }
-      if (!g) { col[o] = VOID[0]; continue; }
+      const ci = (x / CH) | 0, cj = (wy / CH) | 0, key = ci * 4096 + cj;
+      if (key !== lastKey) { lastKey = key; const c = chunks.get(ci + '_' + cj); g = c && c.g; gox = ci * CH; goy = cj * CH; mst = maskAt(ci, cj); }
       const gx = ((x - gox) / CELL) | 0, gy = ((wy - goy) / CELL) | 0, gi = gy * GN + gx;
-      const c = g.cls[gi], hx = ci * GN + gx, hy = cj * GN + gy;
+      const c = g ? g.cls[gi] : (mst === 1 ? 1 : mst === 0 ? 40 : 0), hx = ci * GN + gx, hy = cj * GN + gy;
       let p;
+      if (c === 40) { col[o] = VOID[((Math.floor(x / 8) + Math.floor(wy / 8)) & 1)]; continue; }
       if (c === 1 || c === 34) {                           // su: derin -> sığ, dünyaya sabit dalga, kıyı köpüğü
-        const d = c === 34 ? 8 : g.wd[gi];
+        const d = c === 34 ? 8 : g ? g.wd[gi] : 60;
         const sh = d < 3 ? 0 : d < 8 ? 1 : d < 18 ? 2 : 3;
         let r = [72, 52, 42, 36][sh], gg = [160, 136, 112, 98][sh], bb = [184, 170, 160, 150][sh];
         const wv = (hx * 2 + hy * 3 + ((hash2(hx >> 3, hy >> 2) & 7)) + ph) % 23;
@@ -622,11 +695,16 @@ function shadowPass(vis) {
         P0[i] = projX(u, v); P0[i + 1] = projY(u, v, 0); P1[i] = projX(u, v - s); P1[i + 1] = projY(u, v - s, 0);
       }
       scanFill([P1], W, H, darken);
-      for (let i = 0; i < n; i += 2) { const j = (i + 2) % n; scanFill([[P0[i], P0[i + 1], P0[j], P0[j + 1], P1[j], P1[j + 1], P1[i], P1[i + 1]]], W, H, darken); }
+      // süpürme: yalnızca gölge yönüne (−v) bakan kenarların dörtgenleri gerekir; diğerleri taban/izin içinde kalır
+      for (let i = 0; i < n; i += 2) {
+        const j = (i + 2) % n, ex = q[j] - q[i], ey = q[j + 1] - q[i + 1];
+        if (-RS * ey + RC * -ex >= 0) continue;              // nv = rot(n).v, n = (ey, −ex)
+        scanFill([[P0[i], P0[i + 1], P0[j], P0[j + 1], P1[j], P1[j + 1], P1[i], P1[i + 1]]], W, H, darken);
+      }
     }
   }
   if (opt.trees) for (const c of vis) for (const p of c.p) {
-    if (p.t !== 0) continue;
+    if (p.t !== 0 || (p.s === 2 && k < 1 && (p.x * 7 + p.y * 13 | 0) % 3)) continue;
     const u = RC * p.x + RS * p.y, v = -RS * p.x + RC * p.y - 2.2, px = projX(u, v), py = projY(u, v, 0), rx = 2.4 * k * 1.1, ry = rx * 0.5;
     if (px < -rx || px > W + rx || py < -ry || py > H + ry) continue;
     for (let y = Math.max(0, Math.ceil(py - ry - 0.5)); y <= Math.min(H - 1, Math.floor(py + ry)); y++) {
@@ -756,14 +834,17 @@ function fillRings(f, b, bi, gid, pal) {
   const lod = k < 0.75;
   scanFill(rings, W, H, (y, xa, xb) => {
     const sy = y + 0.5 - HH2 + CY, D = -2 * (sy + z * k * ZS) / k - z / ZS;
+    // satır başında dünya konumu, piksel başına sabit artış (dizi ayırmadan)
+    const B_ = -2 * (sy + z * k * ZS) / k, A0 = (xa + 0.5 - HW2 + CX) / k;
+    let uu = (A0 + B_) / 2, vv = (B_ - A0) / 2; const du = 0.5 / k, dv = -0.5 / k;
     let o = y * W + xa;
-    for (let x = xa; x <= xb; x++, o++) {
+    for (let x = xa; x <= xb; x++, o++, uu += du, vv += dv) {
       if (D >= dep[o] - 1e-3) continue;
       dep[o] = D; ids[o] = bi; fid[o] = gid;
       let px = pal[0];
       if (!lod && f.dec === undefined) {                           // düz çatı: hafif beton dokusu (dünyaya sabit)
-        const [wx, wy] = screenToWorldZ(x + 0.5, y + 0.5, z);
-        if ((hash2(Math.floor(wx / 0.5), Math.floor(wy / 0.5)) & 15) === 0) px = pal[1];
+        const wx = RC * uu - RS * vv, wy = RS * uu + RC * vv;
+        if ((hash2(Math.floor(wx * 2), Math.floor(wy * 2)) & 15) === 0) px = pal[1];
       } else if (f.dec === 1) px = ((x + y) & 1) ? pal[0] : pal[3];
       col[o] = px; emis[o] = 0;
     }
@@ -844,6 +925,7 @@ function pointPass(vis) {
     let kind;
     if (p.t === 0) {
       if (!opt.trees) continue;
+      if (p.s === 2 && k < 1 && (p.x * 7 + p.y * 13 | 0) % 3) continue;      // uzakta stilize ağaçları seyrelt
       const hh = hash2(Math.round(p.x * 10), Math.round(p.y * 10));
       kind = (hh % 10) < 7 ? 'round' : (hh % 10) < 9 ? 'pine' : 'cypress';
     } else if (p.t === 6) continue;
@@ -1018,6 +1100,8 @@ function showInfo(b) {
     if (ex['roof:colour']) rows.push(['Çatı rengi', esc(ex['roof:colour']) + ' <span class="real">OSM</span>']);
   }
   const osmUrl = b.src === 0 ? `https://www.openstreetmap.org/${b.ref[0] === 'w' ? 'way' : 'relation'}/${b.ref.slice(1)}` : null;
+  if (b.extra && b.extra.parent) rows.push(['Parça', `building:part · ana bina <a href="https://www.openstreetmap.org/${b.extra.parent[0] === 'w' ? 'way' : 'relation'}/${b.extra.parent.slice(1)}" target="_blank" rel="noopener">${esc(b.extra.parent)} ↗</a>`]);
+  if (b.zmin > 0) rows.push(['Taban yüksekliği', `${fmt(b.zmin)} m <span class="real">OSM min_height</span>`]);
   rows.push(['Kaynak', b.src === 0 ? `OpenStreetMap · <a href="${osmUrl}" target="_blank" rel="noopener">${b.ref[0] === 'w' ? 'way' : 'relation'} ${b.ref.slice(1)} ↗</a>` :
     'Microsoft Global ML Building Footprints (makine öğrenmesiyle çıkarılmış taban; OSM\'de karşılığı yok)']);
   $('iDl').innerHTML = rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
@@ -1029,14 +1113,24 @@ function showInfo(b) {
 // ---------- arama ----------
 const norm = s => s.toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i');
 let resSel = 0, resList = [];
-$('q').addEventListener('input', () => {
+$('q').addEventListener('input', async () => {
   const q = norm($('q').value.trim()); const box = $('res');
-  if (q.length < 2 || !SEARCH) { box.hidden = true; return; }
+  if (q.length < 2) { box.hidden = true; return; }
+  // arama dizini ilk harfe göre bölünmüş: yalnızca gereken parça indirilir
+  const c0 = /^[a-z0-9]$/.test(q[0]) ? q[0] : '_';
+  if (!SEARCHG[c0]) {
+    if (!META.search.includes(c0)) SEARCHG[c0] = [];
+    else { box.innerHTML = '<button type="button" disabled>Aranıyor…</button>'; box.hidden = false;
+      try { SEARCHG[c0] = (await fetchGzJson(BASE + 's/' + c0 + '.bin')).map(r => ({ r, n: norm(r[0]) })); } catch (e) { SEARCHG[c0] = null; box.hidden = true; return; } }
+    if (norm($('q').value.trim()) !== q) return;
+  }
+  SEARCH = SEARCHG[c0] || [];
   const KN = { street: 'sokak', place: 'yer', park: 'park', edu: 'eğitim', pitch: 'spor', cem: 'mezarlık', square: 'meydan' };
-  resList = SEARCH.filter(r => r.n.includes(q)).sort((a, b) => (a.n.startsWith(q) ? 0 : 1) - (b.n.startsWith(q) ? 0 : 1) || a.r[0].length - b.r[0].length).slice(0, 12);
+  const dd = r => Math.hypot(r.r[1] - cam.x, r.r[2] - cam.y);
+  resList = SEARCH.filter(r => r.n.includes(q)).sort((a, b) => (a.n.startsWith(q) ? 0 : 1) - (b.n.startsWith(q) ? 0 : 1) || dd(a) - dd(b)).slice(0, 12);
   resSel = 0;
   box.innerHTML = resList.length ? resList.map((r, i) => `<button type="button" data-i="${i}" class="${i === 0 ? 'k' : ''}"><span>${esc(r.r[0])}</span><small>${esc(KN[r.r[3]] || (r.r[3].startsWith('b:') ? BL[r.r[3].slice(2)] : r.r[3]))}</small></button>`).join('')
-    : '<button type="button" disabled>Sonuç yok (yalnızca Silivri merkezi)</button>';
+    : '<button type="button" disabled>Sonuç yok (yalnızca İstanbul)</button>';
   box.hidden = false;
 });
 $('q').addEventListener('keydown', e => {
@@ -1065,6 +1159,8 @@ function writeHash() {
 function readHash() {
   const m = location.hash.slice(1).split(',').map(Number);
   if (m.length >= 2 && isFinite(m[0]) && isFinite(m[1])) {
+    const bb = META.bbox;
+    if (m[1] < bb[0] || m[1] > bb[2] || m[0] < bb[1] || m[0] > bb[3]) { toast('Bu konum İstanbul kapsamı dışında; Sultanahmet açıldı'); return false; }
     [cam.x, cam.y] = toM(m[1], m[0]);
     if (m[2] >= 1 && m[2] <= ZL.length) cam.zi = m[2] - 1;
     if (m[3] >= 0 && m[3] <= 3) cam.r = m[3] | 0;
@@ -1090,7 +1186,7 @@ $('bShot').onclick = () => {
   const c = document.createElement('canvas'); c.width = W * PX; c.height = H * PX; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(cv, 0, 0, c.width, c.height);
   g.fillStyle = 'rgba(15,28,71,.8)'; g.fillRect(0, c.height - 22, c.width, 22); g.fillStyle = '#F6F2E9'; g.font = '12px sans-serif';
   g.fillText('pikselharita.com · © OpenStreetMap katkıcıları (ODbL) · Microsoft Building Footprints (ODbL)', 8, c.height - 7);
-  c.toBlob(bl => { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'pikselharita-silivri.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+  c.toBlob(bl => { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'pikselharita-istanbul.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
 };
 for (const [id, key] of [['lTrees', 'trees'], ['lFurn', 'furn'], ['lMs', 'ms'], ['lShadow', 'shadow'], ['lWaves', 'waves'], ['lEst', 'est'], ['lFoot', 'foot']])
   $(id).onchange = e => { opt[key] = e.target.checked; dirty = true; legend(); };
@@ -1124,8 +1220,15 @@ function loop(t) {
   if (!dirty) return;
   dirty = false;
   try { render(); } catch (err) { console.error(err); }
-  // kullanılmayan zemin ızgaralarını boşalt
-  if (chunks.size > 140) for (const [key, c] of chunks) if (frameCount - c.used > 120) chunks.delete(key);
+  // bellek: kullanılmayan parçaları ve paketleri boşalt (bütün şehirde gezinirken sınırlı kalır)
+  if (chunks.size > 180) {
+    const old = [...chunks.entries()].filter(([, c]) => frameCount - c.used > 2).sort((a, b) => a[1].used - b[1].used);
+    for (let i = 0; i < old.length && chunks.size > 140; i++) chunks.delete(old[i][0]);
+  }
+  if (bundles.size > 12) {
+    const old = [...bundles.entries()].filter(([, b]) => b.state !== 'loading' && frameCount - b.used > 2).sort((a, b) => a[1].used - b[1].used);
+    for (let i = 0; i < old.length && bundles.size > 10; i++) bundles.delete(old[i][0]);
+  }
 }
 
 async function init() {
@@ -1133,19 +1236,17 @@ async function init() {
     [META, SRC] = await Promise.all([fetchRetry(BASE + 'meta.json'), fetchRetry(BASE + 'sources.json')]);
   } catch (e) { $('loading').textContent = 'Veri yüklenemedi. Sayfayı yenileyin.'; return; }
   const pj = META.projection; R_ = pj.R; KC = Math.cos(pj.latc * Math.PI / 180); LON0 = pj.lon0; LAT0 = pj.lat0; MY0 = mercY(LAT0);
-  META.nx = Math.ceil(META.size[0] / META.chunk); META.ny = Math.ceil(META.size[1] / META.chunk);
-  META.has = new Set(META.chunks.map(c => c[0] + '_' + c[1]));
+  try { MASK = await fetchGz(BASE + 'mask.bin'); } catch (e) { $('loading').textContent = 'Veri yüklenemedi. Sayfayı yenileyin.'; return; }
   if (!readHash()) home(); else resize();
   legend(); aboutPanel();
   $('loading').hidden = true;
-  fetchRetry(BASE + 'search.json').then(s => { SEARCH = s.map(r => ({ r, n: norm(r[0]) })); }).catch(() => {});
   requestAnimationFrame(loop);
 }
 function aboutPanel() {
   const s = META.stats, hs = s.height_src, tr = s.trees, tot = s.buildings || 1, pc = n => fmt(n / tot * 100, 1) + '%';
   $('sMs').textContent = '';
   $('aboutBody').innerHTML = `
-  <p>Bu sayfa PikselHarita'nın <b>izometrik deneme</b> sürümüdür ve yalnızca <b>Silivri merkezini</b> (boylam ${META.bbox[0]}–${META.bbox[2]}, enlem ${META.bbox[1]}–${META.bbox[3]}) kapsar. Kapsam dışı koyu ızgara ile gösterilir; boş yerler hayalî yapılarla doldurulmaz.</p>
+  <p>Bu sayfa PikselHarita'nın <b>izometrik deneme</b> sürümüdür ve <b>İstanbul il sınırının</b> içini kapsar (OSM il sınırı, admin_level=4). Sınırın dışındaki kara koyu damalı gösterilir; boş yerler hayalî yapılarla doldurulmaz.</p>
   <h3>Kaynaklar</h3>
   <p><b>${esc(SRC.osm.attribution)}</b> — <a href="${SRC.osm.url}" target="_blank" rel="noopener">ODbL 1.0</a>. Dosya: ${esc(SRC.osm.file)}, veri tarihi ${esc(SRC.osm.data_timestamp || '?')}.<br>
   <b>Microsoft Global ML Building Footprints</b> — <a href="${SRC.microsoft.url}" target="_blank" rel="noopener">ODbL 1.0</a>, sürüm ${esc(SRC.microsoft.release)}. ${esc(SRC.microsoft.rule)}</p>
@@ -1159,7 +1260,9 @@ function aboutPanel() {
    <tr><td>Kat sayısı OSM'de (building:levels)</td><td>${fmt(hs.osm_levels, 0)} (${pc(hs.osm_levels)})</td></tr>
    <tr><td>Yüksekliği <b>tahmini</b> (türe ve alana göre)</td><td>${fmt(hs.tahmin + hs.ms_tahmin, 0)} (${pc(hs.tahmin + hs.ms_tahmin)})</td></tr>
    <tr><td>Çatı şekli OSM'de</td><td>${fmt(s.roof_src.osm, 0)}</td></tr>
-   <tr><td>Ağaç: OSM tekil / OSM ağaç sırası / stilize</td><td>${fmt(tr.osm, 0)} / ${fmt(tr.osm_sira, 0)} / ${fmt(tr.stilize, 0)}</td></tr>
+   <tr><td>OSM building:part ile çizilen bina parçası</td><td>${fmt(s.parts || 0, 0)}</td></tr>
+   <tr><td>Ağaç: OSM tekil / OSM ağaç sırası</td><td>${fmt(tr.osm, 0)} / ${fmt(tr.osm_sira, 0)}</td></tr>
+   <tr><td>Ağaç: park, orman, mezarlık içinde stilize</td><td>tarayıcıda, alan sınırına göre</td></tr>
   </table>
   <h3>Neler gerçek, neler stilize?</h3>
   <p><b>Gerçek:</b> bina konumları ve taban şekilleri, yollar, kıyı çizgisi, park ve alan sınırları, OSM'de işaretli ağaçlar, lambalar, banklar, duraklar, yaya geçitleri ve minareler (konum).<br>
@@ -1171,7 +1274,7 @@ window.ISO = { cam, opt, get ms() { return lastMs; }, get prof() { return prof; 
   toM, toLL, pickAt: (x, y) => { const id = ids[y * W + x]; return id >= 0 ? frameB[id].ref : null; }, depthAt: (x, y) => dep[y * W + x],
   depthOf: (x, y, z) => { setupFrame(); const u = RC * x + RS * y, v = -RS * x + RC * y; return u + v - z / ZS; },
   projectWorld: (x, y, z) => { setupFrame(); const u = RC * x + RS * y, v = -RS * x + RC * y; return [projX(u, v), projY(u, v, z)]; },
-  get size() { return [W, H, PX, k]; }, get pixels() { return col; }, get inflight() { return inflight; }, set night(v) { night = nightTarget = v; dirty = true; },
+  get size() { return [W, H, PX, k]; }, get pixels() { return col; }, get inflight() { return inflight; }, get pending() { return pendingC; }, set night(v) { night = nightTarget = v; dirty = true; },
   set waves(v) { opt.waves = v; } };
 init();
 </script>
