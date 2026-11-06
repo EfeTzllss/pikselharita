@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Piksel Harita Yönetim</title>
+<link rel="icon" href="assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column, tile-edged panels; same glaze as the public site */
+:root {
+  --sir: #F6F2E9; --sir-2: #EDE6D7; --murekkep: #19203D; --kobalt: #1B3C8F; --mercan: #D2392C; --turkuaz: #2A9DA6; --soluk: #5A6079; --cizgi: rgba(27, 60, 143, .22);
+  --f-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif; --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--sir); color: var(--murekkep); font: 15px/1.5 var(--f-body); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px)); box-sizing: border-box; }
+header { border-bottom: 4px double var(--kobalt); }
+header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+header img { height: 36px; width: auto; display: block; }
+header .who { font: 13px var(--f-mono); color: var(--soluk); text-align: right; }
+main.wrap { display: grid; gap: 28px; padding-block: 28px 64px; }
+h1 { margin: 0; font: 800 34px/1.05 var(--f-body); font-stretch: 115%; color: var(--kobalt); }
+h2 { margin: 0; font: 800 22px var(--f-body); font-stretch: 110%; color: var(--kobalt); }
+p { margin: 0; }
+.muted { color: var(--soluk); }
+.panel { background: #FBF9F4; border: 3px solid var(--kobalt); box-shadow: inset 0 0 0 4px #FBF9F4, inset 0 0 0 6px var(--kobalt); padding: 22px; display: grid; gap: 14px; }
+label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; }
+input[type=text], input[type=password], input[type=number], select, textarea { font: 15px var(--f-body); color: var(--murekkep); background: #fff; border: 2px solid var(--kobalt); padding: 9px 10px; min-width: 0; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--turkuaz); outline-offset: 1px; }
+textarea { min-height: 130px; resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.row > label { flex: 1 1 140px; }
+.check { display: flex; gap: 8px; align-items: center; font-weight: 400; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 700 15px var(--f-body); font-stretch: 110%; color: var(--kobalt); background: var(--sir); border: 2px solid var(--kobalt); padding: 9px 16px; cursor: pointer; box-shadow: 3px 3px 0 var(--turkuaz); }
+.btn.go { background: var(--kobalt); color: #fff; box-shadow: 3px 3px 0 var(--mercan); }
+.btn.danger { color: var(--mercan); border-color: var(--mercan); box-shadow: none; padding: 5px 10px; font-size: 13px; }
+.btn.danger.sure { background: var(--mercan); color: #fff; }
+.btn:disabled { opacity: .55; cursor: wait; }
+.btn:focus-visible { outline: 3px solid var(--mercan); outline-offset: 3px; }
+.status { font-size: 14px; padding: 10px 12px; border-left: 4px solid var(--turkuaz); background: var(--sir-2); }
+.status.err { border-color: var(--mercan); }
+details { border-top: 2px dotted var(--cizgi); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 700; color: var(--kobalt); }
+.list { display: grid; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; padding: 12px 0; border-bottom: 2px dotted var(--cizgi); align-items: start; }
+.item:last-child { border-bottom: 0; }
+.item b { color: var(--kobalt); font-size: 16px; }
+.item .meta { font: 12.5px var(--f-mono); color: var(--soluk); }
+.help { font-size: 13.5px; color: var(--soluk); }
+.help code { font-family: var(--f-mono); background: var(--sir-2); padding: 1px 4px; }
+a { color: var(--kobalt); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a href="./"><img src="assets/logo-wide.webp" alt="Piksel Harita ana sayfası"></a>
+    <div class="who" id="who">Bağlı değil</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div>
+    <h1>Yönetim</h1>
+    <p class="muted">Devlog kayıtlarını ve kapsam kartlarını buradan yayınla. Değişiklikler 1–2 dakika içinde sitede görünür.</p>
+  </div>
+
+  <section class="panel" id="login">
+    <h2>Giriş</h2>
+    <p class="help">Bu panel yalnızca sitenin GitHub deposuna yazma izni olan bir anahtarla çalışır. Anahtar sadece bu tarayıcıda saklanır, başka hiçbir yere gönderilmez; yalnızca GitHub'a istek yaparken kullanılır.</p>
+    <div class="row">
+      <label for="repo">GitHub deposu<input id="repo" type="text" placeholder="kullaniciadi/pikselharita" autocomplete="off"></label>
+    </div>
+    <label for="token">GitHub anahtarı (fine-grained token)<input id="token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
+    <label class="check" for="remember"><input id="remember" type="checkbox" checked> Bu cihazda beni hatırla</label>
+    <div class="row"><button class="btn go" id="connect" type="button">Bağlan</button></div>
+    <div class="status" id="loginStatus" hidden role="status"></div>
+  </section>
+
+  <div id="app" hidden>
+    <div style="display:grid;gap:28px">
+      <section class="panel">
+        <h2>Yeni devlog kaydı</h2>
+        <label for="title">Başlık<input id="title" type="text" maxlength="120" placeholder="Ankara eklendi"></label>
+        <div class="row">
+          <label for="tag">Tür<select id="tag"><option>Yeni bölge</option><option>Güncelleme</option><option>Düzeltme</option></select></label>
+          <label for="date">Tarih<input id="date" type="text" placeholder="2026-11-07"></label>
+        </div>
+        <label for="body">Ne değişti? (paragrafları boş satırla ayır)<textarea id="body" maxlength="4000" placeholder="Kızılay, Ulus ve Çankaya'daki bütün binalar haritada."></textarea></label>
+        <details>
+          <summary>Konum ekle (isteğe bağlı) — "Haritada gör" bağlantısı çıkar</summary>
+          <p class="help" style="margin:10px 0">Haritada o yere git; sol alttaki satırda enlem, boylam ve <code>z</code> değeri yazar. Onları buraya gir.</p>
+          <div class="row">
+            <label for="lat">Enlem<input id="lat" type="number" step="0.0001" placeholder="39.9208"></label>
+            <label for="lon">Boylam<input id="lon" type="number" step="0.0001" placeholder="32.8541"></label>
+            <label for="z">Yakınlık (z)<input id="z" type="number" step="0.1" placeholder="15"></label>
+          </div>
+        </details>
+        <div class="row"><button class="btn go" id="post" type="button">Yayınla</button></div>
+        <div class="status" id="postStatus" hidden role="status"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Yayındaki kayıtlar</h2>
+        <div class="list" id="entries"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Kapsam kartları</h2>
+        <p class="help">Ana sayfadaki "Kapsam" bölümü. Yeni şehir eklenince durumunu "Tam detay" yap; kapsam haritasındaki kırmızı çerçeve için sınır kutusu (bbox) gerekir.</p>
+        <div class="list" id="regions"></div>
+        <details>
+          <summary>Kart ekle</summary>
+          <div style="display:grid;gap:12px;margin-top:12px">
+            <div class="row">
+              <label for="rname">Ad<input id="rname" type="text" placeholder="Ankara"></label>
+              <label for="rstatus">Durum<select id="rstatus"><option value="full">Tam detay</option><option value="overview">Genel görünüm</option><option value="next">Sırada</option></select></label>
+            </div>
+            <label for="rtext">Açıklama<input id="rtext" type="text" placeholder="Kızılay'dan Etimesgut'a kadar bütün binalar."></label>
+            <div class="row">
+              <label for="rlat">Enlem<input id="rlat" type="number" step="0.0001"></label>
+              <label for="rlon">Boylam<input id="rlon" type="number" step="0.0001"></label>
+              <label for="rz">z<input id="rz" type="number" step="0.1" placeholder="12"></label>
+            </div>
+            <label for="rbbox">Sınır kutusu: batı, güney, doğu, kuzey (isteğe bağlı)<input id="rbbox" type="text" placeholder="32.5, 39.75, 33.05, 40.1"></label>
+            <div class="row"><button class="btn" id="addRegion" type="button">Kartı ekle ve yayınla</button></div>
+          </div>
+        </details>
+        <div class="status" id="regionStatus" hidden role="status"></div>
+      </section>
+
+      <p class="help">Bu cihazda çıkış yapmak için <button class="btn danger" id="logout" type="button">Anahtarı unut</button></p>
+    </div>
+  </div>
+</main>
+
+<script>
+"use strict";
+const API = 'https://api.github.com', PATH = 'data/devlog.json';
+const $ = id => document.getElementById(id);
+let repo = '', token = '', sha = '', devlog = null;
+
+// guess the repo when served from <user>.github.io/<repo>/
+try {
+  const saved = JSON.parse(localStorage.getItem('ph-admin') || 'null');
+  if (saved) { $('repo').value = saved.repo || ''; $('token').value = saved.token || ''; }
+} catch (e) { /* storage blocked: fill by hand */ }
+if (!$('repo').value && location.hostname.endsWith('.github.io')) {
+  const seg = location.pathname.split('/').filter(Boolean)[0];
+  $('repo').value = location.hostname.split('.')[0] + '/' + (seg && !seg.endsWith('.html') ? seg : location.hostname);
+}
+$('date').value = new Date().toISOString().slice(0, 10);
+
+function say(el, msg, err) { const s = $(el); s.textContent = msg; s.hidden = !msg; s.classList.toggle('err', !!err); }
+async function gh(method, path, body) {
+  const r = await fetch(API + path, { method, headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, body: body ? JSON.stringify(body) : undefined });
+  let data = null; try { data = await r.json(); } catch (e) {}
+  if (!r.ok) { const e = new Error((data && data.message) || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+  return data;
+}
+const b64enc = s => { const b = new TextEncoder().encode(s); let x = ''; for (let i = 0; i < b.length; i += 0x8000) x += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(x); };
+const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), c => c.charCodeAt(0)));
+
+async function connect() {
+  repo = $('repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''); token = $('token').value.trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) { say('loginStatus', 'Depo adını "kullaniciadi/depo" biçiminde ve anahtarı gir.', true); return; }
+  $('connect').disabled = true; say('loginStatus', 'Bağlanılıyor…');
+  try {
+    const info = await gh('GET', '/repos/' + repo);
+    if (!info.permissions || !info.permissions.push) throw new Error('Bu anahtarın depoya yazma izni yok. Token ayarlarında "Contents: Read and write" iznini ver.');
+    await reload();
+    try { if ($('remember').checked) localStorage.setItem('ph-admin', JSON.stringify({ repo, token })); else localStorage.removeItem('ph-admin'); } catch (e) {}
+    $('login').hidden = true; $('app').hidden = false;
+    $('who').textContent = repo;
+  } catch (e) {
+    say('loginStatus', e.status === 401 ? 'Anahtar geçersiz ya da süresi dolmuş. GitHub\'da yeni bir anahtar oluştur.' : e.status === 404 ? 'Depo bulunamadı ya da anahtarın bu depoya erişimi yok.' : 'Bağlanılamadı: ' + e.message, true);
+  } finally { $('connect').disabled = false; }
+}
+async function reload() {
+  const f = await gh('GET', '/repos/' + repo + '/contents/' + PATH);
+  sha = f.sha; devlog = JSON.parse(b64dec(f.content));
+  devlog.entries = devlog.entries || []; devlog.regions = devlog.regions || [];
+  render();
+}
+async function save(message) {
+  const body = { message, content: b64enc(JSON.stringify(devlog, null, 1) + '\n'), sha };
+  try { const r = await gh('PUT', '/repos/' + repo + '/contents/' + PATH, body); sha = r.content.sha; }
+  catch (e) {
+    if (e.status === 409 || e.status === 422) { await reload(); throw new Error('Kayıt dosyası başka bir yerden değişmiş; en güncel hâli yüklendi. İşlemi tekrar yap.'); }
+    throw e;
+  }
+}
+const fmt = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } };
+function confirmBtn(label, onSure) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn danger'; b.textContent = label;
+  let armed = false, t = 0;
+  b.onclick = async () => {
+    if (!armed) { armed = true; b.classList.add('sure'); b.textContent = 'Emin misin?'; t = setTimeout(() => { armed = false; b.classList.remove('sure'); b.textContent = label; }, 4000); return; }
+    clearTimeout(t); b.disabled = true; await onSure(); b.disabled = false;
+  };
+  return b;
+}
+function render() {
+  const el = $('entries'); el.innerHTML = '';
+  const list = devlog.entries.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.n || 0) - (a.n || 0));
+  if (!list.length) el.textContent = 'Henüz kayıt yok.';
+  for (const e of list) {
+    const row = document.createElement('div'); row.className = 'item';
+    const txt = document.createElement('div');
+    const t = document.createElement('b'); t.textContent = e.title;
+    const m = document.createElement('div'); m.className = 'meta'; m.textContent = fmt(e.date) + ' · ' + (e.tag || 'Güncelleme') + (e.lat != null ? ' · konumlu' : '');
+    txt.append(t, m);
+    row.append(txt, confirmBtn('Sil', async () => {
+      devlog.entries = devlog.entries.filter(x => x !== e);
+      try { await save('Devlog: "' + e.title + '" silindi'); render(); say('postStatus', '"' + e.title + '" silindi.'); }
+      catch (err) { say('postStatus', 'Silinemedi: ' + err.message, true); }
+    }));
+    el.append(row);
+  }
+  const rg = $('regions'); rg.innerHTML = '';
+  const lbl = { full: 'Tam detay', overview: 'Genel görünüm', next: 'Sırada' };
+  for (const r of devlog.regions) {
+    const row = document.createElement('div'); row.className = 'item';
+    const txt = document.createElement('div');
+    const t = document.createElement('b'); t.textContent = r.name;
+    const m = document.createElement('div'); m.className = 'meta'; m.textContent = (lbl[r.status] || r.status) + (r.bbox ? ' · çerçeveli' : '');
+    txt.append(t, m);
+    const right = document.createElement('div'); right.className = 'row';
+    const sel = document.createElement('select'); sel.setAttribute('aria-label', r.name + ' durumu');
+    for (const k of ['full', 'overview', 'next']) { const o = document.createElement('option'); o.value = k; o.textContent = lbl[k]; o.selected = r.status === k; sel.append(o); }
+    sel.onchange = async () => { const old = r.status; r.status = sel.value; try { await save('Kapsam: ' + r.name + ' -> ' + lbl[r.status]); render(); say('regionStatus', r.name + ' güncellendi.'); } catch (e) { r.status = old; render(); say('regionStatus', 'Kaydedilemedi: ' + e.message, true); } };
+    right.append(sel, confirmBtn('Sil', async () => {
+      devlog.regions = devlog.regions.filter(x => x !== r);
+      try { await save('Kapsam: ' + r.name + ' silindi'); render(); } catch (e) { say('regionStatus', 'Silinemedi: ' + e.message, true); }
+    }));
+    row.append(txt, right); rg.append(row);
+  }
+}
+const num = id => { const v = $(id).value.trim(); return v === '' ? null : Number(v); };
+$('post').onclick = async () => {
+  const title = $('title').value.trim(), body = $('body').value.trim(), date = $('date').value.trim();
+  if (!title || !body) { say('postStatus', 'Başlık ve metin gerekli.', true); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { say('postStatus', 'Tarihi YYYY-AA-GG biçiminde yaz (ör. 2026-11-07).', true); return; }
+  const e = { date, n: Date.now(), tag: $('tag').value, title, body };
+  const lat = num('lat'), lon = num('lon'), z = num('z');
+  if (lat != null || lon != null) {
+    if (lat == null || lon == null || lat < 35 || lat > 43 || lon < 25 || lon > 45) { say('postStatus', 'Konum için enlem (35–43) ve boylam (25–45) ikisi birden gerekli.', true); return; }
+    Object.assign(e, { lat, lon, z: z || 15 });
+  }
+  $('post').disabled = true; say('postStatus', 'Yayınlanıyor…');
+  devlog.entries.unshift(e);
+  try {
+    await save('Devlog: ' + title);
+    ['title', 'body', 'lat', 'lon', 'z'].forEach(id => $(id).value = '');
+    render(); say('postStatus', 'Yayınlandı. Sitede 1–2 dakika içinde görünür.');
+  } catch (err) { devlog.entries = devlog.entries.filter(x => x !== e); say('postStatus', 'Yayınlanamadı: ' + err.message, true); }
+  finally { $('post').disabled = false; }
+};
+$('addRegion').onclick = async () => {
+  const name = $('rname').value.trim(); if (!name) { say('regionStatus', 'Kart için bir ad gir.', true); return; }
+  const r = { name, status: $('rstatus').value, text: $('rtext').value.trim() };
+  const lat = num('rlat'), lon = num('rlon'); if (lat != null && lon != null) Object.assign(r, { lat, lon, z: num('rz') || 12 });
+  const bb = $('rbbox').value.split(',').map(s => Number(s.trim())).filter(v => !isNaN(v));
+  if ($('rbbox').value.trim()) { if (bb.length !== 4) { say('regionStatus', 'Sınır kutusu 4 sayı olmalı: batı, güney, doğu, kuzey.', true); return; } r.bbox = bb; }
+  const next = devlog.regions.findIndex(x => x.status === 'next');
+  devlog.regions.splice(next < 0 ? devlog.regions.length : next, 0, r);
+  try { await save('Kapsam: ' + name + ' eklendi'); ['rname', 'rtext', 'rlat', 'rlon', 'rz', 'rbbox'].forEach(id => $(id).value = ''); render(); say('regionStatus', name + ' eklendi.'); }
+  catch (e) { devlog.regions = devlog.regions.filter(x => x !== r); say('regionStatus', 'Eklenemedi: ' + e.message, true); }
+};
+$('connect').onclick = connect;
+$('token').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
+$('logout').onclick = () => { try { localStorage.removeItem('ph-admin'); } catch (e) {} location.reload(); };
+if ($('repo').value && $('token').value) connect();
+</script>
+</body>
+</html>

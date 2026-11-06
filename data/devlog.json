@@ -1,0 +1,14 @@
+{
+ "regions": [
+  {"name": "Türkiye", "status": "overview", "text": "Bütün ülke pixel-art olarak: yüksekliğe göre renklenen dağlar, derinliğe göre koyulaşan denizler, göller, nehirler ve 448 şehir ile ilçe.", "lat": 39.0, "lon": 35.2, "z": 6},
+  {"name": "İstanbul", "status": "full", "text": "Tarihi Yarımada'dan Silivri'ye, Şile'ye kadar: 811.474 bina, sokaklar, camiler, köprüler, parklar, ağaçlar ve vapur hatları.", "lat": 41.0103, "lon": 28.974, "z": 15.6},
+  {"name": "Diğer şehirler", "status": "next", "text": "Yeni şehirler eklendikçe burada ve devlogda duyurulacak."}
+ ],
+ "entries": [
+  {"date": "2026-11-06", "n": 5, "tag": "Güncelleme", "title": "Yeni logo ve çini görünümü", "body": "Piksel Harita'nın logosu geldi: lale ve karanfillerle bezeli piksel bir Türkiye çinisi. Site de bu logoya göre yeniden giydirildi: krem sır zemin, kobalt çerçeveler, turkuaz saz yaprakları ve lale kırmızısı.\n\nAna sayfadaki \"Canlı pencere\" bir fotoğraf değil; haritayla aynı motor Sultanahmet'i ve Ayasofya'yı OpenStreetMap verisinden senin ekranında çiziyor. Bu pencere artık çok daha hızlı açılıyor ve iki yapıyı da aynı karede gösteriyor."},
+  {"date": "2026-11-06", "n": 4, "tag": "Güncelleme", "title": "Ana sayfa ve devlog", "body": "Site artık doğrudan haritayla açılmıyor. Bu sayfadan neyin eklendiğini görüp \"Haritaya gir\" ile haritaya geçebilirsiniz.\n\nProjenin adı da Piksel Harita oldu."},
+  {"date": "2026-11-06", "n": 3, "tag": "Yeni bölge", "title": "Bütün İstanbul haritada", "body": "Tarihi Yarımada'nın ardından İstanbul'un tamamı eklendi: 811.474 bina, 289.941 yol, ray ve vapur hattı, 64.484 park, orman ve su alanı. Hepsi OpenStreetMap'teki gerçek yerlerinde.\n\nBir binaya tıklayınca adı, türü ve OpenStreetMap bağlantısı çıkıyor. Arama kutusu yaklaşık 7.300 İstanbul yerini tanıyor.", "lat": 41.04, "lon": 29.0, "z": 11.2},
+  {"date": "2026-11-06", "n": 2, "tag": "Yeni bölge", "title": "İlk semt: Tarihi Yarımada", "body": "Sultanahmet, Ayasofya, Topkapı Sarayı, Süleymaniye ve Galata Köprüsü çevresi piksel piksel çizildi. Camiler kurşun gri kubbe rengiyle, surlar tuğla rengiyle görünüyor.", "lat": 41.0086, "lon": 28.978, "z": 16.6},
+  {"date": "2026-11-06", "n": 1, "tag": "Yeni bölge", "title": "Türkiye'nin pixel-art haritası", "body": "Haritanın temeli hazır: kıyılar, denizler, dağlar, göller ve şehirler. Yükseklik verisinden üretilen renkler ve gölgeler dağları pikselle gösteriyor.", "lat": 39.0, "lon": 35.2, "z": 6}
+ ]
+}
