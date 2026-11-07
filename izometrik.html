@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>İzometrik İstanbul (deneme) · Piksel Harita</title>
-<meta name="description" content="İstanbul'un OpenStreetMap verisinden çizilen izometrik pixel art haritası (deneme sürümü).">
+<title>İzometrik Türkiye · İstanbul detaylı (deneme) · Piksel Harita</title>
+<meta name="description" content="Türkiye'nin izometrik pixel art haritası; İstanbul OpenStreetMap verisinden ayrıntılı çizildi (deneme sürümü).">
 <link rel="icon" href="assets/icon-180.png">
 <style>
 @font-face { font-family: "Piksel Oyun"; src: url("assets/fonts/pikseloyun.woff2") format("woff2"); font-display: swap; }
@@ -51,6 +51,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #1a2140; col
 #status a { color: #7fd6dc; }
 #status .sp { flex: 1; }
 #badge { left: 12px; bottom: 34px; background: var(--mercan); color: var(--sir); font-family: var(--f-game); font-size: 12px; padding: 5px 8px; box-shadow: 2px 2px 0 var(--murekkep); }
+#badge.todo { background: var(--ink); color: #ffd27a; box-shadow: 0 0 0 2px #ffd27a, 2px 2px 0 2px var(--murekkep); }
+#menu { flex: none; height: 42px; text-decoration: none; }
 .panel { background: var(--sir); box-shadow: 0 0 0 2px var(--kobalt), 4px 4px 0 2px var(--murekkep); padding: 14px 16px 16px; }
 .panel h2 { font-family: var(--f-game); font-weight: 400; font-size: 20px; color: var(--kobalt); margin: 0 26px 6px 0; line-height: 1.15; }
 .panel .x { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border: 0; background: none; font: 22px var(--f-game); color: var(--mercan); cursor: pointer; }
@@ -77,12 +79,15 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .lbl { display: inline; }
 @media (max-width: 720px) {
   #top { flex-wrap: wrap; left: 8px; right: 8px; top: 8px; gap: 8px; }
-  #brand small { display: none; }
+  #brand small, #brand span { display: none; }
+  #brand { padding: 6px; }
   #search { order: 3; flex: 1 1 100%; max-width: none; }
   #tools { gap: 6px; }
   .pbtn { min-width: 38px; height: 38px; padding: 0 8px; font-size: 14px; }
   .lbl { display: none; }
   #info, #layers { left: 8px; right: 8px; top: auto; bottom: 30px; width: auto; max-height: 52vh; }
+  #badge { max-width: calc(100% - 160px); font-size: 11px; }
+  #menu { height: 38px; }
   #ctrl { right: 8px; bottom: 30px; }
   #badge { left: 8px; bottom: 30px; }
   #status { font-size: 11px; gap: 10px; }
@@ -91,11 +96,12 @@ dd { margin: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
-<canvas id="cv" aria-label="İstanbul'un izometrik piksel haritası"></canvas>
+<canvas id="cv" aria-label="Türkiye'nin izometrik piksel haritası (İstanbul ayrıntılı)"></canvas>
 
 <div id="top" class="hud">
-  <a id="brand" href="./" title="Ana haritaya dön"><img src="assets/icon-180.png" alt=""><span>PİKSEL <b>HARİTA</b><small>İzometrik · İstanbul (deneme)</small></span></a>
-  <div id="search"><input id="q" type="search" placeholder="İstanbul'da sokak, bina, yer ara" autocomplete="off" aria-label="Ara"><div id="res" hidden></div></div>
+  <a id="menu" class="pbtn" href="./" title="Ana menüye dön">☰<span class="lbl">Ana menü</span></a>
+  <a id="brand" href="harita.html" title="Kuşbakışı haritaya geç"><img src="assets/icon-180.png" alt=""><span>PİKSEL <b>HARİTA</b><small>İzometrik · Türkiye · İstanbul detaylı (deneme)</small></span></a>
+  <div id="search"><input id="q" type="search" placeholder="İl, ilçe ya da İstanbul'da sokak, bina ara" autocomplete="off" aria-label="Ara"><div id="res" hidden></div></div>
   <div id="tools">
     <button class="pbtn" id="bNight" type="button" title="Gece / gündüz (N)" aria-label="Gece / gündüz">☾<span class="lbl">Gece</span></button>
     <button class="pbtn" id="bLayers" type="button" title="Katmanlar" aria-label="Katmanlar">▤<span class="lbl">Katman</span></button>
@@ -109,7 +115,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <div class="row"><button class="pbtn" id="bRotL" type="button" title="Sola döndür (Q)" aria-label="Sola döndür">⟲</button><button id="compass" type="button" title="Kuzeyi yukarı al" aria-label="Kuzeyi yukarı al"><canvas id="cmp" width="16" height="16"></canvas></button><button class="pbtn" id="bRotR" type="button" title="Sağa döndür (E)" aria-label="Sağa döndür">⟳</button></div>
   <div class="row"><button class="pbtn" id="bHome" type="button" title="Kamerayı sıfırla" aria-label="Kamerayı sıfırla">⌂</button><button class="pbtn" id="bOut" type="button" title="Uzaklaştır (−)" aria-label="Uzaklaştır">−</button><button class="pbtn" id="bIn" type="button" title="Yakınlaştır (+)" aria-label="Yakınlaştır">+</button></div>
 </div>
-<div id="badge" class="hud">DENEME<span class="lbl"> · İstanbul</span></div>
+<div id="badge" class="hud">DENEME · İstanbul detaylı</div>
 
 <aside id="info" class="hud panel" hidden aria-live="polite">
   <button class="x" id="infoX" type="button" aria-label="Kapat">×</button>
@@ -138,7 +144,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <div id="aboutBody">Yükleniyor…</div>
 </aside>
 <div id="toast" class="hud" hidden></div>
-<div id="loading" class="hud">İstanbul yükleniyor…</div>
+<div id="loading" class="hud">Harita yükleniyor…</div>
 
 <div id="status" class="hud">
   <span id="sCoord"></span><span id="sZoom"></span><span id="sDir"></span><span class="hm" id="sMs"></span><span class="hm" id="sLoad"></span><span class="sp"></span>
@@ -156,7 +162,13 @@ dd { margin: 0; overflow-wrap: anywhere; }
 const BASE = 'data/iso/istanbul/';
 const ZS = 1.2;                       // dikey ölçek
 const CELL = 0.5, GN = 512;           // zemin ızgarası: 0,5 m hücre, 256 m parça
-const ZL = [[0.5, 2], [1, 2], [1, 3], [2, 2], [2, 3], [2, 4]];   // [m başına sanat pikseli, sanat pikseli başına CSS pikseli]
+// [m başına sanat pikseli, sanat pikseli başına CSS pikseli]. İlk üçü Türkiye ölçeğinde gezinme içindir (bina çizilmez).
+const ZL = [[1 / 8192, 2], [1 / 2048, 2], [1 / 512, 2], [1 / 128, 2], [1 / 32, 2], [1 / 8, 2], [0.5, 2], [1, 2], [1, 3], [2, 2], [2, 3], [2, 4]];
+const ZFAR = 6;                       // bu indeksin altı "uzak" seviyeler (bina/parça yüklenmez)
+const ZOLD = 6;                       // eski (yalnız İstanbul) bağlantılardaki yakınlık numarası + 6 = yeni numara
+const TRB = 'data/iso/turkiye/';
+let TR = null, ADMIN = null, trTiles = [], trPal = null, trWater = null, ovTiles = new Map(), ovLo = null;
+let TRA = 0, TRBX = 0, TRBY = 0, TRX0 = 0, TRY0 = 0, TRXMIN = 0, TRXMAX = 0, TRYMIN = 0, TRYMAX = 0, gwat = null;
 const HOME = { lat: 41.00560, lon: 28.97700 };          // Sultanahmet
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false });
 const $ = id => document.getElementById(id);
@@ -603,12 +615,13 @@ function render() {
   for (const [x, y] of cs) { wx0 = Math.min(wx0, x); wx1 = Math.max(wx1, x); wy0 = Math.min(wy0, y); wy1 = Math.max(wy1, y); }
   const CH = META.chunk, ci0 = Math.max(0, Math.floor(wx0 / CH) - 1), ci1 = Math.min(META.nx - 1, Math.floor(wx1 / CH) + 1);
   const cj0 = Math.max(0, Math.floor(wy0 / CH) - 1), cj1 = Math.min(META.ny - 1, Math.floor(wy1 / CH) + 1);
-  const vis = [];
-  for (let i = ci0; i <= ci1; i++) for (let j = cj0; j <= cj1; j++) vis.push(wantChunk(i, j));
-  groundPass();
+  const vis = [], far = cam.zi < ZFAR;
+  if (!far) for (let i = ci0; i <= ci1; i++) for (let j = cj0; j <= cj1; j++) vis.push(wantChunk(i, j));
+  groundPass(far);
+  adminLines();
   // görünür binalar
   frameB = [];
-  for (const c of vis) for (const b of c.b) {
+  if (!far) for (const c of vis) for (const b of c.b) {
     if (!opt.ms && b.src === 1) continue;
     if (b.x1 < wx0 - 80 || b.x0 > wx1 + 80 || b.y1 < wy0 - 80 || b.y0 > wy1 + 80) continue;
     // ekran sınır kutusu
@@ -621,51 +634,147 @@ function render() {
     frameB.push(b);
   }
   const t1 = performance.now();
-  if (opt.shadow) shadowPass(vis);
-  if (night > 0) lampPools(vis);
+  if (opt.shadow && !far) shadowPass(vis);
+  if (night > 0 && !far) lampPools(vis);
   const t2 = performance.now();
   for (let bi = 0; bi < frameB.length; bi++) drawBuilding(frameB[bi], bi);
   const t3 = performance.now();
-  if (opt.trees || opt.furn) pointPass(vis);
+  if ((opt.trees || opt.furn) && !far) pointPass(vis);
   const t4 = performance.now();
-  outlinePass();
-  if (opt.foot) footPass();
+  if (!far) outlinePass();
+  if (opt.foot && !far) footPass();
   compose();
   const t5 = performance.now();
   ctx.putImageData(img, 0, 0);
+  adminLabels();
   prof = { ground: t1 - t0, shadow: t2 - t1, build: t3 - t2, points: t4 - t3, post: t5 - t4, put: performance.now() - t5 };
   lastMs = performance.now() - t0;
   status(vis);
 }
 
 // ---------- zemin: her piksel z=0 düzleminden dünyaya ters izdüşüm ----------
-function groundPass() {
+function waterCol(hx, hy, d, ph) {                   // su: derin -> sığ, dünyaya sabit dalga, kıyı köpüğü
+  const sh = d < 3 ? 0 : d < 8 ? 1 : d < 18 ? 2 : 3;
+  let r = [72, 52, 42, 36][sh], gg = [160, 136, 112, 98][sh], bb = [184, 170, 160, 150][sh];
+  const wv = (hx * 2 + hy * 3 + ((hash2(hx >> 3, hy >> 2) & 7)) + ph) % 23;
+  if (d > 2 && wv === 0) { r += 30; gg += 34; bb += 30; }
+  if (d <= 2 && ((hx + hy + ph) & 3) !== 0) { r = 214; gg = 234; bb = 236; }
+  else if (d <= 4 && ((hx * 3 + hy + ph) % 7) === 0) { r = 168; gg = 210; bb = 218; }
+  return pk(r, gg, bb);
+}
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const VOIDN = pk(30, 36, 58);
+// Türkiye tabanı (z8 mozaiği, ~460 m doku): çift doğrusal + sıralı titreme. Dönen 0: kapsam dışı / yükleniyor.
+let trWaterHit = false;
+function trIdx(ix, iy) {
+  const t = Math.min(trTiles.length - 1, (ix / TR.tw) | 0), tl = trTiles[t];
+  if (!tl.d) { trLoad(t); return -1; }
+  return tl.d[iy * tl.w + ix - tl.x0];
+}
+function trSample(x, y, bay) {
+  const px = x * TRA + TRBX - TRX0 - 0.5, py = TRBY - y * TRA - TRY0 - 0.5;
+  const ix = Math.floor(px), iy = Math.floor(py);
+  if (ix < 0 || iy < 0 || ix >= TR.w - 1 || iy >= TR.h - 1) return 0;
+  let a, b, c, d;
+  const t = Math.min(trTiles.length - 1, (ix / TR.tw) | 0), tl = trTiles[t];
+  if (ix + 1 < tl.x0 + tl.w) {                          // dört komşu aynı karoda (çoğunlukla)
+    if (!tl.d) { trLoad(t); return 0; }
+    const o = iy * tl.w + ix - tl.x0, D = tl.d; a = D[o]; b = D[o + 1]; c = D[o + tl.w]; d = D[o + tl.w + 1];
+  } else {
+    a = trIdx(ix, iy); b = trIdx(ix + 1, iy); c = trIdx(ix, iy + 1); d = trIdx(ix + 1, iy + 1);
+    if (a < 0 || b < 0 || c < 0 || d < 0) return 0;
+  }
+  const tx = px - ix, ty = py - iy;
+  trWaterHit = trWater[tx < 0.5 ? (ty < 0.5 ? a : c) : (ty < 0.5 ? b : d)] === 1;
+  const w0 = (1 - tx) * (1 - ty), w1 = tx * (1 - ty), w2 = (1 - tx) * ty, w3 = tx * ty, P = trPal, dth = (bay - 7.5) * 0.9;
+  const r = P[a * 3] * w0 + P[b * 3] * w1 + P[c * 3] * w2 + P[d * 3] * w3 + dth;
+  const g = P[a * 3 + 1] * w0 + P[b * 3 + 1] * w1 + P[c * 3 + 1] * w2 + P[d * 3 + 1] * w3 + dth;
+  const bl = P[a * 3 + 2] * w0 + P[b * 3 + 2] * w1 + P[c * 3 + 2] * w2 + P[d * 3 + 2] * w3 + dth;
+  return pk(Math.round(r / 6) * 6, Math.round(g / 6) * 6, Math.round(bl / 6) * 6);
+}
+// İstanbul uzak görünüm dokusu (32 m; en uzakta 128 m). 0: yok / şeffaf / yükleniyor
+function ovSample(x, y) {
+  if (x < 0 || y < 0 || x >= META.size[0] || y >= META.size[1] || !TR.ov) return 0;
+  const O = TR.ov;
+  if (cam.zi <= 3) {
+    if (!ovLo) { ovLoad('lo'); return 0; }
+    if (!ovLo.d) return 0;
+    const cx = (x / O.lo_cell) | 0, cy = (y / O.lo_cell) | 0, v = ovLo.d[(ovLo.h - 1 - cy) * ovLo.w + cx];
+    return (v >>> 24) ? v : 0;
+  }
+  const cx = (x / O.cell) | 0, cy = (y / O.cell) | 0, ti = (cx / O.tile) | 0, tj = (cy / O.tile) | 0, key = ti + '_' + tj;
+  let t = ovTiles.get(key);
+  if (!t) { if (!O.has.has(key)) return 0; ovLoad(key); return 0; }
+  if (!t.d) return 0;
+  const v = t.d[(O.tile - 1 - (cy - tj * O.tile)) * t.w + (cx - ti * O.tile)];
+  return (v >>> 24) ? v : 0;
+}
+function loadImgData(url) {
+  return new Promise((ok, bad) => {
+    const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      ok({ w: im.width, h: im.height, d: new Uint32Array(g.getImageData(0, 0, im.width, im.height).data.buffer) }); };
+    im.onerror = () => bad(new Error(url)); im.src = url;
+  });
+}
+function ovLoad(key) {
+  const rec = { d: null }; if (key === 'lo') ovLo = rec; else ovTiles.set(key, rec);
+  inflight++;
+  loadImgData(TRB + (key === 'lo' ? TR.ov.lo : 'ov_' + key + '.png')).then(r => Object.assign(rec, r))
+    .catch(() => setTimeout(() => { if (key === 'lo') ovLo = null; else ovTiles.delete(key); }, 4000)).finally(() => { inflight--; dirty = true; });
+}
+function trLoad(t) {
+  const tl = trTiles[t]; if (tl.state) return; tl.state = 'loading'; inflight++;
+  fetchGz(TRB + tl.fn).then(d => { tl.d = d; tl.state = 'ok'; }).catch(() => { setTimeout(() => { tl.state = null; }, 4000); }).finally(() => { inflight--; dirty = true; });
+}
+function setupTR() {
+  const B = TR.base, Z = 65536, C2 = 2 * Math.PI * R_;
+  TRA = Z / (C2 * KC); TRBX = (LON0 + 180) / 360 * Z; TRBY = (0.5 - MY0 / C2) * Z; TRX0 = B.z8x0; TRY0 = B.z8y0;
+  TR.w = B.w; TR.h = B.h; TR.tw = B.tiles[0][1];
+  trTiles = B.tiles.map(t => ({ x0: t[0], w: t[1], fn: t[2], d: null, state: null }));
+  trPal = new Float32Array(B.palette.flat()); trWater = new Uint8Array(256); for (const i of B.water) trWater[i] = 1;
+  if (TR.ov) TR.ov.has = new Set(TR.ov.tiles.map(t => t[0] + '_' + t[1]));
+  const [a0, b0] = toM(B.box[0], B.box[1]), [a1, b1] = toM(B.box[2], B.box[3]);
+  TRXMIN = a0; TRYMIN = b0; TRXMAX = a1; TRYMAX = b1;
+}
+function groundPass(far) {
   const CH = META.chunk, Wm = META.size[0], Hm = META.size[1], ph = wavePhase;
   let lastKey = -1, g = null, gox = 0, goy = 0, mst = 0;
+  if (!gwat || gwat.length !== W * H) gwat = new Uint8Array(W * H);
   for (let y = 0; y < H; y++) {
     // satır başı dünya koordinatı ve piksel başına artış (doğrusal)
     const sy = y + 0.5 - HH2 + CY, B = -2 * sy / k;
     const sx0 = 0.5 - HW2 + CX, A0 = sx0 / k, dA = 1 / k;
     let u = (A0 + B) / 2, v = (B - A0) / 2; const du = dA / 2, dv = -dA / 2;
     let x = RC * u - RS * v, wy = RS * u + RC * v; const dx = RC * du - RS * dv, dy = RS * du + RC * dv;
-    let o = y * W;
+    let o = y * W; const by = ((y + CY) & 3) * 4;
     for (let i = 0; i < W; i++, o++, x += dx, wy += dy) {
-      if (x < 0 || wy < 0 || x >= Wm || wy >= Hm) { col[o] = VOID[((Math.floor(x / 8) + Math.floor(wy / 8)) & 1)]; continue; }
-      const ci = (x / CH) | 0, cj = (wy / CH) | 0, key = ci * 4096 + cj;
-      if (key !== lastKey) { lastKey = key; const c = chunks.get(ci + '_' + cj); g = c && c.g; gox = ci * CH; goy = cj * CH; mst = maskAt(ci, cj); }
-      const gx = ((x - gox) / CELL) | 0, gy = ((wy - goy) / CELL) | 0, gi = gy * GN + gx;
-      const c = g ? g.cls[gi] : (mst === 1 ? 1 : mst === 0 ? 40 : 0), hx = ci * GN + gx, hy = cj * GN + gy;
+      gwat[o] = 0;
+      if (far) {                                          // Türkiye ölçeği: hazır dokular, bina yok
+        let p = ovSample(x, wy);
+        if (!p) { p = TR ? trSample(x, wy, BAYER[by + ((i + CX) & 3)]) : 0; if (p && trWaterHit) gwat[o] = 1; }
+        col[o] = p || VOIDN; continue;
+      }
+      let outside = x < 0 || wy < 0 || x >= Wm || wy >= Hm, ci = 0, cj = 0, gi = 0, gx = 0, gy = 0, c = 0;
+      if (!outside) {
+        ci = (x / CH) | 0; cj = (wy / CH) | 0; const key = ci * 4096 + cj;
+        if (key !== lastKey) { lastKey = key; const cc = chunks.get(ci + '_' + cj); g = cc && cc.g; gox = ci * CH; goy = cj * CH; mst = maskAt(ci, cj); }
+        gx = ((x - gox) / CELL) | 0; gy = ((wy - goy) / CELL) | 0; gi = gy * GN + gx;
+        c = g ? g.cls[gi] : (mst === 1 ? 1 : mst === 0 ? 40 : 0);
+      }
+      if (outside || c === 40) {                          // il dışı: tasarlanmamış Türkiye zemini
+        const p = TR ? trSample(x, wy, BAYER[by + ((i + CX) & 3)]) : 0;
+        if (p && trWaterHit) { gwat[o] = 1; col[o] = waterCol(Math.floor(x / CELL), Math.floor(wy / CELL), 60, ph); }
+        else if (p) {                                     // hafif, dünyaya sabit zemin benekleri (tasarlanmamış ama düz değil)
+          gwat[o] = 2;                                    // tasarlanmamış kara: il sınırı yalnızca burada çizilir (ayrıntıda)
+          const hs = hash2(Math.floor(x * 0.5), Math.floor(wy * 0.5)) & 15;
+          col[o] = hs === 0 ? pk(cr(p) * 0.92, cg(p) * 0.92, cb(p) * 0.94) : hs === 1 ? pk(Math.min(255, cr(p) * 1.05), Math.min(255, cg(p) * 1.05), Math.min(255, cb(p) * 1.04)) : p;
+        } else col[o] = VOIDN;
+        continue;
+      }
+      const hx = ci * GN + gx, hy = cj * GN + gy;
       let p;
-      if (c === 40) { col[o] = VOID[((Math.floor(x / 8) + Math.floor(wy / 8)) & 1)]; continue; }
-      if (c === 1 || c === 34) {                           // su: derin -> sığ, dünyaya sabit dalga, kıyı köpüğü
-        const d = c === 34 ? 8 : g ? g.wd[gi] : 60;
-        const sh = d < 3 ? 0 : d < 8 ? 1 : d < 18 ? 2 : 3;
-        let r = [72, 52, 42, 36][sh], gg = [160, 136, 112, 98][sh], bb = [184, 170, 160, 150][sh];
-        const wv = (hx * 2 + hy * 3 + ((hash2(hx >> 3, hy >> 2) & 7)) + ph) % 23;
-        if (d > 2 && wv === 0) { r += 30; gg += 34; bb += 30; }
-        if (d <= 2 && ((hx + hy + ph) & 3) !== 0) { r = 214; gg = 234; bb = 236; }
-        else if (d <= 4 && ((hx * 3 + hy + ph) % 7) === 0) { r = 168; gg = 210; bb = 218; }
-        p = pk(r, gg, bb);
+      if (c === 1 || c === 34) {
+        p = waterCol(hx, hy, c === 34 ? 8 : g ? g.wd[gi] : 60, ph); gwat[o] = 1;
       } else {
         const pal = GP[c] || GP[0], hsh = hash2(hx, hy);
         if (c === 20 || c === 15 || c === 32) p = pal[((hx & 1) === 0 || (hy & 1) === 0) ? 1 : 0];       // 1 m karo
@@ -969,6 +1078,53 @@ function outlinePass() {
     for (let o = 0; o < W * H; o++) if (ids[o] === selI && out[o] !== 3) { const c = col[o]; col[o] = pk(Math.min(255, cr(c) * 0.9 + 30), cg(c) * 0.92 + 8, cb(c) * 0.9); }
   }
 }
+// ---------- il sınırları (ince çizgi, yalnızca karada) ve il/ilçe adları ----------
+function adminLines() {
+  // yalnızca uzak seviyelerde: sınırlar ~150 m sadeleştirildi; ayrıntıda kesin sınır zaten zemin geçişinden görünür
+  if (!ADMIN || cam.zi >= ZFAR) return;
+  const [ax, ay] = screenToWorld(0, 0), [bx, by] = screenToWorld(W, 0), [cx2, cy2] = screenToWorld(0, H), [dx2, dy2] = screenToWorld(W, H);
+  const x0 = Math.min(ax, bx, cx2, dx2), x1 = Math.max(ax, bx, cx2, dx2), y0 = Math.min(ay, by, cy2, dy2), y1 = Math.max(ay, by, cy2, dy2);
+  const far = cam.zi < ZFAR;
+  for (const p of ADMIN.il) {
+    if (p.bb[2] < x0 || p.bb[0] > x1 || p.bb[3] < y0 || p.bb[1] > y1) continue;
+    for (const r of p.r) {
+      let px0 = 0, py0 = 0;
+      for (let q = 0; q < r.length; q += 2) {
+        const u = RC * r[q] + RS * r[q + 1], v = -RS * r[q] + RC * r[q + 1], px = projX(u, v), py = projY(u, v, 0);
+        if (q > 0 && !((px0 < 0 && px < 0) || (px0 > W && px > W) || (py0 < 0 && py < 0) || (py0 > H && py > H))) {
+          const n = Math.ceil(Math.max(Math.abs(px - px0), Math.abs(py - py0)));
+          for (let s = 0; s <= n; s++) {
+            const xx = Math.floor(px0 + (px - px0) * s / n), yy = Math.floor(py0 + (py - py0) * s / n);
+            if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+            const o = yy * W + xx; if (far ? gwat[o] === 1 : (gwat[o] !== 2 || ((xx + yy) & 1))) continue;    // denizde çizme; yakında yalnız tasarlanmamış zeminde, kesikli
+            const c = col[o]; col[o] = pk(cr(c) * 0.45 + 40, cg(c) * 0.45 + 30, cb(c) * 0.45 + 52);
+          }
+        }
+        px0 = px; py0 = py;
+      }
+    }
+  }
+}
+function adminLabels() {
+  if (!ADMIN || cam.zi > ZFAR) return;
+  const boxes = [];
+  ctx.font = '8px "Piksel Oyun", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  const put = (name, x, y, big) => {
+    const u = RC * x + RS * y, v = -RS * x + RC * y, px = Math.round(projX(u, v)), py = Math.round(projY(u, v, 0));
+    if (px < -40 || px > W + 40 || py < -10 || py > H + 10) return;
+    const w = ctx.measureText(name).width + 4, h = 10, bx = [px - w / 2, py - h / 2, px + w / 2, py + h / 2];
+    for (const q of boxes) if (bx[0] < q[2] && bx[2] > q[0] && bx[1] < q[3] && bx[3] > q[1]) return;
+    boxes.push(bx);
+    ctx.lineWidth = 3; ctx.strokeStyle = big ? 'rgba(15,28,71,.9)' : 'rgba(15,28,71,.7)'; ctx.strokeText(name, px, py);
+    ctx.fillStyle = big ? '#F6F2E9' : '#cfd6ea'; ctx.fillText(name, px, py);
+  };
+  for (const p of ADMIN.il) put(p.n, p.x, p.y, true);
+  if (cam.zi >= 4) for (const d of ADMIN.ilce) put(d[0], d[1], d[2], false);
+}
+function designedAt(x, y) {                 // İstanbul ayrıntılı kapsamında mı (il içi kara/deniz parçası)
+  if (!META || x < 0 || y < 0 || x >= META.size[0] || y >= META.size[1]) return false;
+  const m = maskAt((x / META.chunk) | 0, (y / META.chunk) | 0); return m === 2 || m === 3;
+}
 // doğruluk kontrolü: taban izlerini z=0'da mercan renginde çiz (binaların üzerinde)
 function footPass() {
   const c = pk(255, 64, 160);
@@ -1002,6 +1158,8 @@ function status(vis) {
   const [lon, lat] = toLL(cam.x, cam.y);
   $('sCoord').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
   $('sZoom').textContent = 'yakınlık ' + (cam.zi + 1) + '/' + ZL.length;
+  const des = designedAt(cam.x, cam.y), bt = des ? 'DENEME · İstanbul detaylı' : 'Bu bölge henüz tasarlanmadı';
+  if ($('badge').dataset.t !== bt) { $('badge').dataset.t = bt; $('badge').textContent = bt; $('badge').classList.toggle('todo', !des); }
   $('sDir').textContent = 'yön ' + ['K', 'B', 'G', 'D'][cam.r] + ' yukarı';
   $('sMs').textContent = lastMs.toFixed(1) + ' ms/kare · ' + frameB.length + ' bina';
   const ld = vis.filter(c => c.state === 'loading').length;
@@ -1060,7 +1218,10 @@ cv.addEventListener('wheel', e => {
   cam.x += wx - nx; cam.y += wy - ny; clampCam(); dirty = true; writeHash();
 }, { passive: false });
 
-function clampCam() { cam.x = Math.max(-200, Math.min(META.size[0] + 200, cam.x)); cam.y = Math.max(-200, Math.min(META.size[1] + 200, cam.y)); }
+function clampCam() {
+  const x0 = TR ? TRXMIN : -200, x1 = TR ? TRXMAX : META.size[0] + 200, y0 = TR ? TRYMIN : -200, y1 = TR ? TRYMAX : META.size[1] + 200;
+  cam.x = Math.max(x0, Math.min(x1, cam.x)); cam.y = Math.max(y0, Math.min(y1, cam.y));
+}
 function setZoom(zi) { cam.zi = zi; spriteCache.clear(); resize(); writeHash(); }
 function rotate(d) { cam.r = (cam.r + d + 4) % 4; spriteCache.clear(); dirty = true; writeHash(); }
 
@@ -1124,13 +1285,14 @@ $('q').addEventListener('input', async () => {
       try { SEARCHG[c0] = (await fetchGzJson(BASE + 's/' + c0 + '.bin')).map(r => ({ r, n: norm(r[0]) })); } catch (e) { SEARCHG[c0] = null; box.hidden = true; return; } }
     if (norm($('q').value.trim()) !== q) return;
   }
-  SEARCH = SEARCHG[c0] || [];
-  const KN = { street: 'sokak', place: 'yer', park: 'park', edu: 'eğitim', pitch: 'spor', cem: 'mezarlık', square: 'meydan' };
-  const dd = r => Math.hypot(r.r[1] - cam.x, r.r[2] - cam.y);
-  resList = SEARCH.filter(r => r.n.includes(q)).sort((a, b) => (a.n.startsWith(q) ? 0 : 1) - (b.n.startsWith(q) ? 0 : 1) || dd(a) - dd(b)).slice(0, 12);
+  SEARCH = (SEARCHG[c0] || []).concat(ADMIN ? ADMIN.search : []);     // İstanbul ayrıntıları + Türkiye il/ilçe adları
+  const KN = { street: 'sokak', place: 'yer', park: 'park', edu: 'eğitim', pitch: 'spor', cem: 'mezarlık', square: 'meydan', il: 'il' };
+  const dd = r => Math.hypot(r.r[1] - cam.x, r.r[2] - cam.y), pr = r => r.r[3] === 'il' ? 0 : r.r[3] === 'ilce' ? 1 : 2;
+  resList = SEARCH.filter(r => r.n.includes(q)).sort((a, b) => (a.n.startsWith(q) ? 0 : 1) - (b.n.startsWith(q) ? 0 : 1) || (a.n === q ? 0 : 1) - (b.n === q ? 0 : 1) || pr(a) - pr(b) || dd(a) - dd(b)).slice(0, 12);
   resSel = 0;
-  box.innerHTML = resList.length ? resList.map((r, i) => `<button type="button" data-i="${i}" class="${i === 0 ? 'k' : ''}"><span>${esc(r.r[0])}</span><small>${esc(KN[r.r[3]] || (r.r[3].startsWith('b:') ? BL[r.r[3].slice(2)] : r.r[3]))}</small></button>`).join('')
-    : '<button type="button" disabled>Sonuç yok (yalnızca İstanbul)</button>';
+  const kn = r => r[3] === 'ilce' ? 'ilçe' + (r[5] ? ' · ' + r[5] : '') : (KN[r[3]] || (r[3].startsWith('b:') ? BL[r[3].slice(2)] : r[3]));
+  box.innerHTML = resList.length ? resList.map((r, i) => `<button type="button" data-i="${i}" class="${i === 0 ? 'k' : ''}"><span>${esc(r.r[0])}</span><small>${esc(kn(r.r))}</small></button>`).join('')
+    : '<button type="button" disabled>Sonuç yok</button>';
   box.hidden = false;
 });
 $('q').addEventListener('keydown', e => {
@@ -1142,7 +1304,11 @@ $('q').addEventListener('keydown', e => {
 $('res').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b) goResult(resList[+b.dataset.i]); });
 function goResult(r) {
   $('res').hidden = true; $('q').value = r.r[0]; $('q').blur();
-  cam.x = r.r[1]; cam.y = r.r[2]; if (cam.zi < 2) cam.zi = 2; resize(); writeHash();
+  cam.x = r.r[1]; cam.y = r.r[2];
+  if (r.r[3] === 'il') cam.zi = designedAt(cam.x, cam.y) ? 4 : 3;          // il: 1/128–1/32, ilçe: 1/8 ya da ayrıntı
+  else if (r.r[3] === 'ilce') cam.zi = designedAt(cam.x, cam.y) ? ZFAR + 1 : 5;
+  else if (cam.zi < ZFAR + 2) cam.zi = ZFAR + 2;
+  spriteCache.clear(); resize(); writeHash();
   selected = null; $('info').hidden = true;
   const ref = r.r[4];
   if (ref && r.r[3].startsWith('b:')) {           // ilgili binayı yüklenince seç
@@ -1154,21 +1320,23 @@ function goResult(r) {
 // ---------- URL ve düğmeler ----------
 function writeHash() {
   const [lon, lat] = toLL(cam.x, cam.y);
-  history.replaceState(null, '', '#' + lat.toFixed(5) + ',' + lon.toFixed(5) + ',' + (cam.zi + 1) + ',' + cam.r);
+  // biçim: #enlem,boylam,yakınlık,yön,t   ("t" = Türkiye numaralandırması; eski bağlantılarda yok, onlarda yakınlık + 3)
+  history.replaceState(null, '', '#' + lat.toFixed(5) + ',' + lon.toFixed(5) + ',' + (cam.zi + 1) + ',' + cam.r + ',t');
 }
 function readHash() {
-  const m = location.hash.slice(1).split(',').map(Number);
+  const parts = location.hash.slice(1).split(','), m = parts.map(Number);
   if (m.length >= 2 && isFinite(m[0]) && isFinite(m[1])) {
-    const bb = META.bbox;
-    if (m[1] < bb[0] || m[1] > bb[2] || m[0] < bb[1] || m[0] > bb[3]) { toast('Bu konum İstanbul kapsamı dışında; Sultanahmet açıldı'); return false; }
+    const bb = TR ? TR.base.box : META.bbox;
+    if (m[1] < bb[0] || m[1] > bb[2] || m[0] < bb[1] || m[0] > bb[3]) { toast('Bu konum harita kapsamı dışında; Sultanahmet açıldı'); return false; }
     [cam.x, cam.y] = toM(m[1], m[0]);
-    if (m[2] >= 1 && m[2] <= ZL.length) cam.zi = m[2] - 1;
+    const z = parts[4] === 't' ? m[2] : m[2] + ZOLD;
+    if (z >= 1 && z <= ZL.length) cam.zi = z - 1;
     if (m[3] >= 0 && m[3] <= 3) cam.r = m[3] | 0;
     return true;
   }
   return false;
 }
-function home() { [cam.x, cam.y] = toM(HOME.lon, HOME.lat); cam.r = 0; cam.zi = innerWidth < 720 ? 1 : 2; spriteCache.clear(); resize(); writeHash(); }
+function home() { [cam.x, cam.y] = toM(HOME.lon, HOME.lat); cam.r = 0; cam.zi = innerWidth < 720 ? ZOLD + 1 : ZOLD + 2; spriteCache.clear(); resize(); writeHash(); }
 function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => el.hidden = true, 2200); }
 $('bIn').onclick = () => setZoom(Math.min(ZL.length - 1, cam.zi + 1));
 $('bOut').onclick = () => setZoom(Math.max(0, cam.zi - 1));
@@ -1237,6 +1405,21 @@ async function init() {
   } catch (e) { $('loading').textContent = 'Veri yüklenemedi. Sayfayı yenileyin.'; return; }
   const pj = META.projection; R_ = pj.R; KC = Math.cos(pj.latc * Math.PI / 180); LON0 = pj.lon0; LAT0 = pj.lat0; MY0 = mercY(LAT0);
   try { MASK = await fetchGz(BASE + 'mask.bin'); } catch (e) { $('loading').textContent = 'Veri yüklenemedi. Sayfayı yenileyin.'; return; }
+  // Türkiye zemini ve il/ilçe adları (yüklenemezse yalnızca İstanbul çalışır)
+  try {
+    TR = await fetchRetry(TRB + 'meta.json'); setupTR();
+    fetchGzJson(TRB + 'admin.bin').then(a => {
+      ADMIN = { il: [], ilce: a.ilce, search: [] };
+      for (const [n, x, y, rings] of a.il) {
+        const bb = [Infinity, Infinity, -Infinity, -Infinity];
+        for (const r of rings) for (let q = 0; q < r.length; q += 2) { bb[0] = Math.min(bb[0], r[q]); bb[1] = Math.min(bb[1], r[q + 1]); bb[2] = Math.max(bb[2], r[q]); bb[3] = Math.max(bb[3], r[q + 1]); }
+        ADMIN.il.push({ n, x, y, r: rings, bb });
+        ADMIN.search.push({ r: [n, x, y, 'il', ''], n: norm(n) });
+      }
+      for (const d of a.ilce) ADMIN.search.push({ r: [d[0], d[1], d[2], 'ilce', '', d[3]], n: norm(d[0]) });
+      dirty = true;
+    }).catch(() => {});
+  } catch (e) { TR = null; }
   if (!readHash()) home(); else resize();
   legend(); aboutPanel();
   $('loading').hidden = true;
@@ -1246,10 +1429,12 @@ function aboutPanel() {
   const s = META.stats, hs = s.height_src, tr = s.trees, tot = s.buildings || 1, pc = n => fmt(n / tot * 100, 1) + '%';
   $('sMs').textContent = '';
   $('aboutBody').innerHTML = `
-  <p>Bu sayfa PikselHarita'nın <b>izometrik deneme</b> sürümüdür ve <b>İstanbul il sınırının</b> içini kapsar (OSM il sınırı, admin_level=4). Sınırın dışındaki kara koyu damalı gösterilir; boş yerler hayalî yapılarla doldurulmaz.</p>
+  <p>Bu sayfa PikselHarita'nın <b>izometrik deneme</b> sürümüdür. Bütün Türkiye'de dolaşılabilir, ama yalnızca <b>İstanbul il sınırının</b> içi (OSM il sınırı, admin_level=4) bina, yol ve ayrıntılarla <b>tasarlandı</b>.</p>
+  <p><b>Henüz tasarlanmayan bölgeler:</b> Yalnızca renkli yükselti zemini (z8, ~460 m çözünürlük; Natural Earth renkleri ve Mapzen/AWS Terrarium gölgelendirmesi), deniz/kara ayrımı, OSM il sınırları ve il/ilçe adları gösterilir. Bina, yol ya da ayrıntı yoktur ve hiçbiri uydurulmaz. Alt köşedeki etiket bulunduğun yerin tasarlanıp tasarlanmadığını söyler.</p>
   <h3>Kaynaklar</h3>
   <p><b>${esc(SRC.osm.attribution)}</b> — <a href="${SRC.osm.url}" target="_blank" rel="noopener">ODbL 1.0</a>. Dosya: ${esc(SRC.osm.file)}, veri tarihi ${esc(SRC.osm.data_timestamp || '?')}.<br>
-  <b>Microsoft Global ML Building Footprints</b> — <a href="${SRC.microsoft.url}" target="_blank" rel="noopener">ODbL 1.0</a>, sürüm ${esc(SRC.microsoft.release)}. ${esc(SRC.microsoft.rule)}</p>
+  <b>Microsoft Global ML Building Footprints</b> — <a href="${SRC.microsoft.url}" target="_blank" rel="noopener">ODbL 1.0</a>, sürüm ${esc(SRC.microsoft.release)}. ${esc(SRC.microsoft.rule)}<br>
+  <b>Türkiye zemini</b> — Natural Earth (kamu malı) renkleri, Mapzen/AWS Terrain Tiles (Terrarium) yükseltisinden gölgelendirme. İl/ilçe sınırları ve adları: © OpenStreetMap katkıcıları (ODbL).</p>
   <h3>Bu bölgedeki veri durumu</h3>
   <table>
    <tr><td>Toplam bina</td><td>${fmt(s.buildings, 0)}</td></tr>
